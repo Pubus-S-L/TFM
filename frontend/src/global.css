@@ -1,0 +1,17 @@
+:root{
+    --main-red-color: #e71f1f;
+    --main-blue-color: #1f33e3;
+    --main-green-color: #14d286;
+    --green-shadow-color: rgba(65, 227, 162, 0.4);
+    --blue-shadow-color: #2452dc66;
+    --red-shadow-color: rgba(237, 53, 53, 0.4);
+}
+
+@font-face {
+    font-family: 'american-typewriter'; 
+    src: url('./static/fonts/American\ Typewriter\ Bold.ttf'); 
+}
+
+* {
+    font-family: 'american-typewriter';
+}
