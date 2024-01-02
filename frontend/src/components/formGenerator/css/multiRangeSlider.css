@@ -1,7 +1,7 @@
 :root{
   --price-range-slider-color: #92278f;
   --price-range-slider-track-color: #ced4da;
-  --price-range-slider-text-color: black;
+  --price-range-slider-text-color: rgb(69, 248, 180);
 }
 
 .container {
