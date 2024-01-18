@@ -7,20 +7,22 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.samples.pubus.model.BaseEntity;
 import org.springframework.samples.pubus.user.User;
 
-
 import lombok.Getter;
 import lombok.Setter;
 
-@Entity
-@Table(name = "papers")
 @Getter
 @Setter
+@Entity
+@Table(name = "papers")
 public class Paper extends BaseEntity {
+
 
 	@NotBlank
 	private String title;
@@ -28,8 +30,9 @@ public class Paper extends BaseEntity {
 	@NotBlank
 	private String authors;
 
-	@NotBlank
-	private Integer year;
+	@Column(name="publication_year")
+	@NotNull
+	private Integer publicationYear;
 
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "type_id")
@@ -49,5 +52,7 @@ public class Paper extends BaseEntity {
 	@JoinColumn(name = "user_id")
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	protected User user;
+
+
 
 }

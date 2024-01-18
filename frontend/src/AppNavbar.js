@@ -20,7 +20,6 @@ function AppNavbar() {
     }, [jwt])
 
     let adminLinks = <></>;
-    let ownerLinks = <></>;
     let userLinks = <></>;
     let userLogout = <></>;
     let publicLinks = <></>;
@@ -38,23 +37,14 @@ function AppNavbar() {
                 </>
             )
         }
-        if (role === "Researcher") {
-            ownerLinks = (
-                <>
-                    <NavItem>
-                        <NavLink style={{ color: "white" }} tag={Link} to="/myPapers">My Papers</NavLink>
-                    </NavItem>
-                    <NavItem>
-                        <NavLink style={{ color: "white" }} tag={Link} to="/groups">Groups</NavLink>
-                    </NavItem>
-                </>
-            )
-        }
     })
 
     if (!jwt) {
         publicLinks = (
             <>
+                <NavItem>
+                    <NavLink style={{ color: "white" }} tag={Link} to="/papers">Papers</NavLink>
+                </NavItem>
                 <NavItem>
                     <NavLink style={{ color: "white" }} id="faq" tag={Link} to="/faq">FAQ</NavLink>
                 </NavItem>
@@ -79,7 +69,10 @@ function AppNavbar() {
         userLinks = (
             <>
                 <NavItem>
-                    <NavLink style={{ color: "white" }} tag={Link} to="/dashboard">Dashboard</NavLink>
+                    <NavLink style={{ color: "white" }} tag={Link} to="/myPapers">My Papers</NavLink>
+                </NavItem>
+                <NavItem>
+                    <NavLink style={{ color: "white" }} tag={Link} to="/groups">Groups</NavLink>
                 </NavItem>
             </>
         )
@@ -112,7 +105,6 @@ function AppNavbar() {
                     <Nav className="me-auto mb-2 mb-lg-0" navbar>
                         {userLinks}
                         {adminLinks}
-                        {ownerLinks}
                     </Nav>
                     <Nav className="ms-auto mb-2 mb-lg-0" navbar>
                         {publicLinks}

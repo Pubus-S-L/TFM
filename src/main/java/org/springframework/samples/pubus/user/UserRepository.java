@@ -8,6 +8,7 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface UserRepository extends  CrudRepository<User, String>{
 
+	@Query("SELECT u FROM User u WHERE u.username = :username")
 	Optional<User> findByUsername(String username);
 
 	Boolean existsByUsername(String username);

@@ -45,7 +45,7 @@ export default function Register() {
           else {
             tokenService.setUser(data);
             tokenService.updateLocalAccessToken(data.token);
-            window.location.href = "/dashboard";
+            window.location.href = "/papers";
           }
         })
         .catch((message) => {

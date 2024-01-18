@@ -8,6 +8,9 @@ import Register from "./auth/register";
 import Login from "./auth/login";
 import Logout from "./auth/logout";
 import tokenService from "./services/token.service";
+import PrivateRoute from "./privateRoute";
+import UserPaperEdit from "./user/papers/myPaperEdit"
+import UserPaperList from "./user/papers/myPaperList"
 
 function ErrorFallback({ error, resetErrorBoundary }) {
   return (
@@ -40,12 +43,13 @@ function App() {
         <>
         </>)
     }
-    if (role === "RESEARCHER") {
-      userRoutes = (
-        <>
-         
-        </>)
-    }
+    // if (role === "USER") {
+    //   userRoutes = (
+    //     <>
+    //       <Route path="/papers/myPapers" element={<PrivateRoute><UserPaperList/></PrivateRoute>} />
+    //       <Route path="/papers/myPapers/:id" element={<PrivateRoute><UserPaperEdit /></PrivateRoute>} />        
+    //     </>)
+    // }
 
   })
   if (!jwt) {
@@ -58,9 +62,11 @@ function App() {
   } else {
     userRoutes = (
       <>
-        {/* <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} /> */}        
+        {/* <Route path="/papers" element={<PrivateRoute><Papers /></PrivateRoute>} /> */}        
         <Route path="/logout" element={<Logout />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/myPapers" exact={true} element={<PrivateRoute><UserPaperList/></PrivateRoute>} />
+        <Route path="/myPapers/:id" exact={true} element={<PrivateRoute><UserPaperEdit /></PrivateRoute>} /> 
       </>
     )
   }

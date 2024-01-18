@@ -5,7 +5,6 @@ import java.util.List;
 
 import jakarta.validation.Valid;
 
-import org.apache.catalina.valves.rewrite.InternalRewriteMap.LowerCase;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -42,8 +41,8 @@ public class PaperRestController {
 
 	private final PaperService paperService;
 	private final UserService userService;
-	private static final String USER_AUTH = "user";
-	private static final String ADMIN_AUTH = "admin";
+	private static final String USER_AUTH = "USER";
+	private static final String ADMIN_AUTH = "ADMIN";
 
 	@Autowired
 	public PaperRestController(PaperService paperService, UserService userService) {
@@ -56,28 +55,34 @@ public class PaperRestController {
 		dataBinder.setValidator(new PaperValidator());
 	}
 
-	@GetMapping("/mine/{userId}")
-	public ResponseEntity<List<Paper>> findAllMine(@RequestParam(required = false) Integer userId) {
-		User user = userService.findCurrentUser();
-		if (userId != null) {
-			if (user.getId().equals(userId) || user.hasAuthority(ADMIN_AUTH).equals(true))
-				return new ResponseEntity<>(paperService.findAllPapersByUserId(userId), HttpStatus.OK);
-		} else {
-			if (user.hasAuthority(ADMIN_AUTH).equals(true))
-				return new ResponseEntity<>((List<Paper>) this.paperService.findAll(), HttpStatus.OK);
-		}
-		throw new AccessDeniedException();
+//GET TYPES	
+
+	@GetMapping("types")
+	public ResponseEntity<List<PaperType>> findAllTypes() {
+		List<PaperType> res = (List<PaperType>) paperService.findPaperTypes();
+		return new ResponseEntity<>(res, HttpStatus.OK);
 	}
 
-	@GetMapping
-	public ResponseEntity<List<Paper>> findAll() {
-		return new ResponseEntity<>((List<Paper>) this.paperService.findAll(), HttpStatus.OK);
-	}
+//GET PAPERS BY TYPE
 
 	@GetMapping("/types/{paperType}")
 	public ResponseEntity<List<Paper>> findAllPapersByType(@RequestParam String paperType) {
 		return new ResponseEntity<>((List<Paper>) this.paperService.findAllPapersByType(paperType), HttpStatus.OK);
 	}
+
+	@GetMapping
+	public ResponseEntity<List<Paper>> findAll(@RequestParam(required = false) Integer userId) {
+		//User user = userService.findCurrentUser();
+		if (userId != null) {
+			//if (user.getId().equals(userId))
+				return new ResponseEntity<>(paperService.findAllPapersByUserId(userId), HttpStatus.OK);
+		} else {
+				return new ResponseEntity<>((List<Paper>) this.paperService.findAll(), HttpStatus.OK);
+		}
+		//throw new AccessDeniedException();
+	}
+
+// GET FILTERED
 
 	@GetMapping("/filtered/{originalSearch}")
 	public ResponseEntity<List<Paper>> searchPaper(@RequestParam String search) {
@@ -94,11 +99,16 @@ public class PaperRestController {
 		return new ResponseEntity<>((List<Paper>) list_complete, HttpStatus.OK);
 	}
 
-	@GetMapping("types")
-	public ResponseEntity<List<PaperType>> findAllTypes() {
-		List<PaperType> res = (List<PaperType>) paperService.findPaperTypes();
-		return new ResponseEntity<>(res, HttpStatus.OK);
-	}
+
+//GET BY ID
+
+	@GetMapping("{paperId}")
+	public ResponseEntity<Paper> findById(@PathVariable("paperId") int paperId) {
+		Paper paper = RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
+			return new ResponseEntity<>(paper, HttpStatus.OK);
+	} 	
+
+//CREATE	
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
@@ -108,51 +118,28 @@ public class PaperRestController {
 		Paper newPaper = new Paper();
 		Paper savedPaper;
 		BeanUtils.copyProperties(paper, newPaper, "id");
-		if (user.hasAuthority(USER_AUTH).equals(true)) {
-			newPaper.setUser(user);
-		}
+		newPaper.setUser(user);
 
 		savedPaper = this.paperService.savePaper(newPaper);
 
 		return new ResponseEntity<>(savedPaper, HttpStatus.CREATED);
 	}
 
+//UPDATE
+
 	@PutMapping("{paperId}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<Paper> update(@PathVariable("paperId") int paperId, @RequestBody @Valid Paper paper) {
-		Paper aux = RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
-		User loggedUser = userService.findCurrentUser();
-		if (loggedUser.hasAuthority(USER_AUTH).equals(true)) {
-			User paperUser = aux.getUser();
-			if (loggedUser.getId().equals(paperUser.getId())) {
+		//Paper aux = RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
+		//User loggedUser = userService.findCurrentUser();
+			//User paperUser = aux.getUser();
+			//if (loggedUser.getId().equals(paperUser.getId())) {
 				Paper res = this.paperService.updatePaper(paper, paperId);
 				return new ResponseEntity<>(res, HttpStatus.OK);
-			} else
-				throw new ResourceNotOwnedException(aux);
-		} else {
-			Paper res = this.paperService.updatePaper(paper, paperId);
-			return new ResponseEntity<>(res, HttpStatus.OK);
-		}
+			//} else
+			//	throw new ResourceNotOwnedException(aux);
 
 	}
-
-// //GET BY ID
-
-// 	@GetMapping("{paperId}")
-// 	public ResponseEntity<Paper> findById(@PathVariable("paperId") int paperId) {
-// 		Paper paper = RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
-// 		User user = userService.findCurrentUser();
-// 		if (user.hasAuthority(RESEARCHER_AUTH).equals(true)) {
-// 			Researcher loggedResearcher = userService.findResearcherByUser(user.getId());
-// 			Researcher paperResearcher = paper.getResearcher();
-// 			if (loggedResearcher.getId().equals(paperResearcher.getId()))
-// 				return new ResponseEntity<>(this.paperService.findPaperById(paperId), HttpStatus.OK);
-// 			else
-// 				throw new ResourceNotOwnedException(paper);
-// 		} else {
-// 			return new ResponseEntity<>(this.paperService.findPaperById(paperId), HttpStatus.OK);
-// 		}
-// 	}
 
 //DELETE	
 
@@ -161,17 +148,12 @@ public class PaperRestController {
 	public ResponseEntity<MessageResponse> delete(@PathVariable("paperId") int paperId) {
 		Paper paper = RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
 		User loggedUser = userService.findCurrentUser();
-		if (loggedUser.hasAuthority(USER_AUTH).equals(true)) {
 			User paperUser = paper.getUser();
 			if (loggedUser.getId().equals(paperUser.getId())) {
 				paperService.deletePaper(paperId);
 				return new ResponseEntity<>(new MessageResponse("Paper deleted!"), HttpStatus.OK);
 			} else
 				throw new ResourceNotOwnedException(paper);
-		} else {
-			paperService.deletePaper(paperId);
-			return new ResponseEntity<>(new MessageResponse("Paper deleted!"), HttpStatus.OK);
-		}
 	}
 
 

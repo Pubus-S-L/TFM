@@ -5,5 +5,11 @@ export const formValidators = {
         },
         message: "The field cannot be empty"
     },
+    notNoneTypeValidator: {
+        validate: (value) => {
+            return value !== "None";
+        },
+        message: "Please, select a type"
+    }
 
 }

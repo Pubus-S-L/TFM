@@ -1,0 +1,61 @@
+import { formValidators } from "../../../../validators/formValidators";
+
+export const paperEditFormInputs = [
+  {
+    tag: "Title",
+    name: "title",
+    type: "text",
+    defaultValue: "",
+    isRequired: true,
+    validators: [formValidators.notEmptyValidator],
+  },
+  {
+    tag: "Authors",
+    name: "authors",
+    type: "text",
+    defaultValue: "",
+    isRequired: true,
+    validators: [formValidators.notEmptyValidator],
+  },
+  {
+    tag: "Publication Year",
+    name: "publicationYear",
+    type: "number",
+    defaultValue: 2024,
+    isRequired: true,
+    validators: [formValidators.notEmptyValidator],
+  },
+  {
+    tag: "Type",
+    name: "type",
+    type: "select",
+    values: ["None"],
+    defaultValue: "",
+    isRequired: true,
+    validators: [formValidators.notEmptyValidator, formValidators.notNoneTypeValidator],
+  },
+  {
+    tag: "Abstract",
+    name: "abstractContent",
+    type: "text",
+    defaultValue: "",
+    isRequired: true,
+    validators: [formValidators.notEmptyValidator],
+  },
+  {
+    tag: "Notes",
+    name: "notes",
+    type: "text",
+    defaultValue: "",
+    isRequired: false,
+    validators: [],
+  },
+  {
+    tag: "Keywords",
+    name: "keywords",
+    type: "text",
+    defaultValue: "",
+    isRequired: true,
+    validators: [formValidators.notEmptyValidator],
+  },
+];

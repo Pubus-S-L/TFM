@@ -4,6 +4,7 @@ c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\spring
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\auth\payload\response\JwtResponse.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\configuration\jwt\AuthTokenFilter.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\configuration\OpenApiConfiguration.java
+c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\user\AuthoritiesService.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\configuration\jwt\AuthEntryPointJwt.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\exceptions\AccessDeniedException.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\configuration\ExceptionHandlerConfiguration.java
@@ -25,6 +26,7 @@ c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\spring
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\util\CallMonitoringAspect.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\configuration\services\UserDetailsServiceImpl.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\PubusApplication.java
+c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\user\Authorities.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\configuration\jwt\JwtUtils.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\model\BaseEntity.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\PubusInitializer.java
@@ -32,6 +34,7 @@ c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\spring
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\paper\PaperRepository.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\user\UserRestController.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\model\package-info.java
+c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\user\AuthoritiesRepository.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\auth\payload\request\LoginRequest.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\configuration\services\UserDetailsImpl.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\auth\payload\response\MessageResponse.java

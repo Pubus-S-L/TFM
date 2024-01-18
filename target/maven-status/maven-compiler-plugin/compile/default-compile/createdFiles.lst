@@ -1,5 +1,8 @@
 org\springframework\samples\pubus\PubusApplication.class
 org\springframework\samples\pubus\configuration\SecurityConfiguration.class
+org\springframework\samples\pubus\user\AuthoritiesService.class
+org\springframework\samples\pubus\user\Authorities.class
+org\springframework\samples\pubus\user\AuthoritiesRepository.class
 org\springframework\samples\pubus\user\UserRepository.class
 org\springframework\samples\pubus\configuration\WebConfig.class
 org\springframework\samples\pubus\paper\PaperService.class
