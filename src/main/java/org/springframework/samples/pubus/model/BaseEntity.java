@@ -38,7 +38,7 @@ public class BaseEntity {
         sequenceName = "entity_sequence", 
         initialValue = 100)
 	@GeneratedValue(strategy = GenerationType.SEQUENCE	, generator = "entity_seq")
-	protected Integer id;
+    public Integer id;
 
 	public Integer getId() {
 		return id;

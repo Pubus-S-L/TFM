@@ -1,13 +1,21 @@
 package org.springframework.samples.pubus.paper;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.annotation.Resource;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.pubus.auth.payload.response.MessageResponse;
@@ -29,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -41,13 +50,15 @@ public class PaperRestController {
 
 	private final PaperService paperService;
 	private final UserService userService;
+	private final PaperFileService paperFileService;
 	private static final String USER_AUTH = "USER";
 	private static final String ADMIN_AUTH = "ADMIN";
 
 	@Autowired
-	public PaperRestController(PaperService paperService, UserService userService) {
+	public PaperRestController(PaperService paperService, UserService userService, PaperFileService paperFileService) {
 		this.paperService = paperService;
 		this.userService = userService;
+		this.paperFileService = paperFileService;
 	}
 
 	@InitBinder("paper")
@@ -100,6 +111,47 @@ public class PaperRestController {
 	}
 
 
+//UPLOAD FILE
+
+	@PostMapping("/{paperId}/upload")
+	public ResponseEntity<String> uploadFile(@PathVariable int paperId, @RequestParam("file") MultipartFile file) {
+	try {
+		Paper paper = RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
+		long fileSize = file.getSize();
+		long maxfileSize = 199 * 1024 * 1024;
+		if (fileSize > maxfileSize) return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File size must be less than or equal 199MB");
+		paperFileService.upload(file, paper);
+		return ResponseEntity.ok("File uploaded successfully");
+	} catch (IOException e) {
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error uploading file");
+	}
+	}
+
+//DOWNLOAD FILE
+
+	@GetMapping("/{paperId}/download/{paperFileId}")
+	public ResponseEntity<byte[]> downloadFile(@PathVariable int paperFileId) {
+	try {
+		PaperFile paperFile = paperFileService.download(paperFileId).get();
+		return ResponseEntity.status(HttpStatus.OK)
+				.header(HttpHeaders.CONTENT_TYPE, paperFile.getType())
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + paperFile.getName()+ "\"")
+				.body(paperFile.getData());
+				
+	} catch (NotFoundException e) {
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+	}
+	}
+
+//GET FILES BY PAPERID
+
+	@GetMapping("/{paperId}/files")
+	public ResponseEntity<List<ResponseFile>> getListFiles(@PathVariable int paperId){
+		Paper paper = RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
+		List<ResponseFile> files = paperFileService.getAllFilesByPaperId(paperId);
+		return ResponseEntity.status(HttpStatus.OK).body(files);
+	}
+
 //GET BY ID
 
 	@GetMapping("{paperId}")
@@ -130,7 +182,7 @@ public class PaperRestController {
 	@PutMapping("{paperId}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<Paper> update(@PathVariable("paperId") int paperId, @RequestBody @Valid Paper paper) {
-		//Paper aux = RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
+		Paper aux = RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
 		//User loggedUser = userService.findCurrentUser();
 			//User paperUser = aux.getUser();
 			//if (loggedUser.getId().equals(paperUser.getId())) {
@@ -147,13 +199,13 @@ public class PaperRestController {
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<MessageResponse> delete(@PathVariable("paperId") int paperId) {
 		Paper paper = RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
-		User loggedUser = userService.findCurrentUser();
-			User paperUser = paper.getUser();
-			if (loggedUser.getId().equals(paperUser.getId())) {
+		// User loggedUser = userService.findCurrentUser();
+		// 	User paperUser = paper.getUser();
+		// 	if (loggedUser.getId().equals(paperUser.getId())) {
 				paperService.deletePaper(paperId);
 				return new ResponseEntity<>(new MessageResponse("Paper deleted!"), HttpStatus.OK);
-			} else
-				throw new ResourceNotOwnedException(paper);
+			// } else
+			// 	throw new ResourceNotOwnedException(paper);
 	}
 
 

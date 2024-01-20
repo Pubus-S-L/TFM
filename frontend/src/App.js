@@ -7,6 +7,8 @@ import Home from "./home";
 import Register from "./auth/register";
 import Login from "./auth/login";
 import Logout from "./auth/logout";
+import Papers from "./public/papers/papersList";
+import PaperDetail from "./public/papers/papersDetails";
 import tokenService from "./services/token.service";
 import PrivateRoute from "./privateRoute";
 import UserPaperEdit from "./user/papers/myPaperEdit"
@@ -57,6 +59,8 @@ function App() {
       <>        
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/papers" exact={true} element={<Papers />} />
+        <Route path="/papers/:id" exact={true} element={<PaperDetail />} />
       </>
     )
   } else {
@@ -67,6 +71,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/myPapers" exact={true} element={<PrivateRoute><UserPaperList/></PrivateRoute>} />
         <Route path="/myPapers/:id" exact={true} element={<PrivateRoute><UserPaperEdit /></PrivateRoute>} /> 
+        <Route path="/papers" exact={true} element={<Papers />} />
+        <Route path="/papers/:id" exact={true} element={<PaperDetail />} />
       </>
     )
   }

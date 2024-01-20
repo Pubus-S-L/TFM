@@ -9,6 +9,7 @@ c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\spring
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\exceptions\AccessDeniedException.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\configuration\ExceptionHandlerConfiguration.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\auth\AuthService.java
+c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\paper\PaperFileServiceImpl.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\paper\PaperTypeFormatter.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\exceptions\ResourceNotOwnedException.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\util\RestPreconditions.java
@@ -18,10 +19,13 @@ c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\spring
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\configuration\GenericIdToEntityConverter.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\paper\exceptions\DuplicatedPaperTitleException.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\user\UserService.java
+c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\paper\PaperFileService.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\user\User.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\configuration\SecurityConfiguration.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\paper\PaperType.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\paper\PaperValidator.java
+c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\paper\PaperFileRepository.java
+c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\paper\ResponseFile.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\paper\PaperRestController.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\util\CallMonitoringAspect.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\configuration\services\UserDetailsServiceImpl.java
@@ -29,6 +33,7 @@ c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\spring
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\user\Authorities.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\configuration\jwt\JwtUtils.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\model\BaseEntity.java
+c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\paper\PaperFile.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\PubusInitializer.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\auth\payload\request\SignupRequest.java
 c:\Users\lucia\OneDrive\Escritorio\4SOFT2CUATRI\TFG\TFG\src\main\java\org\springframework\samples\pubus\paper\PaperRepository.java

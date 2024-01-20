@@ -84,11 +84,5 @@ public class AuthController {
 		return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
 	}
 
-	// @GetMapping("/papers/myPapers")
-	// public ResponseEntity<Boolean> paperValidateToken(@RequestParam String token) {
-	// 	Boolean isValid = jwtUtils.validateJwtToken(token);
-	// 	return ResponseEntity.ok(isValid);
-	// }
-
 
 }

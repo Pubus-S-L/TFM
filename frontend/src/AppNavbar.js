@@ -79,12 +79,22 @@ function AppNavbar() {
         userLogout = (
             <>
                 <NavItem>
-                    <NavLink style={{ color: "white" }} id="docs" tag={Link} to="/docs">Docs</NavLink>
+                    <NavLink style={{ color: "white" }} tag={Link} to="/papers">Papers</NavLink>
                 </NavItem>
                 <NavItem>
-                    <NavLink style={{ color: "white" }} id="plans" tag={Link} to="/plans">Pricing Plans</NavLink>
+                    <NavLink style={{ color: "white" }} id="faq" tag={Link} to="/faq">FAQ</NavLink>
                 </NavItem>
-                <NavbarText style={{ color: "white" }} className="justify-content-end">{username}</NavbarText>
+                <NavItem>
+                    <NavLink style={{ color: "white" }} id="suppor" tag={Link} to="/support">Support</NavLink>
+                </NavItem>
+                <NavItem>
+                    <NavLink style={{ color: "white" }} id="about" tag={Link} to="/about">About Us</NavLink>
+                </NavItem>
+                <NavItem>
+                    <NavLink style={{ color: "white" }} id="news" tag={Link} to="/news">News</NavLink>
+                </NavItem>
+                <NavItem></NavItem>
+                {/* <NavbarText style={{ color: "white" }} className="justify-content-end">Welcome {username}</NavbarText> */}
                 <NavItem className="d-flex">
                     <NavLink style={{ color: "white" }} id="logout" tag={Link} to="/logout">Logout</NavLink>
                 </NavItem>

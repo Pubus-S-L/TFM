@@ -42,7 +42,12 @@
 		</developer>
 	</developers>
 
-	<dependencies>		
+	<dependencies>	
+		<dependency>
+   			<groupId>commons-fileupload</groupId>
+    		<artifactId>commons-fileupload</artifactId>
+    		<version>1.5</version>
+		</dependency>	
 
 		<!-- Spring and Spring Boot dependencies -->
 		<dependency>
