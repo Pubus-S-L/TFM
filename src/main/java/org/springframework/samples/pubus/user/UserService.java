@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.samples.pubus.exceptions.ResourceNotFoundException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.samples.pubus.configuration.services.UserDetailsImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,9 +53,18 @@ public class UserService {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		if (auth == null)
 			throw new ResourceNotFoundException("Nobody authenticated!");
-		else
-			return userRepository.findByUsername(auth.getName())
+		else{
+			Object principal = auth.getPrincipal();
+			if (principal instanceof UserDetailsImpl) {
+				UserDetailsImpl userDetails = (UserDetailsImpl) principal;
+				return userRepository.findByUsername(userDetails.getUsername())
+					.orElseThrow(() -> new ResourceNotFoundException("User", "username", userDetails.getUsername()));
+			}
+			else{
+				return userRepository.findByUsername(auth.getName())
 					.orElseThrow(() -> new ResourceNotFoundException("User", "username", auth.getName()));
+			}
+		}
 	}
 
 	public Boolean existsUser(String username) {

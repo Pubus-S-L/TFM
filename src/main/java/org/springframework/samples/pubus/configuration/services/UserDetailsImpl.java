@@ -17,25 +17,35 @@ public class UserDetailsImpl implements UserDetails {
 
 	private Integer id;
 
+	private String firstName;
+
+	private String lastName;
+
 	private String username;
+
+	private String email;
 
 	@JsonIgnore
 	private String password;
 
 	private Collection<? extends GrantedAuthority> authorities;
 
-	public UserDetailsImpl(Integer id, String username, String password,
+	public UserDetailsImpl(Integer id, String firstName, String lastName, String username, String email, String password,
 			Collection<? extends GrantedAuthority> authorities) {
+				
 		this.id = id;
+		this.firstName = firstName;
+		this.lastName = lastName;
 		this.username = username;
+		this.email = email;
 		this.password = password;
 		this.authorities = authorities;
 	}
 
 	public static UserDetailsImpl build(User user) {
-		List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(user.getAuthority()));
+		List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(user.getAuthority().getAuthority()));
 
-		return new UserDetailsImpl(user.getId(), user.getUsername(),
+		return new UserDetailsImpl(user.getId(),user.getFirstName(),user.getLastName(), user.getUsername(),user.getEmail(),
 				user.getPassword(),
 				authorities);
 	}

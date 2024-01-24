@@ -1,0 +1,70 @@
+.paper-list-page-container{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    margin-top: 2%;
+    padding: 0 2%;
+}
+
+.title-and-add{
+    width: 50%;
+    padding: 0 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.paper-list-title{
+    margin-bottom: 2rem;
+}
+
+.paper-row{
+    width: 50%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--main-green-color);
+    border-radius: 2.25rem;
+    padding: 2rem;
+    background-color: rgb(245, 245, 245);
+    margin: 25px 0;
+}
+
+.paper-data{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.paper-options{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--main-green-color);
+}
+
+.paper-name{
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.carousel-slide{
+    width: 90%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 0 10px;
+}
