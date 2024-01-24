@@ -6,11 +6,24 @@ import { useState, useEffect } from "react";
 
 export default function Papers() {
   let [papers, setPapers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  // let [search, setSearch] = useState("");
+  // const datos = e=>
+  //   e.preventDefault()
+  //   fetch(`/api/v1/papers/filtered/${search}`)
+  //   .then(response => response.json())
+  //   .then(data => {
+  //       setPapers(data)
+  //   })
+
+  //   const changeState = e =>{
+  //     setSearch(e.target.value)
+  //   }
 
 
   async function setUp() {
     let papers = await (
-      await fetch(`/api/v1/papers`, {
+      await fetch(`/api/v1/papers?search=${searchTerm}`, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -21,7 +34,7 @@ export default function Papers() {
 
   useEffect(() => {
     setUp();
-  }, []);
+  },  [searchTerm]);
 
   return (
     <div>
@@ -30,7 +43,13 @@ export default function Papers() {
         <div className="title-and-add">
           <h1 className="paper-list-title">Papers</h1>
         </div>
-        {papers.length > 0 ? (
+        <input
+          type="text"
+          placeholder="Search papers"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        {papers && papers.length > 0 ? (
           papers.map((paper) => {
             return (
               <div key={paper.id} className="paper-row">
@@ -59,7 +78,7 @@ export default function Papers() {
             );
           })
         ) : (
-          <p>Loading...</p>
+          <p>No papers found</p>
         )}
       </div>
     </div>

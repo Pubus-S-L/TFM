@@ -66,13 +66,8 @@ public class PaperService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<Paper> findAllPapersByUserFirstName(String first_name) throws DataAccessException {
-		return paperRepository.findAllPapersByUserFirstName(first_name);
-	}
-
-	@Transactional(readOnly = true)
-	public List<Paper> findAllPapersByUserLastName(String last_name) throws DataAccessException {
-		return paperRepository.findAllPapersByUserLastName(last_name);
+	public List<Paper> findAllPapersByAuthor(String author) throws DataAccessException {
+		return paperRepository.findAllPapersByAuthor(author);
 	}
 
 	@Transactional(readOnly = true)

@@ -33,11 +33,8 @@ public interface PaperRepository extends CrudRepository<Paper, Integer> {
 	@Query(("SELECT p FROM Paper p WHERE p.user.id = :id"))
 	List<Paper> findAllPapersByUserId(@Param("id") int id) throws DataAccessException;
 
-	@Query(("SELECT p FROM Paper p WHERE LOWER(p.user.firstName) = LOWER(:firstName)"))
-	List<Paper> findAllPapersByUserFirstName(@Param("firstName") String firstName);
-
-	@Query(("SELECT p FROM Paper p WHERE LOWER(p.user.lastName) = LOWER(:lastName)"))
-	List<Paper> findAllPapersByUserLastName(@Param("lastName") String lastName);
+	@Query(("SELECT p FROM Paper p WHERE LOWER(p.authors) LIKE %:author%"))
+	List<Paper> findAllPapersByAuthor(@Param("author") String author);
 
 	@Query(("SELECT COUNT(p) FROM Paper p WHERE p.user.id = :id"))
 	public Integer countPapersByUser(int id);

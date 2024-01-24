@@ -21,16 +21,13 @@ public class PaperFileServiceImpl implements PaperFileService {
 
     @Autowired
     private PaperFileRepository paperFileRepository;
+    
+    @Autowired
+    private PaperService paperService;
 
     @Transactional
     public PaperFile save(PaperFile paperFile) {
         return paperFileRepository.save(paperFile);
-    }
-
-	@Transactional(readOnly = true)
-    public PaperFile getPaperFileById(int paperFileId) {
-        return paperFileRepository.findById(paperFileId)
-                .orElseThrow(() -> new ResourceNotFoundException("File not found with ID: " + paperFileId));
     }
 
 	// @Transactional(readOnly = true)
@@ -46,13 +43,9 @@ public class PaperFileServiceImpl implements PaperFileService {
     //     else throw new ResourceNotFoundException("File not found with ID: " + paperFileId);
     // }
 
-    @Transactional
-    public void deletePaperFile(int paperFileId) {
-        paperFileRepository.deleteById(paperFileId);
-    }
 
     @Override
-    public PaperFile upload(MultipartFile file, Paper paper) throws IOException {
+    public PaperFile upload(MultipartFile file, Paper paper, Integer paperId) throws IOException {
        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
        
        PaperFile paperFile = PaperFile.builder()
@@ -61,6 +54,10 @@ public class PaperFileServiceImpl implements PaperFileService {
        .data(file.getBytes())
        .paper(paper)
        .build();
+       List<PaperFile> paperFiles = paper.getPaperFiles();
+       paperFiles.add(paperFile);
+       paper.setPaperFiles(paperFiles);
+       paperService.updatePaper(paper, paperId);
        return paperFileRepository.save(paperFile);
     }
 
@@ -89,6 +86,18 @@ public class PaperFileServiceImpl implements PaperFileService {
         }).collect(Collectors.toList());
 
         return files;
+    }
+
+    @Override
+    public void deletePaperFile(Integer id) {
+        paperFileRepository.deleteById(id);
+       
+    }
+
+    @Override
+    public PaperFile getPaperFileById(Integer id) {
+        return paperFileRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("File not found with ID: " + id));
     }
 
 

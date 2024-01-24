@@ -2,6 +2,8 @@ package org.springframework.samples.pubus.paper;
 
 import org.springframework.samples.pubus.model.BaseEntity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -35,6 +37,7 @@ public class PaperFile extends BaseEntity {
 
     private String type;
 
+    @JsonIgnore
     @ManyToOne(optional = false)
     @JoinColumn(name = "paper_id")
     private Paper paper;

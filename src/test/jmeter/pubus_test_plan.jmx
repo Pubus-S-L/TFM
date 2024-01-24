@@ -54,8 +54,8 @@
           </elementProp>
           <stringProp name="HTTPSampler.domain">${pubus_HOST}</stringProp>
           <stringProp name="HTTPSampler.port">${pubus_PORT}</stringProp>
-          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
-          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout">300000</stringProp>
+          <stringProp name="HTTPSampler.response_timeout">300000</stringProp>
           <stringProp name="HTTPSampler.protocol"></stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
           <stringProp name="HTTPSampler.path"></stringProp>

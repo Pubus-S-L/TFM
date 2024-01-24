@@ -13,6 +13,8 @@ import { paperEditFormInputs } from "./form/paperEditFormInputs";
 import "../../../static/css/user/myPaperEdit.css";
 import "../../../static/css/auth/authButton.css"
 import useFetchState from "../../../util/useFetchState";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import axios from 'axios';
 
 export default function UserPaperEdit(){
   let pathArray = window.location.pathname.split("/");
@@ -34,8 +36,34 @@ export default function UserPaperEdit(){
   const [paper,setPaper] = useState(emptyItem);  
   const [paperId,setPaperId] = useState(pathArray[2]);
   const editPaperFormRef=useRef();
-  
+  const [files,setFiles] = useState([]);
+  const uploadFiles=e=>{
+    setFiles(e);
+  }
+
   useEffect( () => setupPaper(),[]);  
+
+  function removePaperFile(id) {
+    fetch(`/api/v1/papers/${paperId}/delete/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        if (response.status === 200) {
+          let updatedFiles = [...files].filter((i) => i.id !== id);
+          setFiles(updatedFiles);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setMessage(data.message);
+        setModalShow(true);
+      });
+  }
   
   function setupPaper(){
       if (paperId !== "new" && paper.id==null) { 
@@ -104,7 +132,22 @@ export default function UserPaperEdit(){
       keywords: values['keywords'],
       notes: values['notes'],
       user: paper.user,
+
+
     };
+         
+    const f = new FormData();
+    if(files != null){
+      for(let index = 0; index < files.length; index++){
+        f.append('files', files[index]);
+      }
+    }
+    else{ 
+      const nofiles = [];
+      f.append('files',nofiles)}
+     
+
+    f.append('paper', new Blob([JSON.stringify(mypaper)], { type: 'application/json' }));
 
     const submit = await (await fetch("/api/v1/papers" + (paper.id ? "/" + paperId : ""), 
       {
@@ -112,9 +155,8 @@ export default function UserPaperEdit(){
         headers: {
           Authorization: `Bearer ${jwt}`,
           Accept: "application/json",
-          "Content-Type": "application/json",
         },
-        body: JSON.stringify(mypaper),
+        body: f,
       }
     )).json();
 
@@ -195,6 +237,24 @@ export default function UserPaperEdit(){
             buttonText="Save"
             buttonClassName="auth-button"
           />
+          <span>
+            <strong>Files:</strong>
+              {paper.paperFiles && paper.paperFiles.map((paperFile, index) => (
+              <><div key={index}>
+                  {paperFile.name}
+                </div>
+                <div classNme="paper-options">
+                    <button
+                      onClick={() => removePaperFile(paperFile.id)}
+                      className="auth-button danger"
+                    >
+                      Delete
+                    </button>
+                  </div></>
+              ))}
+          </span>
+          <br /><br />
+          <input type="file" name="files" multiple onChange={(e)=>uploadFiles(e.target.files)}/>
         </div>
         {modal}
       </div>

@@ -2,7 +2,11 @@ package org.springframework.samples.pubus.paper;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import jakarta.annotation.Resource;
 import jakarta.persistence.EntityNotFoundException;
@@ -35,6 +39,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -82,48 +87,58 @@ public class PaperRestController {
 	}
 
 	@GetMapping
-	public ResponseEntity<List<Paper>> findAll(@RequestParam(required = false) Integer userId) {
+	public ResponseEntity<List<Paper>> findAll(@RequestParam(required = false) Integer userId,@RequestParam(required = false) String search) {
 		//User user = userService.findCurrentUser();
 		if (userId != null) {
 			//if (user.getId().equals(userId))
 				return new ResponseEntity<>(paperService.findAllPapersByUserId(userId), HttpStatus.OK);
-		} else {
+		} else {			
+			if (search != null && !search.isEmpty()) {
+				ResponseEntity<List<Paper>> res = searchPaper(search);
+				return res;
+			}
+			else{
 				return new ResponseEntity<>((List<Paper>) this.paperService.findAll(), HttpStatus.OK);
+			}
+
+				
 		}
 		//throw new AccessDeniedException();
 	}
 
 // GET FILTERED
 
-	@GetMapping("/filtered/{originalSearch}")
-	public ResponseEntity<List<Paper>> searchPaper(@RequestParam String search) {
-		List<Paper> list1 = this.paperService.findAllPapersByUserFirstName(search);
-		List<Paper> list2 = this.paperService.findAllPapersByUserLastName(search);
-		List<Paper> list3 = this.paperService.findAllPapersAbstractWord(search);
-		List<Paper> list4 = this.paperService.findAllPapersByKeyword(search);
-		List<Paper> list_complete = new ArrayList<>();
-		list_complete.addAll(list1);
-		list_complete.addAll(list2);
-		list_complete.addAll(list3);
-		list_complete.addAll(list4);
+	private ResponseEntity<List<Paper>> searchPaper(String originalSearch) {
+		String search = originalSearch.toLowerCase();
+		Set<Paper> set_complete = new HashSet<>();
+		List<Paper> list1 = this.paperService.findAllPapersByAuthor(search);
+		List<Paper> list2 = this.paperService.findAllPapersAbstractWord(search);
+		List<Paper> list3 = this.paperService.findAllPapersByKeyword(search);
+
+		set_complete.addAll(list1);
+		set_complete.addAll(list2);
+		set_complete.addAll(list3);
+
+		List<Paper> list_complete = set_complete.stream().collect(Collectors.toList());
 
 		return new ResponseEntity<>((List<Paper>) list_complete, HttpStatus.OK);
 	}
 
-
 //UPLOAD FILE
 
-	@PostMapping("/{paperId}/upload")
-	public ResponseEntity<String> uploadFile(@PathVariable int paperId, @RequestParam("file") MultipartFile file) {
+	private ResponseEntity<Paper> uploadFile(Integer paperId, Paper paper, List<MultipartFile> files) {
 	try {
-		Paper paper = RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
-		long fileSize = file.getSize();
-		long maxfileSize = 199 * 1024 * 1024;
-		if (fileSize > maxfileSize) return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File size must be less than or equal 199MB");
-		paperFileService.upload(file, paper);
-		return ResponseEntity.ok("File uploaded successfully");
+		//Paper paper = RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
+		for(MultipartFile file: files){	
+			long fileSize = file.getSize();
+			long maxfileSize = 199 * 1024 * 1024;
+			if (fileSize > maxfileSize) return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+			paperFileService.upload(file, paper, paperId);	
+		}
+		Paper paperUpdated = paperService.findPaperById(paperId);
+		return ResponseEntity.status(HttpStatus.OK).body(paperUpdated);
 	} catch (IOException e) {
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error uploading file");
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
 	}
 	}
 
@@ -181,13 +196,21 @@ public class PaperRestController {
 
 	@PutMapping("{paperId}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<Paper> update(@PathVariable("paperId") int paperId, @RequestBody @Valid Paper paper) {
+	public ResponseEntity<Paper> update(@PathVariable("paperId") int paperId, @RequestPart("paper") @Valid Paper paper, @RequestParam(required=false) List<MultipartFile> files) {
 		Paper aux = RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
 		//User loggedUser = userService.findCurrentUser();
 			//User paperUser = aux.getUser();
 			//if (loggedUser.getId().equals(paperUser.getId())) {
-				Paper res = this.paperService.updatePaper(paper, paperId);
-				return new ResponseEntity<>(res, HttpStatus.OK);
+				if(files!=null){
+					ResponseEntity<Paper> res = uploadFile(paperId, paper, files);
+					return res;
+				}
+				else{
+					Paper res = paperService.updatePaper(paper, paperId);
+					return new ResponseEntity<>(res, HttpStatus.OK);
+				}
+
+
 			//} else
 			//	throw new ResourceNotOwnedException(aux);
 
@@ -204,6 +227,21 @@ public class PaperRestController {
 		// 	if (loggedUser.getId().equals(paperUser.getId())) {
 				paperService.deletePaper(paperId);
 				return new ResponseEntity<>(new MessageResponse("Paper deleted!"), HttpStatus.OK);
+			// } else
+			// 	throw new ResourceNotOwnedException(paper);
+	}
+
+//DELETE PAPERFILE
+
+	@DeleteMapping("{paperId}/delete/{paperFileId}")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<MessageResponse> deletePaperFile(@PathVariable("paperFileId") int paperFileId) {
+		PaperFile paperFile = RestPreconditions.checkNotNull(paperFileService.getPaperFileById(paperFileId), "PaperField", "ID", paperFileId);
+		// User loggedUser = userService.findCurrentUser();
+		// 	User paperUser = paper.getUser();
+		// 	if (loggedUser.getId().equals(paperUser.getId())) {
+				paperFileService.deletePaperFile(paperFileId);
+				return new ResponseEntity<>(new MessageResponse("File deleted!"), HttpStatus.OK);
 			// } else
 			// 	throw new ResourceNotOwnedException(paper);
 	}

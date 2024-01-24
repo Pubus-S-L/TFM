@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.annotations.OnDelete;
@@ -57,8 +58,8 @@ public class Paper extends BaseEntity {
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	protected User user;
 
-	@OneToMany(mappedBy = "paper", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PaperFile> paperFiles;
+	@OneToMany(mappedBy = "paper", cascade = CascadeType.ALL)
+    private List<PaperFile> paperFiles = new ArrayList<>();
 
 
 

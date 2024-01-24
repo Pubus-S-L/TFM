@@ -11,8 +11,8 @@ import Papers from "./public/papers/papersList";
 import PaperDetail from "./public/papers/papersDetails";
 import tokenService from "./services/token.service";
 import PrivateRoute from "./privateRoute";
-import UserPaperEdit from "./user/papers/myPaperEdit"
-import UserPaperList from "./user/papers/myPaperList"
+import UserPaperEdit from "./user/papers/myPaperEdit";
+import UserPaperList from "./user/papers/myPaperList";
 
 function ErrorFallback({ error, resetErrorBoundary }) {
   return (
@@ -60,7 +60,9 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/papers" exact={true} element={<Papers />} />
+        <Route path="/papers/filtered/:search" exact={true} element={<Papers />} />
         <Route path="/papers/:id" exact={true} element={<PaperDetail />} />
+        <Route path="/papers/:id/download/:paperFileId" exact={true} element={<PaperDetail />} />
       </>
     )
   } else {
@@ -72,7 +74,9 @@ function App() {
         <Route path="/myPapers" exact={true} element={<PrivateRoute><UserPaperList/></PrivateRoute>} />
         <Route path="/myPapers/:id" exact={true} element={<PrivateRoute><UserPaperEdit /></PrivateRoute>} /> 
         <Route path="/papers" exact={true} element={<Papers />} />
+        <Route path="/papers/filtered/:search" exact={true} element={<Papers />} />
         <Route path="/papers/:id" exact={true} element={<PaperDetail />} />
+        <Route path="/papers/:id/download/:paperFileId" exact={true} element={<PaperDetail />} />
       </>
     )
   }
