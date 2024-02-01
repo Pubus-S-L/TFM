@@ -1,12 +1,11 @@
 import React from "react";
 import { useEffect, useState, useRef } from "react";
 import "../../../static/css/user/myPaperList.css";
-import "../../../static/css/auth/authButton.css"
+import "../../../static/css/auth/authButton.css";
+import { Link } from "react-router-dom";
 export default function PaperDetail() {
     let pathArray = window.location.pathname.split("/");
     const [paper,setPaper] = useState();  
-    let [message, setMessage] = useState(null);
-    let [modalShow, setModalShow] = useState(false);
     const [paperId,setPaperId] = useState(pathArray[2]);
 
     function downloadFile(fileId,fileName) {
@@ -105,6 +104,18 @@ export default function PaperDetail() {
                 </button></>
                  ))}
             </span>
+            <span>
+                <strong>User:</strong> {paper.user.firstName + " " + paper.user.lastName}
+            </span>
+            <div className="paper-options">
+                  <Link
+                    to={"/users/" + paper.user.id}
+                    className="auth-button blue"
+                    style={{ textDecoration: "none" }}
+                  >
+                    View Profile
+                  </Link>
+                </div>
             </>
             )}
             </div>

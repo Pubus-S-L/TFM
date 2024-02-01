@@ -7,19 +7,6 @@ import { useState, useEffect } from "react";
 export default function Papers() {
   let [papers, setPapers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  // let [search, setSearch] = useState("");
-  // const datos = e=>
-  //   e.preventDefault()
-  //   fetch(`/api/v1/papers/filtered/${search}`)
-  //   .then(response => response.json())
-  //   .then(data => {
-  //       setPapers(data)
-  //   })
-
-  //   const changeState = e =>{
-  //     setSearch(e.target.value)
-  //   }
-
 
   async function setUp() {
     let papers = await (

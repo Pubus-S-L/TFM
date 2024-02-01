@@ -14,6 +14,7 @@ import "../../../static/css/user/myPaperEdit.css";
 import "../../../static/css/auth/authButton.css"
 import useFetchState from "../../../util/useFetchState";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import tokenService from "../../../services/token.service";
 import axios from 'axios';
 
 export default function UserPaperEdit(){
@@ -29,12 +30,14 @@ export default function UserPaperEdit(){
     notes: "",
     user: {},
   };  
+  const user = tokenService.getUser();
   const jwt = JSON.parse(window.localStorage.getItem("jwt"));
   const [message,setMessage] = useState(null);
   const [modalShow,setModalShow] = useState(false);
   const [types, setTypes] = useState([])
   const [paper,setPaper] = useState(emptyItem);  
   const [paperId,setPaperId] = useState(pathArray[2]);
+  const [userId, setUserId] = useState(user.id)
   const editPaperFormRef=useRef();
   const [files,setFiles] = useState([]);
   const uploadFiles=e=>{
@@ -148,6 +151,7 @@ export default function UserPaperEdit(){
      
 
     f.append('paper', new Blob([JSON.stringify(mypaper)], { type: 'application/json' }));
+    f.append('userId', userId.toString());
 
     const submit = await (await fetch("/api/v1/papers" + (paper.id ? "/" + paperId : ""), 
       {
@@ -155,6 +159,7 @@ export default function UserPaperEdit(){
         headers: {
           Authorization: `Bearer ${jwt}`,
           Accept: "application/json",
+          
         },
         body: f,
       }
