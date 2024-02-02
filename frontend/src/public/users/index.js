@@ -1,6 +1,6 @@
 import React from "react";
 import { useEffect, useState, useRef } from "react";
-import "../../static/css/user/myPaperList.css";
+import "../../static/css/user/myProfile.css";
 import "../../static/css/auth/authButton.css";
 import { Link } from "react-router-dom";
 export default function UserDetail() {
@@ -79,7 +79,7 @@ export default function UserDetail() {
                 return (
                 <div key={paper.id} className="paper-row">
                     <div className="paper-data">
-                    <h4 className="paper-name">{paper.title}</h4>
+                    <h4 className="title-and-add">{paper.title}</h4>
                     </div>
                     <div className="paper-options">
                     <Link

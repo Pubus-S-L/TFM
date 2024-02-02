@@ -60,7 +60,7 @@ export default function UserPaperList() {
       {/* <AppNavbar /> */}
       <div className="paper-list-page-container">
         <div className="title-and-add">
-          <h1 className="paper-list-title">Papers</h1>
+          <h1 className="paper-list-title">My Papers</h1>
           <Link
             to="/myPapers/new"
             className="auth-button"
@@ -104,7 +104,7 @@ export default function UserPaperList() {
             );
           })
         ) : (
-          <p>Loading...</p>
+          <p>Papers not found.</p>
         )}
 
         <Modal isOpen={modalShow} toggle={handleShow} keyboard={false}>
