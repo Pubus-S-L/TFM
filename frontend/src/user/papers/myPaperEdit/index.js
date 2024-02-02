@@ -192,8 +192,8 @@ export default function UserPaperEdit(){
       paperEditFormInputs[2].defaultValue = paper.publicationYear || "";
       paperEditFormInputs[3].defaultValue = paper.type.name || "None";
       paperEditFormInputs[4].defaultValue = paper.abstractContent || "";
-      paperEditFormInputs[5].defaultValue = paper.keywords || "";
-      paperEditFormInputs[6].defaultValue = paper.notes || "";
+      paperEditFormInputs[5].defaultValue = paper.notes || "";
+      paperEditFormInputs[6].defaultValue = paper.keywords || "";
     }
 
     function handleShow() {
