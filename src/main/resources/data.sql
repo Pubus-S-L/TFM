@@ -15,5 +15,5 @@ INSERT INTO types(id,name) VALUES (8,'Essay')
 INSERT INTO types(id,name) VALUES (9,'Paper')
 INSERT INTO types(id,name) VALUES (10,'Other')
 
-INSERT INTO papers(id,title,authors,publication_year,type_id,abstract_content,notes,keywords,user_id) VALUES(1,'Title article','Pedro Pérez',2019,1,'An article about science', 'A short article', 'article, science',2)
-INSERT INTO papers(id,title,authors,publication_year,type_id,abstract_content,notes,keywords,user_id) VALUES(2,'My thesis','Paco Ortiz, Pedro P',2024,5,'A thesis about informatics', 'Use of complexity knowledge for the efficiency of code ', 'complexity, efficiency, code',2)
+INSERT INTO papers(id,title,authors,publication_year,type_id,abstract_content,notes,keywords,user_id) VALUES(1,'Title article','Pedro P.',2019,1,'An article about science', 'A short article', 'article, science',2)
+INSERT INTO papers(id,title,authors,publication_year,type_id,abstract_content,notes,keywords,user_id) VALUES(2,'My thesis','Paco O., Pedro P.',2024,5,'A thesis about informatics', 'Use of complexity knowledge for the efficiency of code ', 'complexity, efficiency, code',2)

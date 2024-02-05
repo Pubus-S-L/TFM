@@ -103,11 +103,13 @@ export default function Papers() {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
+         <div className="type-row">
       <span>
-        <strong>Filter by Type:</strong>
+        <strong>Filter by Type:  </strong>
       </span>
             {types.map((type, index) => (
       <label key={index}>
+          <strong>  </strong>
         <input
           type="checkbox"
           value={type.name}
@@ -115,8 +117,10 @@ export default function Papers() {
           onChange={(e) => changeCheckbox(e)}
         />
         {type.name}
+        <strong className="separator"> </strong>
       </label>
     ))}
+    </div>
         {papers && papers.length > 0 ? (
           papers.map((paper) => {
             return (
