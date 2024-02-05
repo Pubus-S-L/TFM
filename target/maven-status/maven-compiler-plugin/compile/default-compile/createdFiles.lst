@@ -10,6 +10,7 @@ org\springframework\samples\pubus\paper\PaperFile.class
 org\springframework\samples\pubus\paper\PaperService.class
 org\springframework\samples\pubus\paper\PaperFileServiceImpl.class
 org\springframework\samples\pubus\paper\PaperTypeFormatter.class
+org\springframework\samples\pubus\company\Company.class
 org\springframework\samples\pubus\util\RestPreconditions.class
 org\springframework\samples\pubus\configuration\jwt\JwtUtils.class
 org\springframework\samples\pubus\paper\exceptions\DuplicatedPaperTitleException.class

@@ -10,6 +10,15 @@ export const formValidators = {
             return value !== "None";
         },
         message: "Please, select a type"
+    },
+
+    date: {
+        validate: (value) => {
+            let year = new Date().getFullYear()
+            return value !== "None" && value> year-100 && value<=year;
+        },
+        message: "Please, write a date beetwen "+ (new Date().getFullYear()-100) + " and " + new Date().getFullYear()
     }
+
 
 }
