@@ -1,4 +1,6 @@
 org\springframework\samples\pubus\PubusApplication.class
+org\springframework\samples\pubus\company\CompanyRestController.class
+org\springframework\samples\pubus\company\CompanyService.class
 org\springframework\samples\pubus\configuration\SecurityConfiguration.class
 org\springframework\samples\pubus\user\AuthoritiesService.class
 org\springframework\samples\pubus\user\Authorities.class
@@ -32,6 +34,7 @@ org\springframework\samples\pubus\paper\PaperRestController.class
 org\springframework\samples\pubus\configuration\OpenApiConfiguration.class
 org\springframework\samples\pubus\configuration\services\UserDetailsImpl.class
 org\springframework\samples\pubus\model\package-info.class
+org\springframework\samples\pubus\company\CompanyRepository.class
 org\springframework\samples\pubus\exceptions\ResourceNotOwnedException.class
 org\springframework\samples\pubus\configuration\jwt\AuthTokenFilter.class
 org\springframework\samples\pubus\exceptions\ResourceNotFoundException.class

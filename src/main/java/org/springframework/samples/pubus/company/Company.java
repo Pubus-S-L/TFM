@@ -1,5 +1,7 @@
 package org.springframework.samples.pubus.company;
 
+import java.util.Map;
+
 import org.springframework.samples.pubus.model.NamedEntity;
 
 import jakarta.persistence.Entity;
@@ -19,6 +21,8 @@ public class Company extends NamedEntity {
     String direction;
 
     Integer phone;
+
+    String email;
 
     Integer supportPhone;
 

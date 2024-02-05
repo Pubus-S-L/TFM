@@ -77,6 +77,7 @@ function App() {
         <Route path="/papers/:id" exact={true} element={<PaperDetail />} />
         <Route path="/papers/:id/download/:paperFileId" exact={true} element={<PaperDetail />} />
         <Route path="/users/:id" exact={true} element={<UserDetail />} />
+        <Route path="/about" exact={true} element={<AboutUs />} />
       </>
     )
   }
