@@ -37,6 +37,20 @@
     margin: 15px 25px 25px 25px;
 }
 
+.type-row{
+    width: 95%;
+    height: 100%;
+    display: flex-start;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--main-green-color);
+    border-radius: 2.25rem;
+    padding: 2rem;
+    background-color: rgb(245, 245, 245);
+    margin: 15px 25px 25px 25px;
+}
+
 .paper-data{
     width: 100%;
     height: 100%;
@@ -70,3 +84,7 @@
     align-items: flex-start;
     padding: 0 10px;
 }
+
+.separator {
+    margin: 0 4px;
+  }
