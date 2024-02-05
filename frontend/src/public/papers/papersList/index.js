@@ -7,34 +7,88 @@ import { useState, useEffect } from "react";
 export default function Papers() {
   let [papers, setPapers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  // let [search, setSearch] = useState("");
-  // const datos = e=>
-  //   e.preventDefault()
-  //   fetch(`/api/v1/papers/filtered/${search}`)
-  //   .then(response => response.json())
-  //   .then(data => {
-  //       setPapers(data)
-  //   })
+  const [types, setTypes] = useState([]);
+  const [typesSelected, setTypeSelected] = useState([]);
+  
+  async function setUpTypes() {
+    let types = await (
+      await fetch(`/api/v1/papers/types`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+    ).json();
+    setTypes(types)
+  }
 
-  //   const changeState = e =>{
-  //     setSearch(e.target.value)
-  //   }
+
+  const changeCheckbox = (e) => {
+    const selectedValue = e.target.value;
+    const newTypesSelected = [...typesSelected];
+  
+    if (e.target.checked) {
+      newTypesSelected.push(selectedValue);
+    } else {
+      const index = newTypesSelected.indexOf(selectedValue);
+      if (index !== -1) {
+        newTypesSelected.splice(index, 1);
+      }
+    }
+  
+    setTypeSelected(newTypesSelected);
+  };
+
 
 
   async function setUp() {
-    let papers = await (
+    let papersFilteredByType = []
+    if (typesSelected.length > 0) {
+      for(const paperType of typesSelected){
+        console.log(paperType)
+        let papersByType = await (
+          await fetch(`/api/v1/papers/types/${paperType}`, {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          })
+        ).json();
+        papersFilteredByType= papersFilteredByType.concat(papersByType)
+      }   
+    }
+  
+    let papersFiltered = await (
       await fetch(`/api/v1/papers?search=${searchTerm}`, {
         headers: {
           "Content-Type": "application/json",
         },
       })
     ).json();
-    setPapers(papers)
+
+    let papersRes = []
+    if(typesSelected.length > 0){ 
+      console.log(typesSelected)
+      console.log(papersFilteredByType)
+      console.log(papersFiltered)
+      papersRes = papersFilteredByType.filter(elemento =>
+        papersFiltered.some(paper => paper.id === elemento.id))
+    }
+    else{
+      console.log("AAA")
+      papersRes = papersFiltered
+    }
+
+
+    setPapers(papersRes)
   }
 
   useEffect(() => {
-    setUp();
-  },  [searchTerm]);
+    async function fetchData() {
+      await setUpTypes();
+      await setUp();
+    }
+
+    fetchData();
+  }, [typesSelected, searchTerm]);
 
   return (
     <div>
@@ -49,6 +103,20 @@ export default function Papers() {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
+      <span>
+        <strong>Filter by Type:</strong>
+      </span>
+            {types.map((type, index) => (
+      <label key={index}>
+        <input
+          type="checkbox"
+          value={type.name}
+          checked={typesSelected.includes(type.name)}
+          onChange={(e) => changeCheckbox(e)}
+        />
+        {type.name}
+      </label>
+    ))}
         {papers && papers.length > 0 ? (
           papers.map((paper) => {
             return (

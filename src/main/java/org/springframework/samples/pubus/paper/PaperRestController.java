@@ -82,7 +82,7 @@ public class PaperRestController {
 //GET PAPERS BY TYPE
 
 	@GetMapping("/types/{paperType}")
-	public ResponseEntity<List<Paper>> findAllPapersByType(@RequestParam String paperType) {
+	public ResponseEntity<List<Paper>> findAllPapersByType(@PathVariable String paperType) {
 		return new ResponseEntity<>((List<Paper>) this.paperService.findAllPapersByType(paperType), HttpStatus.OK);
 	}
 
