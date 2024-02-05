@@ -173,34 +173,54 @@ public class PaperRestController {
 	public ResponseEntity<Paper> findById(@PathVariable("paperId") int paperId) {
 		Paper paper = RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
 			return new ResponseEntity<>(paper, HttpStatus.OK);
-	} 	
+	} 
+	
+//GET BY USERID
+
+	@GetMapping("/users/{userId}")
+	public ResponseEntity<List<Paper>> findAllByUserId(@PathVariable("userId") int userId) {
+		List<Paper> papers = RestPreconditions.checkNotNull(paperService.findAllPapersByUserId(userId), "User", "ID", userId);
+			return new ResponseEntity<>(papers, HttpStatus.OK);
+	}
+
 
 //CREATE	
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseEntity<Paper> create(@RequestBody @Valid Paper paper)
+	public ResponseEntity<Paper> create(@RequestPart @Valid Paper paper, @RequestParam(required=false) List<MultipartFile> files, @RequestPart("userId") String userId)
 			throws DataAccessException, DuplicatedPaperTitleException {
-		User user = userService.findCurrentUser();
+		Integer id = Integer.parseInt(userId);
+		User user = userService.findUser(id);
 		Paper newPaper = new Paper();
 		Paper savedPaper;
 		BeanUtils.copyProperties(paper, newPaper, "id");
 		newPaper.setUser(user);
-
 		savedPaper = this.paperService.savePaper(newPaper);
 
-		return new ResponseEntity<>(savedPaper, HttpStatus.CREATED);
+		if(files!=null){
+			ResponseEntity<Paper> res = uploadFile(savedPaper.getId(), savedPaper, files);
+			return res;
+		}
+		else{
+			Paper res = paperService.updatePaper(savedPaper, savedPaper.getId());
+			return new ResponseEntity<>(res, HttpStatus.OK);
+		}
+
+
+		// return new ResponseEntity<>(savedPaper, HttpStatus.CREATED);
 	}
 
 //UPDATE
 
 	@PutMapping("{paperId}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<Paper> update(@PathVariable("paperId") int paperId, @RequestPart("paper") @Valid Paper paper, @RequestParam(required=false) List<MultipartFile> files) {
+	public ResponseEntity<Paper> update(@PathVariable("paperId") int paperId, @RequestPart("paper") @Valid Paper paper, @RequestParam(required=false) List<MultipartFile> files, @RequestPart("userId") String userId) {
 		Paper aux = RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
-		//User loggedUser = userService.findCurrentUser();
-			//User paperUser = aux.getUser();
-			//if (loggedUser.getId().equals(paperUser.getId())) {
+		Integer id = Integer.parseInt(userId);
+		User loggedUser = userService.findUser(id);
+			User paperUser = aux.getUser();
+			if (loggedUser.getId().equals(paperUser.getId())) {
 				if(files!=null){
 					ResponseEntity<Paper> res = uploadFile(paperId, paper, files);
 					return res;
@@ -211,8 +231,8 @@ public class PaperRestController {
 				}
 
 
-			//} else
-			//	throw new ResourceNotOwnedException(aux);
+			} else
+				throw new ResourceNotOwnedException(aux);
 
 	}
 

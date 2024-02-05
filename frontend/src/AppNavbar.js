@@ -55,9 +55,6 @@ function AppNavbar() {
                     <NavLink style={{ color: "white" }} id="about" tag={Link} to="/about">About Us</NavLink>
                 </NavItem>
                 <NavItem>
-                    <NavLink style={{ color: "white" }} id="news" tag={Link} to="/news">News</NavLink>
-                </NavItem>
-                <NavItem>
                     <NavLink style={{ color: "white" }} id="register" tag={Link} to="/register">Register</NavLink>
                 </NavItem>
                 <NavItem>
@@ -70,6 +67,9 @@ function AppNavbar() {
             <>
                 <NavItem>
                     <NavLink style={{ color: "white" }} tag={Link} to="/myPapers">My Papers</NavLink>
+                </NavItem>
+                <NavItem>
+                    <NavLink style={{ color: "white" }} tag={Link} to="/myProfile">My Profile</NavLink>
                 </NavItem>
                 <NavItem>
                     <NavLink style={{ color: "white" }} tag={Link} to="/groups">Groups</NavLink>
@@ -89,9 +89,6 @@ function AppNavbar() {
                 </NavItem>
                 <NavItem>
                     <NavLink style={{ color: "white" }} id="about" tag={Link} to="/about">About Us</NavLink>
-                </NavItem>
-                <NavItem>
-                    <NavLink style={{ color: "white" }} id="news" tag={Link} to="/news">News</NavLink>
                 </NavItem>
                 <NavItem></NavItem>
                 {/* <NavbarText style={{ color: "white" }} className="justify-content-end">Welcome {username}</NavbarText> */}

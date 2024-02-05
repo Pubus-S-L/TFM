@@ -13,6 +13,9 @@ import tokenService from "./services/token.service";
 import PrivateRoute from "./privateRoute";
 import UserPaperEdit from "./user/papers/myPaperEdit";
 import UserPaperList from "./user/papers/myPaperList";
+import UserDetail from "./public/users";
+import UserProfile from "./user/profile";
+import AboutUs from "./public/others/aboutUs"
 
 function ErrorFallback({ error, resetErrorBoundary }) {
   return (
@@ -45,13 +48,6 @@ function App() {
         <>
         </>)
     }
-    // if (role === "USER") {
-    //   userRoutes = (
-    //     <>
-    //       <Route path="/papers/myPapers" element={<PrivateRoute><UserPaperList/></PrivateRoute>} />
-    //       <Route path="/papers/myPapers/:id" element={<PrivateRoute><UserPaperEdit /></PrivateRoute>} />        
-    //     </>)
-    // }
 
   })
   if (!jwt) {
@@ -63,6 +59,8 @@ function App() {
         <Route path="/papers/filtered/:search" exact={true} element={<Papers />} />
         <Route path="/papers/:id" exact={true} element={<PaperDetail />} />
         <Route path="/papers/:id/download/:paperFileId" exact={true} element={<PaperDetail />} />
+        <Route path="/users/:id" exact={true} element={<UserDetail />} />
+        <Route path="/about" exact={true} element={<AboutUs />} />
       </>
     )
   } else {
@@ -73,10 +71,12 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/myPapers" exact={true} element={<PrivateRoute><UserPaperList/></PrivateRoute>} />
         <Route path="/myPapers/:id" exact={true} element={<PrivateRoute><UserPaperEdit /></PrivateRoute>} /> 
+        <Route path="/myProfile" exact={true} element={<PrivateRoute><UserProfile /></PrivateRoute>} /> 
         <Route path="/papers" exact={true} element={<Papers />} />
         <Route path="/papers/filtered/:search" exact={true} element={<Papers />} />
         <Route path="/papers/:id" exact={true} element={<PaperDetail />} />
         <Route path="/papers/:id/download/:paperFileId" exact={true} element={<PaperDetail />} />
+        <Route path="/users/:id" exact={true} element={<UserDetail />} />
       </>
     )
   }
