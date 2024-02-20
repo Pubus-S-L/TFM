@@ -1,17 +1,23 @@
 import "../../../static/css/user/myPaperList.css";
 import "../../../static/css/auth/authButton.css";
 import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
-import { Link } from "react-router-dom";
+import { Link, json } from "react-router-dom";
 import tokenService from "../../../services/token.service";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import * as XLSX from 'xlsx';
 
-export default function UserPaperList() {
+let exportTitles = []
+
+  function UserPaperList() {
   let [papers, setPapers] = useState([]);
   let [message, setMessage] = useState(null);
   let [modalShow, setModalShow] = useState(false);
+  let [jsonData, setJsonData] = useState(null);
+  let [titles, setTitles] = useState([]);
 
   const user = tokenService.getUser();
   const jwt = tokenService.getLocalAccessToken();
+  const inputFileRef = useRef(null);
 
   function removePaper(id) {
     fetch(`/api/v1/papers/${id}`, {
@@ -55,19 +61,81 @@ export default function UserPaperList() {
     setUp();
   }, []);
 
+  async function handleImportExcel(event){
+    const file = event.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+      const dataJson = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: null });
+
+      setJsonData(dataJson)
+
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  console.log(jsonData);
+
+  async function setUpFiles(){
+    if (!jsonData) {
+      return; // Si jsonData es null, no proceder
+    }
+      await fetch(`/api/v1/papers/importPaper/${user.id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(jsonData),
+    })
+    .then((response) => {
+      if (response.status === 200) {
+      }else {
+        throw new Error("Invalid Excel");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      setMessage(data.message);
+      setModalShow(true);
+    });
+    };
+
+useEffect(() => {
+  if (jsonData) {
+    setUpFiles();
+  }
+}, [jsonData]);
+
+
+
+
   return (
     <div>
       {/* <AppNavbar /> */}
       <div className="paper-list-page-container">
         <div className="title-and-add">
           <h1 className="paper-list-title">My Papers</h1>
-          <Link
-            to="/myPapers/new"
-            className="auth-button"
-            style={{ textDecoration: "none", marginBottom: "2rem" }}
-          >
-            Add Paper
-          </Link>
+          <div style={{ display: "flex", marginBottom: "2rem" }}>
+            <Link
+              to="/myPapers/new"
+              className="auth-button green"
+              style={{ textDecoration: "none", marginRight: "1rem", display: "inline-block" }}
+            >
+              Add Paper
+            </Link>
+              <button 
+                onClick={() => inputFileRef.current.click()}
+                className="auth-button purple"
+                style={{ display: "inline-block" }}
+                >
+                Import Papers by Excell
+              </button>
+             </div>
         </div>
         {papers.length > 0 ? (
           papers.map((paper) => {
@@ -93,6 +161,13 @@ export default function UserPaperList() {
                   >
                     Edit
                   </Link>
+                  <input
+                  type="file"
+                  accept=".xlsx, .xls"
+                  onChange={handleImportExcel}
+                  style={{ display: "none" }} // Ocultar el input, puedes personalizarlo como desees
+                  ref={inputFileRef}
+                />
                   <button
                     onClick={() => removePaper(paper.id)}
                     className="auth-button danger"
@@ -129,3 +204,5 @@ export default function UserPaperList() {
     </div>
   );
 }
+
+export {exportTitles, UserPaperList}

@@ -1,18 +1,22 @@
 package org.springframework.samples.pubus.paper;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 import jakarta.annotation.Resource;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -44,6 +48,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -264,6 +269,43 @@ public class PaperRestController {
 				return new ResponseEntity<>(new MessageResponse("File deleted!"), HttpStatus.OK);
 			// } else
 			// 	throw new ResourceNotOwnedException(paper);
+	}
+
+//IMPORT PAPERS BY EXCELL
+
+	@PostMapping("/importPaper/{userId}")
+	public ResponseEntity<MessageResponse> importPapersByExcell(@PathVariable("userId") Integer userId, @RequestBody List<List<String>> jsonData) {
+		List<String> oldTitles = paperService.findAllPapersByUserId(userId).stream().map(x-> x.getTitle()).toList();
+		User user = userService.findUser(userId);
+		for(Integer i=1; i<jsonData.size(); i++ ){
+			String title = jsonData.get(i).get(1).toString();
+			if(!oldTitles.contains(title)){
+				Paper newPaper = new Paper();
+				newPaper.setTitle(title);
+				newPaper.setPublicationYear(Integer.parseInt(jsonData.get(i).get(2)));
+				newPaper.setAuthors(jsonData.get(i).get(8));
+				newPaper.setDOI(jsonData.get(i).get(4));
+				newPaper.setPublicationData(jsonData.get(i).get(5));
+				newPaper.setScopus(jsonData.get(i).get(9));
+				newPaper.setUser(user);
+
+				String excelType = jsonData.get(i).get(3);
+				List<PaperType> types = paperService.findPaperTypes();
+				Optional<PaperType> paperType = types.stream().filter(x->x.getName().equals(excelType)).findFirst();
+				if(paperType.isPresent()){
+					newPaper.setType(paperType.get());
+				}else{
+					PaperType type = types.stream().filter(x->x.getName().equals("Other")).findFirst().get();
+					newPaper.setType(type);
+				}try {
+					paperService.savePaper(newPaper);
+				} catch (Exception e) {
+				}
+				
+			}
+		}
+		System.out.println(jsonData);
+		return new ResponseEntity<>(new MessageResponse("Paper added correctly"), HttpStatus.OK);
 	}
 
 

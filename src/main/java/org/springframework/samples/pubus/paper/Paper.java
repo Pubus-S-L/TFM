@@ -39,18 +39,23 @@ public class Paper extends BaseEntity {
 	@NotNull
 	private Integer publicationYear;
 
+	private String DOI;
+
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "type_id")
 	private PaperType type;
 
 	@Column(name="abstract_content")
-	@NotBlank
 	private String abstractContent;
+
+	private String publicationData;
 
 	private String notes;
 
-	@NotBlank
 	private String keywords;
+
+	private String Scopus;
+
 
 	@Valid
 	@ManyToOne(optional = true)
