@@ -13,7 +13,7 @@ let exportTitles = []
   let [message, setMessage] = useState(null);
   let [modalShow, setModalShow] = useState(false);
   let [jsonData, setJsonData] = useState(null);
-  let [titles, setTitles] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const user = tokenService.getUser();
   const jwt = tokenService.getLocalAccessToken();
@@ -100,8 +100,10 @@ let exportTitles = []
       return response.json();
     })
     .then((data) => {
-      setMessage(data.message);
-      setModalShow(true);
+      window.location.href = `/myPapers`;
+      // setMessage(data.message);
+      // setModalShow(true);
+
     });
     };
 
@@ -112,6 +114,36 @@ useEffect(() => {
 }, [jsonData]);
 
 
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    // Aquí puedes hacer algo con el término de búsqueda, como enviarlo a una API
+    console.log("Se realizó la búsqueda:", searchTerm);
+  };
+
+  const handleChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  function importPaperByDOI(searchTerm) {
+    const params = new URLSearchParams({ searchTerm: searchTerm });
+    fetch(`/api/v1/papers/${user.id}/importByDOI?${params.toString()}`, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${jwt}`,
+            Accept: "application/json",
+            "Content-Type": "application/json",
+        },
+    })
+    .then((response) => {
+        return response.json();
+    })
+    .then((data) => {
+        window.location.href = `/myPapers`;
+        // setMessage(data.message);
+        // setModalShow(true);
+    });
+}
+
 
 
   return (
@@ -120,6 +152,22 @@ useEffect(() => {
       <div className="paper-list-page-container">
         <div className="title-and-add">
           <h1 className="paper-list-title">My Papers</h1>
+          <div style={{ display: "flex", marginBottom: "2rem" }}>
+          <form onSubmit={(event) => {
+              event.preventDefault();
+              importPaperByDOI(searchTerm);
+          }}>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={handleChange}
+              placeholder="Write down the DOI"
+            />
+            <button type="submit">
+              Import
+            </button>
+          </form>
+          </div>
           <div style={{ display: "flex", marginBottom: "2rem" }}>
             <Link
               to="/myPapers/new"
@@ -131,7 +179,7 @@ useEffect(() => {
               <button 
                 onClick={() => inputFileRef.current.click()}
                 className="auth-button purple"
-                style={{ display: "inline-block" }}
+                style={{ display: "inline-block"}}
                 >
                 Import Papers by Excell
               </button>

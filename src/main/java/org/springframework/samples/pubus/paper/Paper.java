@@ -41,6 +41,8 @@ public class Paper extends BaseEntity {
 
 	private String DOI;
 
+	private String publisher;
+
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "type_id")
 	private PaperType type;
@@ -54,7 +56,9 @@ public class Paper extends BaseEntity {
 
 	private String keywords;
 
-	private String Scopus;
+	private String scopus;
+
+	private String source;
 
 
 	@Valid
