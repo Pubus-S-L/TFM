@@ -1,18 +1,22 @@
 package org.springframework.samples.pubus.paper;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 import jakarta.annotation.Resource;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -33,6 +37,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.MatrixVariable;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -44,8 +49,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
+import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.web.client.RestTemplate;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping("/api/v1/papers")
@@ -58,12 +68,16 @@ public class PaperRestController {
 	private final PaperFileService paperFileService;
 	private static final String USER_AUTH = "USER";
 	private static final String ADMIN_AUTH = "ADMIN";
+	private final RestTemplate restTemplate;
+	private final ObjectMapper objectMapper;
 
 	@Autowired
-	public PaperRestController(PaperService paperService, UserService userService, PaperFileService paperFileService) {
+	public PaperRestController(PaperService paperService, UserService userService, PaperFileService paperFileService, RestTemplate restTemplate,ObjectMapper objectMapper) {
 		this.paperService = paperService;
 		this.userService = userService;
 		this.paperFileService = paperFileService;
+		this.restTemplate = restTemplate;
+		this.objectMapper = objectMapper;
 	}
 
 	@InitBinder("paper")
@@ -266,5 +280,100 @@ public class PaperRestController {
 			// 	throw new ResourceNotOwnedException(paper);
 	}
 
+//IMPORT PAPERS BY EXCELL
+
+	@PostMapping("/importPaper/{userId}")
+	public ResponseEntity<MessageResponse> importPapersByExcell(@PathVariable("userId") Integer userId, @RequestBody List<List<String>> jsonData) {
+		List<String> oldTitles = paperService.findAllPapersByUserId(userId).stream().map(x-> x.getTitle()).toList();
+		User user = userService.findUser(userId);
+		for(Integer i=1; i<jsonData.size(); i++ ){
+			String title = jsonData.get(i).get(1).toString();
+			if(!oldTitles.contains(title)){
+				Paper newPaper = new Paper();
+				newPaper.setTitle(title);
+				newPaper.setPublicationYear(Integer.parseInt(jsonData.get(i).get(2)));
+				newPaper.setAuthors(jsonData.get(i).get(8));
+				newPaper.setDOI(jsonData.get(i).get(4));
+				newPaper.setPublicationData(jsonData.get(i).get(5));
+				newPaper.setScopus(jsonData.get(i).get(9));
+				newPaper.setUser(user);
+				newPaper.setPublisher(jsonData.get(i).get(7));
+				newPaper.setSource(jsonData.get(i).get(6));
+
+				String excelType = jsonData.get(i).get(3);
+				List<PaperType> types = paperService.findPaperTypes();
+				Optional<PaperType> paperType = types.stream().filter(x->x.getName().equals(excelType)).findFirst();
+				if(paperType.isPresent()){
+					newPaper.setType(paperType.get());
+				}else{
+					PaperType type = types.stream().filter(x->x.getName().equals("Other")).findFirst().get();
+					newPaper.setType(type);
+				}try {
+					paperService.savePaper(newPaper);
+				} catch (Exception e) {
+				}
+				
+			}
+		}
+		System.out.println(jsonData);
+		return new ResponseEntity<>(new MessageResponse("Papers added correctly"), HttpStatus.OK);
+	}
+
+//IMPORT PAPER BY DOI
+	@PostMapping("{userId}/importByDOI")
+	public ResponseEntity<MessageResponse> importPapersByDOI(@PathVariable("userId") Integer userId,
+		@RequestParam("searchTerm") String searchTerm){
+			String url = "https://api.crossref.org/works/"+searchTerm;
+			List<String> oldTitles = paperService.findAllPapersByUserId(userId).stream().map(x-> x.getTitle()).toList();
+			try {
+				String response = restTemplate.getForObject(url, String.class);
+	
+				// Convertir la respuesta JSON a un objeto JsonNode para acceder a los campos de manera estructurada
+				JsonNode jsonResponse = objectMapper.readTree(response);
+				User user = userService.findUser(userId);
+				Paper newPaper = new Paper();
+				// Acceder a los campos de la respuesta JSON
+				String title = jsonResponse.get("message").get("title").get(0).asText();
+				if(oldTitles.contains(title)) throw new Exception("There is a paper with the same title already");
+				String publisher = jsonResponse.get("message").get("publisher").asText();
+	            String paper_type = jsonResponse.get("message").get("type").asText();
+				
+				
+				
+				String date = jsonResponse.get("message").get("published-print").get("date-parts").get(0).get(0).asText();
+				String autores = "";
+				JsonNode autoresNode = jsonResponse.path("message").path("author");
+				for (JsonNode autor : autoresNode) {
+					String firstName = autor.get("given").asText();
+					String lastName = autor.get("family").asText();
+					autores += lastName + ", " + firstName + ";";
+					System.out.println(autores);
+				}
+					
+				String isbnPrint = jsonResponse.get("message").get("isbn-type").get(0).get("value").asText();
+				String isbnElectronic = jsonResponse.get("message").get("isbn-type").get(1).get("value").asText();
+				newPaper.setTitle(title);
+				newPaper.setPublicationYear(Integer.parseInt(date));
+				newPaper.setDOI(searchTerm);
+				newPaper.setPublisher(publisher);
+				newPaper.setPublicationData("isbnPrint: "+isbnPrint + " isbnElectronic: "+ isbnElectronic);
+				newPaper.setAuthors(autores);
+				newPaper.setUser(user);
+				newPaper.setSource("Crossref");
+				List<PaperType> types = paperService.findPaperTypes();
+				Optional<PaperType> paperType = types.stream().filter(x->x.getName().toLowerCase().equals(paper_type.toLowerCase())).findFirst();
+				if(paperType.isPresent()){
+					newPaper.setType(paperType.get());
+				}else{
+					PaperType type = types.stream().filter(x->x.getName().equals("Other")).findFirst().get();
+					newPaper.setType(type);
+				}
+				paperService.savePaper(newPaper);
+				return new ResponseEntity<>(new MessageResponse("Paper added correctly"), HttpStatus.OK);
+			} catch (Exception e) {
+				e.printStackTrace();
+				return new ResponseEntity<>(new MessageResponse("Paper can not be added"), HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		}
 
 }

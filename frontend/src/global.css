@@ -2,9 +2,11 @@
     --main-red-color: #e71f1f;
     --main-blue-color: #1f33e3;
     --main-green-color: #14d286;
+    --main-purple-color: #d729e3;
     --green-shadow-color: rgba(12, 235, 161, 0.4);
     --blue-shadow-color: #2452dc66;
     --red-shadow-color: rgba(237, 53, 53, 0.4);
+    --purple-shadow-color: #d729e377;
 }
 
 @font-face {

@@ -73,7 +73,6 @@ export default function Papers() {
         papersFiltered.some(paper => paper.id === elemento.id))
     }
     else{
-      console.log("AAA")
       papersRes = papersFiltered
     }
 

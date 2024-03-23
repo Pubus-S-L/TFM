@@ -79,16 +79,28 @@ export default function PaperDetail() {
                 <strong>Publication Year:</strong> {paper.publicationYear}
             </span>
             <span>
+                <strong>Publisher:</strong> {paper.publisher}
+            </span>
+            <span>
                 <strong>Type:</strong> {paper.type.name}
             </span>
             <span>
                 <strong>Abstract:</strong> {paper.abstractContent}
             </span>
             <span>
+                <strong>Publication Data:</strong> {paper.publicationData}
+            </span>
+            <span>
                 <strong>Notes:</strong> {paper.notes}
             </span>
             <span>
                 <strong>Keywords:</strong> {paper.keywords}
+            </span>
+            <span>
+                <strong>Source:</strong> {paper.source}
+            </span>
+            <span>
+                <strong>Scopus:</strong> {paper.scopus}
             </span>
             <span>
                 <strong>Files:</strong>

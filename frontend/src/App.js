@@ -12,7 +12,7 @@ import PaperDetail from "./public/papers/papersDetails";
 import tokenService from "./services/token.service";
 import PrivateRoute from "./privateRoute";
 import UserPaperEdit from "./user/papers/myPaperEdit";
-import UserPaperList from "./user/papers/myPaperList";
+import {UserPaperList} from "./user/papers/myPaperList";
 import UserDetail from "./public/users";
 import UserProfile from "./user/profile";
 import AboutUs from "./public/others/aboutUs"
