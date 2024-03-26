@@ -25,7 +25,7 @@ public class PaperService {
 	}
 
 	@Transactional(readOnly = true)
-	public Collection<PaperType> findPaperTypes() throws DataAccessException {
+	public List<PaperType> findPaperTypes() throws DataAccessException {
 		return paperRepository.findPaperTypes();
 	}
 

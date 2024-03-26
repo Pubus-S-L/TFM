@@ -131,9 +131,13 @@ export default function UserPaperEdit(){
       authors: values['authors'],
       publicationYear: values["publicationYear"],
       type: types.filter((type) => type.name === values["type"])[0],
+      publisher: values['publisher'],
+      publicationData: values['publicationData'],
       abstractContent: values['abstractContent'],
       keywords: values['keywords'],
       notes: values['notes'],
+      source: values['source'],
+      scopus: values['scoupus'],
       user: paper.user,
 
 
@@ -179,21 +183,25 @@ export default function UserPaperEdit(){
     paperEditFormInputs.forEach(i => i.handleChange=handleChange);
     
 
-    if (paperEditFormInputs[3].values.length < 2) {
-      paperEditFormInputs[3].values = [
-        ...paperEditFormInputs[3].values,
+    if (paperEditFormInputs[5].values.length < 2) {
+      paperEditFormInputs[5].values = [
+        ...paperEditFormInputs[5].values,
         ...types.map((type) => type.name),
       ];
     }
 
-    if (paper && paperEditFormInputs[3].values.length >= 2) {
+    if (paper && paperEditFormInputs[5].values.length >= 2) {
       paperEditFormInputs[0].defaultValue = paper.title || "";
       paperEditFormInputs[1].defaultValue = paper.authors || "";
-      paperEditFormInputs[2].defaultValue = paper.publicationYear || "";
-      paperEditFormInputs[3].defaultValue = paper.type.name || "None";
-      paperEditFormInputs[4].defaultValue = paper.abstractContent || "";
-      paperEditFormInputs[5].defaultValue = paper.notes || "";
-      paperEditFormInputs[6].defaultValue = paper.keywords || "";
+      paperEditFormInputs[2].defaultValue = paper.publisher || "";
+      paperEditFormInputs[3].defaultValue = paper.publicationData || "";
+      paperEditFormInputs[4].defaultValue = paper.publicationYear || "";
+      paperEditFormInputs[5].defaultValue = paper.type.name || "None";
+      paperEditFormInputs[6].defaultValue = paper.abstractContent || "";
+      paperEditFormInputs[7].defaultValue = paper.notes || "";
+      paperEditFormInputs[8].defaultValue = paper.keywords || "";
+      paperEditFormInputs[9].defaultValue = paper.scopus || "";
+      paperEditFormInputs[10].defaultValue = paper.source || "";
     }
 
     function handleShow() {
