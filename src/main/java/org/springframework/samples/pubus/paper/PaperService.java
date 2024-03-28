@@ -29,12 +29,6 @@ public class PaperService {
 		return paperRepository.findPaperTypes();
 	}
 
-	// @Transactional(readOnly = true)
-	// public PaperType findPaperTypeByName(String name) throws DataAccessException {
-	// 	return paperRepository.findPaperTypeByName(name)
-	// 			.orElseThrow(() -> new ResourceNotFoundException("PaperType", "name", name));
-	// }
-
 	@Transactional(readOnly = true)
 	public Collection<Paper> findAll() {
 		return (List<Paper>) paperRepository.findAll();

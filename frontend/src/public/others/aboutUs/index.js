@@ -1,21 +1,70 @@
 import React from "react";
+import { useEffect, useState} from "react";
 import "../../../static/css/user/myProfile.css";
 import "../../../static/css/auth/authButton.css";
+import myGif from './PubUS.gif';
 
 export default function AboutUs() {
+    const [company,setCompany] = useState();  
 
-    const title = "About us"
-    const telefono = "958426315"
+    async function setUp() {
+        try {
+            let response = await fetch(`/api/v1/company`, {
+                method: "GET",
+                headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                },
+            });
     
+            if (!response.ok) {
+                throw new Error(`Error fetching data: ${response.statusText}`);
+            }
+    
+            let company = await response.json();
+            setCompany(company);
+        } catch (error) {
+            console.error("Error during data fetching:", error);
+        }
+    }
+    
+
+    useEffect(() => {
+        setUp();
+    },);
+
     return (
+        <div style={{ display: "flex", alignItems: "center", marginTop: "2rem", marginLeft: "2rem" }}>
+            <img src={myGif} alt="My GIF" style={{ width: "20%", height: "auto"}} />
+            <div className="paper-row" style={{ marginLeft: "1rem", width: "70%" }}>
             <div className="paper-data">
-            <h4 className="paper-name">{title}</h4>
+            {company && (
+                <>
+            <h4 className="paper-name">{company.name}</h4>
             <span>
-                <strong>Studies:</strong> {telefono}
+                <strong>Description:</strong> {company.description}
             </span>
             <span>
-                <strong>Job:</strong> {}
+                <strong>Phone:</strong> {company.phone}
             </span>
+            <span>
+                <strong>Email:</strong> {company.email}
+            </span>
+            <br />
+            <span>
+                <strong>--Support Data--</strong>
+            </span>
+            <span>
+                <strong>Phone:</strong> {company.supportPhone}
+            </span>
+            <span>
+                <strong>Email:</strong> {company.supportEmail}
+            </span>
+                </>
+                )}
             </div>
+
+            </div>
+        </div>
         );
 }

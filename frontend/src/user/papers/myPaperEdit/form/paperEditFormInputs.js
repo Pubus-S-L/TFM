@@ -39,7 +39,7 @@ export const paperEditFormInputs = [
     type: "number",
     defaultValue: 2024,
     isRequired: true,
-    validators: [formValidators.notEmptyValidator],
+    validators: [formValidators.date],
   },
   {
     tag: "Type",

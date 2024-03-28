@@ -45,12 +45,12 @@ function AppNavbar() {
                 <NavItem>
                     <NavLink style={{ color: "white" }} tag={Link} to="/papers">Papers</NavLink>
                 </NavItem>
-                <NavItem>
+                {/* <NavItem>
                     <NavLink style={{ color: "white" }} id="faq" tag={Link} to="/faq">FAQ</NavLink>
-                </NavItem>
-                <NavItem>
-                    <NavLink style={{ color: "white" }} id="suppor" tag={Link} to="/support">Support</NavLink>
-                </NavItem>
+                </NavItem> */}
+                {/* <NavItem>
+                    <NavLink style={{ color: "white" }} id="support" tag={Link} to="/support">Support</NavLink>
+                </NavItem> */}
                 <NavItem>
                     <NavLink style={{ color: "white" }} id="about" tag={Link} to="/about">About Us</NavLink>
                 </NavItem>
@@ -71,9 +71,9 @@ function AppNavbar() {
                 <NavItem>
                     <NavLink style={{ color: "white" }} tag={Link} to="/myProfile">My Profile</NavLink>
                 </NavItem>
-                <NavItem>
+                {/* <NavItem>
                     <NavLink style={{ color: "white" }} tag={Link} to="/groups">Groups</NavLink>
-                </NavItem>
+                </NavItem> */}
             </>
         )
         userLogout = (
@@ -81,12 +81,12 @@ function AppNavbar() {
                 <NavItem>
                     <NavLink style={{ color: "white" }} tag={Link} to="/papers">Papers</NavLink>
                 </NavItem>
-                <NavItem>
+                {/* <NavItem>
                     <NavLink style={{ color: "white" }} id="faq" tag={Link} to="/faq">FAQ</NavLink>
-                </NavItem>
-                <NavItem>
+                </NavItem> */}
+                {/* <NavItem>
                     <NavLink style={{ color: "white" }} id="suppor" tag={Link} to="/support">Support</NavLink>
-                </NavItem>
+                </NavItem> */}
                 <NavItem>
                     <NavLink style={{ color: "white" }} id="about" tag={Link} to="/about">About Us</NavLink>
                 </NavItem>

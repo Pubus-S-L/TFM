@@ -39,10 +39,6 @@ public class User extends BaseEntity {
 
 	String job;
 
-	@OneToMany
-	@JoinColumn(name = "paper_id")
-    private List<Paper> papers;
-
 	@Column(unique = true)
 	String email;
 
