@@ -2,6 +2,7 @@ import React from "react";
 import { useEffect, useState} from "react";
 import "../../../static/css/user/myProfile.css";
 import "../../../static/css/auth/authButton.css";
+import myGif from './PubUS.gif';
 
 export default function AboutUs() {
     const [company,setCompany] = useState();  
@@ -33,7 +34,9 @@ export default function AboutUs() {
     },);
 
     return (
-        <div className="paper-row">
+        <div style={{ display: "flex", alignItems: "center", marginTop: "2rem", marginLeft: "2rem" }}>
+            <img src={myGif} alt="My GIF" style={{ width: "20%", height: "auto"}} />
+            <div className="paper-row" style={{ marginLeft: "1rem", width: "70%" }}>
             <div className="paper-data">
             {company && (
                 <>
@@ -59,6 +62,8 @@ export default function AboutUs() {
             </span>
                 </>
                 )}
+            </div>
+
             </div>
         </div>
         );
