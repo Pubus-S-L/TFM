@@ -289,28 +289,33 @@ public class PaperRestController {
 		for(Integer i=1; i<jsonData.size(); i++ ){
 			String title = jsonData.get(i).get(1).toString();
 			if(!oldTitles.contains(title)){
-				Paper newPaper = new Paper();
-				newPaper.setTitle(title);
-				newPaper.setPublicationYear(Integer.parseInt(jsonData.get(i).get(2)));
-				newPaper.setAuthors(jsonData.get(i).get(8));
-				newPaper.setDOI(jsonData.get(i).get(4));
-				newPaper.setPublicationData(jsonData.get(i).get(5));
-				newPaper.setScopus(jsonData.get(i).get(9));
-				newPaper.setUser(user);
-				newPaper.setPublisher(jsonData.get(i).get(7));
-				newPaper.setSource(jsonData.get(i).get(6));
-
-				String excelType = jsonData.get(i).get(3);
-				List<PaperType> types = paperService.findPaperTypes();
-				Optional<PaperType> paperType = types.stream().filter(x->x.getName().equals(excelType)).findFirst();
-				if(paperType.isPresent()){
-					newPaper.setType(paperType.get());
+				String DOI = jsonData.get(i).get(4);
+				if(DOI.length()>0){
+					importPapersByDOI(userId, DOI);
 				}else{
-					PaperType type = types.stream().filter(x->x.getName().equals("Other")).findFirst().get();
-					newPaper.setType(type);
-				}try {
-					paperService.savePaper(newPaper);
-				} catch (Exception e) {
+					Paper newPaper = new Paper();
+					newPaper.setTitle(title);
+					newPaper.setPublicationYear(Integer.parseInt(jsonData.get(i).get(2)));
+					newPaper.setAuthors(jsonData.get(i).get(8));
+					newPaper.setDOI(jsonData.get(i).get(4));
+					newPaper.setPublicationData(jsonData.get(i).get(5));
+					newPaper.setScopus(jsonData.get(i).get(9));
+					newPaper.setUser(user);
+					newPaper.setPublisher(jsonData.get(i).get(7));
+					newPaper.setSource(jsonData.get(i).get(6));
+	
+					String excelType = jsonData.get(i).get(3);
+					List<PaperType> types = paperService.findPaperTypes();
+					Optional<PaperType> paperType = types.stream().filter(x->x.getName().equals(excelType)).findFirst();
+					if(paperType.isPresent()){
+						newPaper.setType(paperType.get());
+					}else{
+						PaperType type = types.stream().filter(x->x.getName().equals("Other")).findFirst().get();
+						newPaper.setType(type);
+					}try {
+						paperService.savePaper(newPaper);
+					} catch (Exception e) {
+					}
 				}
 				
 			}
