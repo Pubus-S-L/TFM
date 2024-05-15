@@ -9,5 +9,4 @@ import org.springframework.samples.pubus.model.NamedEntity;
 @Table(name = "types")
 public class PaperType extends NamedEntity {
 
-
 }
