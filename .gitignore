@@ -4,3 +4,4 @@ node_modules/
 target/*
 .settings/*
 .classpath
+frontend/secret.json

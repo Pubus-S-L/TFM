@@ -1,10 +1,13 @@
 :root{
     --main-red-color: #e71f1f;
-    --main-blue-color: #1f33e3;
+    --main-blue-color: #3aaaeb;
     --main-green-color: #14d286;
     --main-purple-color: #d729e3;
+    --main-linkedIn-color: #0f22c7;
+    --main-twitter-color: #010211;
+    --twitter-shadow-color: #01021177;
     --green-shadow-color: rgba(12, 235, 161, 0.4);
-    --blue-shadow-color: #2452dc66;
+    --blue-shadow-color: #31a0eb66;
     --red-shadow-color: rgba(237, 53, 53, 0.4);
     --purple-shadow-color: #d729e377;
 }

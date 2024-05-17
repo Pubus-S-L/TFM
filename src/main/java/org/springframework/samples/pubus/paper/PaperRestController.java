@@ -289,35 +289,81 @@ public class PaperRestController {
 		for(Integer i=1; i<jsonData.size(); i++ ){
 			String title = jsonData.get(i).get(1).toString();
 			if(!oldTitles.contains(title)){
-				Paper newPaper = new Paper();
-				newPaper.setTitle(title);
-				newPaper.setPublicationYear(Integer.parseInt(jsonData.get(i).get(2)));
-				newPaper.setAuthors(jsonData.get(i).get(8));
-				newPaper.setDOI(jsonData.get(i).get(4));
-				newPaper.setPublicationData(jsonData.get(i).get(5));
-				newPaper.setScopus(jsonData.get(i).get(9));
-				newPaper.setUser(user);
-				newPaper.setPublisher(jsonData.get(i).get(7));
-				newPaper.setSource(jsonData.get(i).get(6));
-
-				String excelType = jsonData.get(i).get(3);
-				List<PaperType> types = paperService.findPaperTypes();
-				Optional<PaperType> paperType = types.stream().filter(x->x.getName().equals(excelType)).findFirst();
-				if(paperType.isPresent()){
-					newPaper.setType(paperType.get());
-				}else{
-					PaperType type = types.stream().filter(x->x.getName().equals("Other")).findFirst().get();
-					newPaper.setType(type);
-				}try {
-					paperService.savePaper(newPaper);
-				} catch (Exception e) {
-				}
+				// String DOI = jsonData.get(i).get(4);
+				// if(DOI != null){
+				// 	if(DOI.length()>0){
+				// 		importPapersByDOI(userId, DOI);
+				// 	}
+				// }else{
+					Paper newPaper = new Paper();
+					newPaper.setTitle(title);
+					newPaper.setPublicationYear(Integer.parseInt(jsonData.get(i).get(2)));
+					newPaper.setAuthors(jsonData.get(i).get(8));
+					newPaper.setDOI(jsonData.get(i).get(4));
+					newPaper.setPublicationData(jsonData.get(i).get(5));
+					newPaper.setScopus(jsonData.get(i).get(9));
+					newPaper.setUser(user);
+					newPaper.setPublisher(jsonData.get(i).get(7));
+					newPaper.setSource(jsonData.get(i).get(6));
+	
+					String excelType = jsonData.get(i).get(3);
+					List<PaperType> types = paperService.findPaperTypes();
+					Optional<PaperType> paperType = types.stream().filter(x->x.getName().equals(excelType)).findFirst();
+					if(paperType.isPresent()){
+						newPaper.setType(paperType.get());
+					}else{
+						PaperType type = types.stream().filter(x->x.getName().equals("Other")).findFirst().get();
+						String min_excelType = excelType.toLowerCase();
+						switch (min_excelType) {
+							case "artículo":
+								type = types.stream().filter(x->x.getName().equals("Article")).findFirst().get();
+								break;
+							case "libro":
+								type = types.stream().filter(x->x.getName().equals("Book")).findFirst().get();
+								break;
+							case "tesis":
+								type = types.stream().filter(x->x.getName().equals("Thesis")).findFirst().get();
+								break;
+							case "reporte técnico":
+								type = types.stream().filter(x->x.getName().equals("Technical-report")).findFirst().get();
+								break;
+							case "disertación":
+								type = types.stream().filter(x->x.getName().equals("Dissertation")).findFirst().get();
+								break;
+							case "ensayo":
+								type = types.stream().filter(x->x.getName().equals("Essay")).findFirst().get();
+								break;
+							case "documento":
+								type = types.stream().filter(x->x.getName().equals("Paper")).findFirst().get();
+								break;
+							case "capítulo":
+								type = types.stream().filter(x->x.getName().equals("Book-chapter")).findFirst().get();
+								break;
+							case "cuaderno":
+								type = types.stream().filter(x->x.getName().equals("Booklet")).findFirst().get();
+								break;
+							case "ponencia":
+								type = types.stream().filter(x->x.getName().equals("Conference")).findFirst().get();
+								break;
+							case "conferencia":
+								type = types.stream().filter(x->x.getName().equals("Conference")).findFirst().get();
+								break;
+						}
+						newPaper.setType(type);
+					}	
+					try {
+						paperService.savePaper(newPaper);
+					} catch (Exception e) {
+					}
+				//}
 				
 			}
 		}
 		System.out.println(jsonData);
 		return new ResponseEntity<>(new MessageResponse("Papers added correctly"), HttpStatus.OK);
 	}
+
+	
 
 //IMPORT PAPER BY DOI
 	@PostMapping("{userId}/importByDOI")
