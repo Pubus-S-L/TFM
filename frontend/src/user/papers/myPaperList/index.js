@@ -5,7 +5,7 @@ import { Link, json } from "react-router-dom";
 import tokenService from "../../../services/token.service";
 import { useState, useEffect, useRef } from "react";
 import * as XLSX from 'xlsx';
-import openai from "openai";
+import secret from "../../../secret.json"
 
 let exportTitles = []
 
@@ -21,6 +21,7 @@ let exportTitles = []
   const inputFileRef = useRef(null);
   const linkedIn = "linkedIn";
   const twitter = "twitter";
+  const apiKey = secret.OPENAI_API_KEY;
   
 
   function removePaper(id) {
@@ -159,7 +160,7 @@ useEffect(() => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${'sk-proj-yaI5HgcAyXfsB3oaMrcMT3BlbkFJJrofosl6tkW0fmqVOOXc'}`
+          'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
           model,
