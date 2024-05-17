@@ -48,6 +48,27 @@
   box-shadow: 0px 15px 20px var(--purple-shadow-color)
 }
 
+.linkedIn{
+  border: solid 2px var(--main-linkedIn-color) !important;
+  box-shadow: 0px 15px 20px rgba(31, 44, 224, 0.63);
+
+}
+
+.linkedIn:hover{
+  background-color: var(--main-linkedIn-color) !important;
+  box-shadow: 0px 15px 20px rgba(62, 45, 214, 0.925);
+}
+
+.twitter{
+  border: solid 2px var(--main-twitter-color) !important;
+  box-shadow: 0px 15px 20px rgba(7, 2, 19, 0.4);
+}
+
+.twitter:hover{
+  background-color: var(--twitter-shadow-color) !important;
+  box-shadow: 0px 15px 20px rgba(1, 4, 19, 0.4);
+}
+
 .purple:hover{
   background-color: var(--main-purple-color) !important;
   box-shadow: 0px 15px 20px rgba(229, 46, 202, 0.4);

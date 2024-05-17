@@ -84,12 +84,12 @@ export default function Login() {
             buttonClassName="auth-button"
           />
         </div>
-        <img
+        {/* <img
           onClick={linkedInLogin}
           src={linkedin}
           alt="Sign in with LinkedIn"
           style={{marginTop: '2rem', maxWidth: '180px', cursor:'pointer'}}
-        />
+        /> */}
       </div>
     );  
 }
