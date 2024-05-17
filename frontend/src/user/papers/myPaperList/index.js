@@ -19,7 +19,6 @@ let exportTitles = []
   const user = tokenService.getUser();
   const jwt = tokenService.getLocalAccessToken();
   const inputFileRef = useRef(null);
-  const apiKey = 'sk-proj-yaI5HgcAyXfsB3oaMrcMT3BlbkFJJrofosl6tkW0fmqVOOXc';
   const linkedIn = "linkedIn";
   const twitter = "twitter";
   
@@ -160,7 +159,7 @@ useEffect(() => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
+          'Authorization': `Bearer ${'sk-proj-yaI5HgcAyXfsB3oaMrcMT3BlbkFJJrofosl6tkW0fmqVOOXc'}`
         },
         body: JSON.stringify({
           model,
