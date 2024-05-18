@@ -102,9 +102,7 @@ public class PaperRestController {
 
 	@GetMapping
 	public ResponseEntity<List<Paper>> findAll(@RequestParam(required = false) Integer userId,@RequestParam(required = false) String search) {
-		//User user = userService.findCurrentUser();
 		if (userId != null) {
-			//if (user.getId().equals(userId))
 				return new ResponseEntity<>(paperService.findAllPapersByUserId(userId), HttpStatus.OK);
 		} else {			
 			if (search != null && !search.isEmpty()) {
@@ -113,11 +111,8 @@ public class PaperRestController {
 			}
 			else{
 				return new ResponseEntity<>((List<Paper>) this.paperService.findAll(), HttpStatus.OK);
-			}
-
-				
+			}				
 		}
-		//throw new AccessDeniedException();
 	}
 
 // GET FILTERED
@@ -256,13 +251,8 @@ public class PaperRestController {
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<MessageResponse> delete(@PathVariable("paperId") int paperId) {
 		Paper paper = RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
-		// User loggedUser = userService.findCurrentUser();
-		// 	User paperUser = paper.getUser();
-		// 	if (loggedUser.getId().equals(paperUser.getId())) {
-				paperService.deletePaper(paperId);
-				return new ResponseEntity<>(new MessageResponse("Paper deleted!"), HttpStatus.OK);
-			// } else
-			// 	throw new ResourceNotOwnedException(paper);
+		paperService.deletePaper(paperId);
+		return new ResponseEntity<>(new MessageResponse("Paper deleted!"), HttpStatus.OK);
 	}
 
 //DELETE PAPERFILE
@@ -271,13 +261,9 @@ public class PaperRestController {
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<MessageResponse> deletePaperFile(@PathVariable("paperFileId") int paperFileId) {
 		PaperFile paperFile = RestPreconditions.checkNotNull(paperFileService.getPaperFileById(paperFileId), "PaperField", "ID", paperFileId);
-		// User loggedUser = userService.findCurrentUser();
-		// 	User paperUser = paper.getUser();
-		// 	if (loggedUser.getId().equals(paperUser.getId())) {
-				paperFileService.deletePaperFile(paperFileId);
-				return new ResponseEntity<>(new MessageResponse("File deleted!"), HttpStatus.OK);
-			// } else
-			// 	throw new ResourceNotOwnedException(paper);
+		paperFileService.deletePaperFile(paperFileId);
+		return new ResponseEntity<>(new MessageResponse("File deleted!"), HttpStatus.OK);
+
 	}
 
 //IMPORT PAPERS BY EXCELL

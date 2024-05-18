@@ -153,6 +153,7 @@ useEffect(() => {
       let prompt = "You are an enthusiastic researcher and you write a social media post about your new paper"+title+"";
       const model = "gpt-3.5-turbo-instruct";
       let maxTokens = 300;
+      const url = `http://localhost:3000/papers/${paperId}`;
       if(red_social==="twitter"){
         prompt = "You are an enthusiastic researcher and you write a social media post on 190 characteres about your new paper"+title+"";
       }
@@ -172,24 +173,18 @@ useEffect(() => {
       try {
         const response = await fetch('https://api.openai.com/v1/completions', requestOptions);
         const previa = await response.json();
-        console.log("Este es el response.json()")
-        console.log(previa)
         const output = await previa.choices[0].text;
-      console.log("Este es el output ")
-      console.log(output)
-      const url = `http://localhost:3000/papers/${paperId}`;
-      let shareText = encodeURIComponent(`${output}. If you want to know more about it click on ${url}`);
+
+      let shareText = encodeURIComponent(`${output}. If you want to know more about it, check out this link: `);
       if(red_social==="linkedIn"){
-        window.open(`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(url)}&text=${shareText}`, '_blank');
+        window.open(`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(url)}&text=${shareText}${url}`, '_blank');
       }
       else{
-        shareText = encodeURIComponent(`${output}. If you want to know more about it click on `);
-        window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${shareText}`, '_blank');
+        shareText = encodeURIComponent(`${output}. If you want to know more about it, check out this link: `);
+        window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&title=${shareText}`, '_blank');
       }
       }catch(error){
-      console.log(error)
       const generatedText = "🎉 Exciting News! 🚀 Just published my latest paper:" + title + "";
-      const url = `http://localhost:3000/papers/${paperId}`;
       const shareText = encodeURIComponent(`${generatedText}. If you want to know more about it click on ${url}`);
       if(red_social==="linkedIn"){
         window.open(`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(url)}&text=${shareText}`, '_blank');

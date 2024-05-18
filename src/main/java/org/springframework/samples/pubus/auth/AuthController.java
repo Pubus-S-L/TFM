@@ -158,7 +158,7 @@ public class AuthController {
     }
 }
 
-	private LoginRequest createLoginRequest(String username, String password){
+	LoginRequest createLoginRequest(String username, String password){
 		LoginRequest loginRequest = new LoginRequest();
 		loginRequest.setUsername(username);
 		loginRequest.setPassword(password);
