@@ -15,7 +15,8 @@ import UserPaperEdit from "./user/papers/myPaperEdit";
 import {UserPaperList} from "./user/papers/myPaperList";
 import UserDetail from "./public/users";
 import UserProfile from "./user/profile";
-import AboutUs from "./public/others/aboutUs"
+import AboutUs from "./public/others/aboutUs";
+import LoginLinkedIn from "./auth/login/LinkedIn/loginLinkedin";
 
 function ErrorFallback({ error, resetErrorBoundary }) {
   return (
@@ -61,6 +62,7 @@ function App() {
         <Route path="/papers/:id/download/:paperFileId" exact={true} element={<PaperDetail />} />
         <Route path="/users/:id" exact={true} element={<UserDetail />} />
         <Route path="/about" exact={true} element={<AboutUs />} />
+        <Route path="/linkedInLogin" exact={true} element={<LoginLinkedIn />} />
       </>
     )
   } else {

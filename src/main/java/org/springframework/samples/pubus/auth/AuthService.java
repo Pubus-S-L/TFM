@@ -1,5 +1,6 @@
 package org.springframework.samples.pubus.auth;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 
 import jakarta.transaction.Transactional;
@@ -12,6 +13,9 @@ import org.springframework.samples.pubus.user.AuthoritiesService;
 import org.springframework.samples.pubus.user.User;
 import org.springframework.samples.pubus.user.UserService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.samples.pubus.configuration.jwt.JwtUtils;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,13 +23,17 @@ public class AuthService {
 
 	private final PasswordEncoder encoder;
 	private final AuthoritiesService authoritiesService;
+	private final JwtUtils jwtUtils;
 	private final UserService userService;
+	private RestTemplate restTemplate;
 
 	@Autowired
-	public AuthService(PasswordEncoder encoder, AuthoritiesService authoritiesService, UserService userService) {
+	public AuthService(PasswordEncoder encoder, AuthoritiesService authoritiesService, UserService userService, JwtUtils jwtUtils, RestTemplate restTemplate) {
 		this.encoder = encoder;
+		this.jwtUtils = jwtUtils;
 		this.authoritiesService = authoritiesService;
 		this.userService = userService;
+		this.restTemplate = restTemplate;
 	}
 
 	@Transactional
@@ -50,6 +58,45 @@ public class AuthService {
 			user.setAuthority(role);
 			userService.saveUser(user);
 		}
+	}
+
+	public String createUsername(String firstName, String lastName){
+
+		String first = "";
+		String last = "";
+		Integer num = 1;
+		if(firstName.length()>=4){
+			first = firstName.substring(0, 4);		
+		}
+		else{
+			first = firstName;
+		}
+		if(lastName.length()>=4){
+			last = lastName.substring(0, 4);	
+		}
+		else{
+			last = lastName;
+		}
+		String username = first + last;
+		if(!userService.existsUser(username)){
+			return username.toLowerCase();
+		}else{
+			username = first + last + num.toString();
+			while(userService.existsUser(username)){
+				num +=1;
+				username = first + last + num.toString();
+			}
+			username = quitarTildes(username);
+			return username.toLowerCase();
+		}
+	}
+
+	private String quitarTildes(String cadena){
+		return cadena.replaceAll("[áÁ]", "a")
+		.replaceAll("[éÉ]", "e")
+		.replaceAll("[íÍ]", "i")
+		.replaceAll("[óÓ]", "o")
+		.replaceAll("[úÚ]", "u");
 	}
 
 }
