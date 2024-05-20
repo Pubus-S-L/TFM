@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -18,11 +19,15 @@ import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataAccessException;
 import org.springframework.samples.pubus.exceptions.ResourceNotFoundException;
+import org.springframework.samples.pubus.paper.exceptions.DuplicatedPaperTitleException;
+import org.springframework.samples.pubus.user.User;
 import org.springframework.security.core.context.SecurityContext;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -200,24 +205,140 @@ public class PaperServiceTest {
         verify(paperRepository, times(1)).delete(paper);
     }
 
-
-
-    //Test for getPaperWithTitleAndIdDifferent
-    @Test
-    void testGetPaperWithTitleAndIdDifferent() {
+     @Test
+    void testSavePaper_Success() throws DataAccessException, DuplicatedPaperTitleException {
         // Arrange
+        User user = new User();
+        user.setId(1);
+
         Paper paper = new Paper();
         paper.setId(1);
-        paper.setTitle("Title");
-        List<Paper> papers = new ArrayList<>();
-        papers.add(paper);
-        when(paperRepository.findAllPapersByUserId(anyInt())).thenReturn(papers);
+        paper.setTitle("Test Paper");
+        paper.setUser(user);
+
+        when(paperRepository.findAllPapersByUserId(1)).thenReturn(Arrays.asList());
 
         // Act
-        Paper result = assertDoesNotThrow(() -> paperService.getPaperWithTitleAndIdDifferent(paper));
+        Paper savedPaper = paperService.savePaper(paper);
+
+        // Assert
+        verify(paperRepository, times(1)).save(paper);
+        assertEquals(paper, savedPaper);
+    }
+
+    @Test
+    void testSavePaper_DuplicatedTitle() {
+        // Arrange
+        User user = new User();
+        user.setId(1);
+
+        Paper existingPaper = new Paper();
+        existingPaper.setId(2);
+        existingPaper.setTitle("Test Paper");
+        existingPaper.setUser(user);
+
+        Paper newPaper = new Paper();
+        newPaper.setId(1);
+        newPaper.setTitle("Test Paper");
+        newPaper.setUser(user);
+
+        when(paperRepository.findAllPapersByUserId(1)).thenReturn(Arrays.asList(existingPaper));
+
+        // Act & Assert
+        assertThrows(DuplicatedPaperTitleException.class, () -> {
+            paperService.savePaper(newPaper);
+        });
+
+        verify(paperRepository, never()).save(any(Paper.class));
+    }
+
+    @Test
+    void testGetPaperWithTitleAndIdDifferent_Found() {
+        // Arrange
+        User user = new User();
+        user.setId(1);
+
+        Paper existingPaper = new Paper();
+        existingPaper.setId(2);
+        existingPaper.setTitle("Test Paper");
+        existingPaper.setUser(user);
+
+        Paper newPaper = new Paper();
+        newPaper.setId(1);
+        newPaper.setTitle("Test Paper");
+        newPaper.setUser(user);
+
+        when(paperRepository.findAllPapersByUserId(1)).thenReturn(Arrays.asList(existingPaper));
+
+        // Act
+        Paper result = paperService.getPaperWithTitleAndIdDifferent(newPaper);
+
+        // Assert
+        assertEquals(existingPaper, result);
+    }
+
+    @Test
+    void testGetPaperWithTitleAndIdDifferent_NotFound() {
+        // Arrange
+        User user = new User();
+        user.setId(1);
+
+        Paper newPaper = new Paper();
+        newPaper.setId(1);
+        newPaper.setTitle("Test Paper");
+        newPaper.setUser(user);
+
+        when(paperRepository.findAllPapersByUserId(1)).thenReturn(Arrays.asList());
+
+        // Act
+        Paper result = paperService.getPaperWithTitleAndIdDifferent(newPaper);
 
         // Assert
         assertNull(result);
+    }
+
+    @Test
+    void testUpdatePaper_Success() throws DataAccessException, DuplicatedPaperTitleException {
+        // Arrange
+        User user = new User();
+        user.setId(1);
+
+        Paper existingPaper = new Paper();
+        existingPaper.setId(1);
+        existingPaper.setTitle("Old Title");
+        existingPaper.setUser(user);
+
+        Paper updatedPaper = new Paper();
+        updatedPaper.setId(1);
+        updatedPaper.setTitle("Updated Title");
+        updatedPaper.setUser(user);
+
+        when(paperRepository.findById(1)).thenReturn(Optional.of(existingPaper));
+        when(paperRepository.findAllPapersByUserId(1)).thenReturn(Arrays.asList());
+
+        // Act
+        Paper result = paperService.updatePaper(updatedPaper, 1);
+
+        // Assert
+        verify(paperRepository, times(1)).save(existingPaper);
+        assertEquals("Updated Title", result.getTitle());
+    }
+
+    @Test
+    void testUpdatePaper_NotFound() {
+        // Arrange
+        Paper updatedPaper = new Paper();
+        updatedPaper.setId(1);
+        updatedPaper.setTitle("Updated Title");
+
+        when(paperRepository.findById(1)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(ResourceNotFoundException.class, () -> {
+            paperService.updatePaper(updatedPaper, 1);
+        });
+
+        verify(paperRepository, never()).save(any(Paper.class));
     }
 
 

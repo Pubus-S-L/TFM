@@ -1,6 +1,9 @@
 package org.springframework.samples.pubus.user;
 
 import static org.junit.Assert.*;
+
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.junit.jupiter.api.BeforeEach;
@@ -103,16 +106,6 @@ public class UserServiceTest {
     
         assertThrows(ResourceNotFoundException.class, () -> userService.findUser(id));
     }
-    
-    @Test
-    void testExistsUser() {
-    String username = "testuser";
-    when(userRepository.existsByUsername(username)).thenReturn(true);
-
-    Boolean exists = userService.existsUser(username);
-
-    assertTrue(exists);
-    }
 
     @Test
     void testDeleteUser() {
@@ -143,31 +136,62 @@ public class UserServiceTest {
     assertEquals("new@example.com", updatedUser.getEmail());
 }
 
-    // @Test
-    // void testFindCurrentUser() {
-    //     String username = "testuser";
-    //     User user = new User();
-    //     user.setUsername(username);
-    //     when(securityContext.getAuthentication()).thenReturn(authentication);
-    //     when(authentication.getPrincipal()).thenReturn(new UserDetailsImpl(user));
-    //     when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
-    //     SecurityContextHolder.setContext(securityContext);
+    @Test
+    void testFindAllAuthorities_1() {
+        // Arrange
+        List<String> authorities = Arrays.asList("ROLE_USER", "ROLE_ADMIN");
+        when(userRepository.findAllAuthorities()).thenReturn(authorities);
 
-    //     User currentUser = userService.findCurrentUser();
+        // Act
+        List<String> result = userService.findAllAuthorities();
 
-    //     assertNotNull(currentUser);
-    //     assertEquals(username, currentUser.getUsername());
-    // }
+        // Assert
+        assertEquals(authorities, result);
+    }
 
-    // @Test
-    // void testFindCurrentUserNotFound() {
-    //     String username = "testuser";
-    //     when(securityContext.getAuthentication()).thenReturn(authentication);
-    //     when(authentication.getPrincipal()).thenReturn(new UserDetailsImpl(new User()));
-    //     when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
-    //     SecurityContextHolder.setContext(securityContext);
+    // Test for existsUser
+    @Test
+    void testExistsUser() {
+        // Arrange
+        String username = "testuser";
+        when(userRepository.existsByUsername(username)).thenReturn(true);
 
-    //     assertThrows(ResourceNotFoundException.class, () -> userService.findCurrentUser());
-    // }
+        // Act
+        Boolean result = userService.existsUser(username);
+
+        // Assert
+        assertTrue(result);
+    }
+
+    // Test for findAll
+    @Test
+    void testFindAll() {
+        // Arrange
+        Iterable<User> users = Arrays.asList(new User(), new User());
+        when(userRepository.findAll()).thenReturn(users);
+
+        // Act
+        Iterable<User> result = userService.findAll();
+
+        // Assert
+        assertEquals(users, result);
+    }
+
+    // Test for findAllByAuthority
+    @Test
+    void testFindAllByAuthority() {
+        // Arrange
+        String authority = "ROLE_USER";
+        User user1 = new User();
+        User user2 = new User();
+        Iterable<User> users = Arrays.asList(user1, user2);
+        when(userRepository.findAllByAuthority(authority)).thenReturn(users);
+
+        // Act
+        Iterable<User> result = userService.findAllByAuthority(authority);
+
+        // Assert
+        assertEquals(users, result);
+    }
 
 }
