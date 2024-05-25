@@ -101,24 +101,6 @@ public class AuthServiceTest {
     // }
 
 @Test
-void testCreateUsername() {
-    when(userService.existsUser(any(String.class))).thenReturn(false);
-
-    String username = authService.createUsername("Test", "User");
-
-    assertEquals("testuser", username);
-}
-
-
-@Test
-void testCreateUsernameWithShortNames() {
-    when(userService.existsUser(any(String.class))).thenReturn(false);
-
-    String username = authService.createUsername("Te", "Us");
-
-    assertEquals("teus", username);
-}
-@Test
 void testQuitarTildes() throws Exception {
     Method quitarTildesMethod = AuthService.class.getDeclaredMethod("quitarTildes", String.class);
     quitarTildesMethod.setAccessible(true);

@@ -117,7 +117,7 @@ public class PaperRestController {
 
 // GET FILTERED
 
-	private ResponseEntity<List<Paper>> searchPaper(String originalSearch) {
+	public ResponseEntity<List<Paper>> searchPaper(String originalSearch) {
 		String search = originalSearch.toLowerCase();
 		Set<Paper> set_complete = new HashSet<>();
 		List<Paper> list1 = this.paperService.findAllPapersByAuthor(search);

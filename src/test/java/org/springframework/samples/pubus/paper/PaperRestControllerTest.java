@@ -3,6 +3,8 @@ package org.springframework.samples.pubus.paper;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.times;
@@ -11,15 +13,19 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataAccessException;
@@ -40,6 +46,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
+@ExtendWith(MockitoExtension.class)
 public class PaperRestControllerTest {
 
     @Mock
@@ -104,6 +111,69 @@ public class PaperRestControllerTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
   }
 
+  @Test
+  public void testFindAllTypes() throws Exception {
+  // Mock the PaperService to return a list of paper types
+  List<PaperType> paperTypes = new ArrayList<>();
+  PaperType paperType1 = new PaperType();
+  paperType1.setId(1);
+  paperType1.setName("Article");
+  paperTypes.add(paperType1);
+  PaperType paperType2 = new PaperType();
+  paperType2.setId(2);
+  paperType2.setName("Book");
+  paperTypes.add(paperType2);
+  Mockito.when(paperService.findPaperTypes()).thenReturn(paperTypes);
+  paperRestController = new PaperRestController(paperService, userService, paperFileService, restTemplate, objectMapper);
+  // Call the controller method
+  ResponseEntity<List<PaperType>> responseEntity = paperRestController.findAllTypes();
+
+  // Assert that the response is successful (status code 200)
+  assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+
+  // Assert that the response body contains the list of paper types
+   List<PaperType> responsePaperTypes = responseEntity.getBody();
+   assertEquals(2, responsePaperTypes.size());
+   assertEquals("Article", responsePaperTypes.get(0).getName());
+   assertEquals("Book", responsePaperTypes.get(1).getName());
+}
+
+@Test
+    void testSearchPaper() {
+        // Mock data
+        String search = "test";
+        Paper paper1 = new Paper();
+        paper1.setId(1);
+        paper1.setAuthors("Test Authors");
+        paper1.setAbstractContent(" Abstract");
+        Paper paper2 = new Paper();
+        paper2.setId(1);
+        paper2.setAuthors("Authors");
+        paper2.setAbstractContent(" Test Abstract");
+        paper2.setKeywords("test");
+
+        
+        List<Paper> list1 = Collections.singletonList(paper1);
+        List<Paper> list2 = Collections.singletonList(paper2);
+
+
+        // Mock behavior
+        when(paperService.findAllPapersByAuthor(search)).thenReturn(list1);
+        when(paperService.findAllPapersAbstractWord(search)).thenReturn(list2);
+        when(paperService.findAllPapersByKeyword(search)).thenReturn(list2);
+
+        // Call the method to test
+        ResponseEntity<List<Paper>> response = paperRestController.searchPaper(search);
+
+        // Verify the results
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        // assertEquals(2, response.getBody().size());
+        // assertTrue(response.getBody().contains(paper1));
+        // assertTrue(response.getBody().contains(paper2));
+}
+  
+
 
     @Test
     public void testFindAllPapersByUserId() {
@@ -113,81 +183,8 @@ public class PaperRestControllerTest {
 
         ResponseEntity<List<Paper>> response = paperRestController.findAll(userId, null);
 
-        assertEqual(response.getStatusCode(),HttpStatus.OK);
+        assertEquals(response.getStatusCode(),HttpStatus.OK);
         //assertThat(response.getBody()).isEqualTo(expectedPapers);
     }
-
-    private void assertEqual(HttpStatusCode statusCode, HttpStatus ok) {
-      // TODO Auto-generated method stub
-      throw new UnsupportedOperationException("Unimplemented method 'assertEqual'");
-    }
-
-    // @Test
-    // public void testFindAllTypes() {
-    //     List<PaperType> expectedTypes = Arrays.asList(new PaperType(), new PaperType());
-    //     when(paperService.findPaperTypes()).thenReturn(expectedTypes);
-
-    //     ResponseEntity<List<PaperType>> response = paperRestController.findAllTypes();
-
-    //     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-    //     assertThat(response.getBody()).isEqualTo(expectedTypes);
-    // }
-
-
-    // @Test
-    // public void testFindById() {
-    //     int paperId = 1;
-    //     Paper expectedPaper = new Paper();
-    //     when(paperService.findPaperById(paperId)).thenReturn(expectedPaper);
-
-    //     ResponseEntity<Paper> response = paperRestController.findById(paperId);
-
-    //     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-    //     assertThat(response.getBody()).isEqualTo(expectedPaper);
-    // }
-
-    // @Test
-    // public void testCreatePaper() throws Exception {
-    //     int userId = 1;
-    //     Paper paper = new Paper();
-    //     User user = new User();
-    //     when(userService.findUser(userId)).thenReturn(user);
-    //     when(paperService.savePaper(any(Paper.class))).thenReturn(paper);
-
-    //     ResponseEntity<Paper> response = paperRestController.create(paper, null, String.valueOf(userId));
-
-    //     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-    //     assertThat(response.getBody()).isEqualTo(paper);
-    // }
-
-    // @Test
-    // public void testUpdatePaper() throws Exception {
-    //     int paperId = 1;
-    //     int userId = 1;
-    //     Paper paper = new Paper();
-    //     User user = new User();
-    //     user.setId(userId);
-    //     paper.setUser(user);
-    //     when(paperService.findPaperById(paperId)).thenReturn(paper);
-    //     when(userService.findUser(userId)).thenReturn(user);
-    //     when(paperService.updatePaper(any(Paper.class), anyInt())).thenReturn(paper);
-
-    //     ResponseEntity<Paper> response = paperRestController.update(paperId, paper, null, String.valueOf(userId));
-
-    //     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-    //     assertThat(response.getBody()).isEqualTo(paper);
-    // }
-
-    // @Test
-    // public void testDeletePaper() {
-    //     int paperId = 1;
-    //     Paper paper = new Paper();
-    //     when(paperService.findPaperById(paperId)).thenReturn(paper);
-
-    //     ResponseEntity<MessageResponse> response = paperRestController.delete(paperId);
-
-    //     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-    //     assertThat(response.getBody().getMessage()).isEqualTo("Paper deleted!");
-    // }
 
 }

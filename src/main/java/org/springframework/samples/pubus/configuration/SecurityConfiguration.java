@@ -23,11 +23,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.core.annotation.Order;
+import org.springframework.samples.pubus.configuration.jwt.AuthEntryPointJwt;
+import org.springframework.samples.pubus.configuration.jwt.AuthTokenFilter;
 //import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 // import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationProvider;
 // import org.springframework.security.oauth2.client.web.OAuth2LoginConfigurer;
@@ -43,6 +46,9 @@ public class SecurityConfiguration {
 	@Autowired
 	DataSource dataSource;
 
+    @Autowired
+	private AuthEntryPointJwt unauthorizedHandler;
+
     private final ClientRegistrationRepository clientRegistrationRepository;
     private final OAuth2AuthorizedClientRepository authorizedClientRepository;
 
@@ -51,6 +57,13 @@ public class SecurityConfiguration {
         this.clientRegistrationRepository = clientRegistrationRepository;
         this.authorizedClientRepository = authorizedClientRepository;
     }
+
+
+    @Bean
+	public AuthTokenFilter authenticationJwtTokenFilter() {
+		return new AuthTokenFilter();
+	}
+
 
     @SuppressWarnings({ "removal", "deprecation" })
 	@Bean

@@ -60,43 +60,43 @@ public class AuthService {
 		}
 	}
 
-	public String createUsername(String firstName, String lastName){
+	// public String createUsername(String firstName, String lastName){
 
-		String first = "";
-		String last = "";
-		Integer num = 1;
-		if(firstName.length()>=4){
-			first = firstName.substring(0, 4);		
-		}
-		else{
-			first = firstName;
-		}
-		if(lastName.length()>=4){
-			last = lastName.substring(0, 4);	
-		}
-		else{
-			last = lastName;
-		}
-		String username = first + last;
-		if(!userService.existsUser(username)){
-			return username.toLowerCase();
-		}else{
-			username = first + last + num.toString();
-			while(userService.existsUser(username)){
-				num +=1;
-				username = first + last + num.toString();
-			}
-			username = quitarTildes(username);
-			return username.toLowerCase();
-		}
-	}
+	// 	String first = "";
+	// 	String last = "";
+	// 	Integer num = 1;
+	// 	if(firstName.length()>=4){
+	// 		first = firstName.substring(0, 4);		
+	// 	}
+	// 	else{
+	// 		first = firstName;
+	// 	}
+	// 	if(lastName.length()>=4){
+	// 		last = lastName.substring(0, 4);	
+	// 	}
+	// 	else{
+	// 		last = lastName;
+	// 	}
+	// 	String username = first + last;
+	// 	if(!userService.existsUser(username)){
+	// 		return username.toLowerCase();
+	// 	}else{
+	// 		username = first + last + num.toString();
+	// 		while(userService.existsUser(username)){
+	// 			num +=1;
+	// 			username = first + last + num.toString();
+	// 		}
+	// 		username = quitarTildes(username);
+	// 		return username.toLowerCase();
+	// 	}
+	// }
 
-	private String quitarTildes(String cadena){
-		return cadena.replaceAll("[áÁ]", "a")
-		.replaceAll("[éÉ]", "e")
-		.replaceAll("[íÍ]", "i")
-		.replaceAll("[óÓ]", "o")
-		.replaceAll("[úÚ]", "u");
-	}
+	// private String quitarTildes(String cadena){
+	// 	return cadena.replaceAll("[áÁ]", "a")
+	// 	.replaceAll("[éÉ]", "e")
+	// 	.replaceAll("[íÍ]", "i")
+	// 	.replaceAll("[óÓ]", "o")
+	// 	.replaceAll("[úÚ]", "u");
+	// }
 
 }

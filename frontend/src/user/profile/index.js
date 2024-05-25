@@ -48,7 +48,6 @@ export default function UserProfile() {
       try {
         const response = await fetch(`/api/v1/users/${userId}`, {
           headers: {
-            Authorization: `Bearer ${jwt}`,
           },
         });
   
