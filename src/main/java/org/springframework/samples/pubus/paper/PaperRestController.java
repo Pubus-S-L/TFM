@@ -135,7 +135,7 @@ public class PaperRestController {
 
 //UPLOAD FILE
 
-	private ResponseEntity<Paper> uploadFile(Integer paperId, Paper paper, List<MultipartFile> files) {
+	public ResponseEntity<Paper> uploadFile(Integer paperId, Paper paper, List<MultipartFile> files) {
 	try {
 		//Paper paper = RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
 		for(MultipartFile file: files){	
@@ -215,9 +215,6 @@ public class PaperRestController {
 			Paper res = paperService.updatePaper(savedPaper, savedPaper.getId());
 			return new ResponseEntity<>(res, HttpStatus.OK);
 		}
-
-
-		// return new ResponseEntity<>(savedPaper, HttpStatus.CREATED);
 	}
 
 //UPDATE
@@ -275,12 +272,7 @@ public class PaperRestController {
 		for(Integer i=1; i<jsonData.size(); i++ ){
 			String title = jsonData.get(i).get(1).toString();
 			if(!oldTitles.contains(title)){
-				// String DOI = jsonData.get(i).get(4);
-				// if(DOI != null){
-				// 	if(DOI.length()>0){
-				// 		importPapersByDOI(userId, DOI);
-				// 	}
-				// }else{
+
 					Paper newPaper = new Paper();
 					newPaper.setTitle(title);
 					newPaper.setPublicationYear(Integer.parseInt(jsonData.get(i).get(2)));
@@ -341,11 +333,9 @@ public class PaperRestController {
 						paperService.savePaper(newPaper);
 					} catch (Exception e) {
 					}
-				//}
 				
 			}
 		}
-		System.out.println(jsonData);
 		return new ResponseEntity<>(new MessageResponse("Papers added correctly"), HttpStatus.OK);
 	}
 

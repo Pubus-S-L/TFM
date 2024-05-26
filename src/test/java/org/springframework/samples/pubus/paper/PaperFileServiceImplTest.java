@@ -47,6 +47,9 @@ public class PaperFileServiceImplTest {
     private PaperFileServiceImpl paperFileService;
 
     @Mock
+    private ServletUriComponentsBuilder componentsBuilder;
+
+    @Mock
     private HttpServletRequest mockRequest;
 
     @BeforeEach
@@ -160,66 +163,4 @@ public class PaperFileServiceImplTest {
         });
     }
 
-
-
-    // @Test
-    // public void testGetAllFilesByPaperId() {
-    //   PaperFile paperFile = new PaperFile();
-    //   paperFile.setName("testfile.pdf");
-    //   paperFile.setType("application/pdf");
-    //   paperFile.setData(new byte[]{1, 2, 3});
-    //   paperFile.setId(1);
-    
-    //   String fileDownloadUri = ServletUriComponentsBuilder.fromRequest(mockRequest)
-    //     .path("/papers/{paperId}/files/")
-    //     .path(paperFile.getId().toString())
-    //     .toUriString();
-    
-    //   ResponseFile responseFile = ResponseFile.builder()
-    //     .name("testfile.pdf")
-    //     .url(fileDownloadUri)
-    //     .type("application/pdf")
-    //     .size(3)
-    //     .build();
-    
-    //   when(paperFileRepository.findByPaperId(anyInt())).thenReturn(Arrays.asList(paperFile));
-    
-    //   List<ResponseFile> result = paperFileService.getAllFilesByPaperId(1);
-    
-    //   assertEquals(1, result.size());
-    //   assertEquals(responseFile.getName(), result.get(0).getName());
-    //   assertEquals(responseFile.getUrl(), result.get(0).getUrl());
-    //   assertEquals(responseFile.getType(), result.get(0).getType());
-    //   assertEquals(responseFile.getSize(), result.get(0).getSize());
-
-    // }
-    // @Test
-    // public void testGetAllFilesByPaperId() {
-    //     PaperFile paperFile = PaperFile.builder()
-    //         .name("testfile.pdf")
-    //         .type("application/pdf")
-    //         .data(new byte[]{1, 2, 3})
-    //         .build();
-
-    //     String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-    //         .path("/api/v1/papers/{paperId}/files/")
-    //         .path(paperFile.getId().toString())
-    //         .toUriString();
-
-    //     responseFile = ResponseFile.builder()
-    //         .name("testfile.pdf")
-    //         .url(fileDownloadUri)
-    //         .type("application/pdf")
-    //         .size(3)
-    //         .build();
-    //     when(paperFileRepository.findByPaperId(anyInt())).thenReturn(Arrays.asList(paperFile));
-
-    //     List<ResponseFile> result = paperFileService.getAllFilesByPaperId(1);
-
-    //     assertEquals(1, result.size());
-    //     assertEquals(responseFile.getName(), result.get(0).getName());
-    //     assertEquals(responseFile.getUrl(), result.get(0).getUrl());
-    //     assertEquals(responseFile.getType(), result.get(0).getType());
-    //     assertEquals(responseFile.getSize(), result.get(0).getSize());
-    // }
 }
