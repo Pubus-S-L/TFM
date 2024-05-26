@@ -18,7 +18,14 @@ export const formValidators = {
             return value !== "None" && value> year-100 && value<=year;
         },
         message: "Please, write a date beetwen "+ (new Date().getFullYear()-100) + " and " + new Date().getFullYear()
-    }
+    },
+    notMoreThan1000: {
+        validate: (value) => {
+            return value.trim().length <= 1000;
+        },
+        message: "The field can not be longer than 1000 characteres"
+    },
+
 
 
 }

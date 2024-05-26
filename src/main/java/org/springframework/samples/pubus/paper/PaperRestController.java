@@ -102,9 +102,7 @@ public class PaperRestController {
 
 	@GetMapping
 	public ResponseEntity<List<Paper>> findAll(@RequestParam(required = false) Integer userId,@RequestParam(required = false) String search) {
-		//User user = userService.findCurrentUser();
 		if (userId != null) {
-			//if (user.getId().equals(userId))
 				return new ResponseEntity<>(paperService.findAllPapersByUserId(userId), HttpStatus.OK);
 		} else {			
 			if (search != null && !search.isEmpty()) {
@@ -113,16 +111,13 @@ public class PaperRestController {
 			}
 			else{
 				return new ResponseEntity<>((List<Paper>) this.paperService.findAll(), HttpStatus.OK);
-			}
-
-				
+			}				
 		}
-		//throw new AccessDeniedException();
 	}
 
 // GET FILTERED
 
-	private ResponseEntity<List<Paper>> searchPaper(String originalSearch) {
+	public ResponseEntity<List<Paper>> searchPaper(String originalSearch) {
 		String search = originalSearch.toLowerCase();
 		Set<Paper> set_complete = new HashSet<>();
 		List<Paper> list1 = this.paperService.findAllPapersByAuthor(search);
@@ -140,7 +135,7 @@ public class PaperRestController {
 
 //UPLOAD FILE
 
-	private ResponseEntity<Paper> uploadFile(Integer paperId, Paper paper, List<MultipartFile> files) {
+	public ResponseEntity<Paper> uploadFile(Integer paperId, Paper paper, List<MultipartFile> files) {
 	try {
 		//Paper paper = RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
 		for(MultipartFile file: files){	
@@ -220,9 +215,6 @@ public class PaperRestController {
 			Paper res = paperService.updatePaper(savedPaper, savedPaper.getId());
 			return new ResponseEntity<>(res, HttpStatus.OK);
 		}
-
-
-		// return new ResponseEntity<>(savedPaper, HttpStatus.CREATED);
 	}
 
 //UPDATE
@@ -256,13 +248,8 @@ public class PaperRestController {
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<MessageResponse> delete(@PathVariable("paperId") int paperId) {
 		Paper paper = RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
-		// User loggedUser = userService.findCurrentUser();
-		// 	User paperUser = paper.getUser();
-		// 	if (loggedUser.getId().equals(paperUser.getId())) {
-				paperService.deletePaper(paperId);
-				return new ResponseEntity<>(new MessageResponse("Paper deleted!"), HttpStatus.OK);
-			// } else
-			// 	throw new ResourceNotOwnedException(paper);
+		paperService.deletePaper(paperId);
+		return new ResponseEntity<>(new MessageResponse("Paper deleted!"), HttpStatus.OK);
 	}
 
 //DELETE PAPERFILE
@@ -271,13 +258,9 @@ public class PaperRestController {
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<MessageResponse> deletePaperFile(@PathVariable("paperFileId") int paperFileId) {
 		PaperFile paperFile = RestPreconditions.checkNotNull(paperFileService.getPaperFileById(paperFileId), "PaperField", "ID", paperFileId);
-		// User loggedUser = userService.findCurrentUser();
-		// 	User paperUser = paper.getUser();
-		// 	if (loggedUser.getId().equals(paperUser.getId())) {
-				paperFileService.deletePaperFile(paperFileId);
-				return new ResponseEntity<>(new MessageResponse("File deleted!"), HttpStatus.OK);
-			// } else
-			// 	throw new ResourceNotOwnedException(paper);
+		paperFileService.deletePaperFile(paperFileId);
+		return new ResponseEntity<>(new MessageResponse("File deleted!"), HttpStatus.OK);
+
 	}
 
 //IMPORT PAPERS BY EXCELL
@@ -289,12 +272,7 @@ public class PaperRestController {
 		for(Integer i=1; i<jsonData.size(); i++ ){
 			String title = jsonData.get(i).get(1).toString();
 			if(!oldTitles.contains(title)){
-				// String DOI = jsonData.get(i).get(4);
-				// if(DOI != null){
-				// 	if(DOI.length()>0){
-				// 		importPapersByDOI(userId, DOI);
-				// 	}
-				// }else{
+
 					Paper newPaper = new Paper();
 					newPaper.setTitle(title);
 					newPaper.setPublicationYear(Integer.parseInt(jsonData.get(i).get(2)));
@@ -355,11 +333,9 @@ public class PaperRestController {
 						paperService.savePaper(newPaper);
 					} catch (Exception e) {
 					}
-				//}
 				
 			}
 		}
-		System.out.println(jsonData);
 		return new ResponseEntity<>(new MessageResponse("Papers added correctly"), HttpStatus.OK);
 	}
 

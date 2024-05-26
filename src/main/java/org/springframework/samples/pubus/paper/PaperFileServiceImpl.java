@@ -30,19 +30,6 @@ public class PaperFileServiceImpl implements PaperFileService {
         return paperFileRepository.save(paperFile);
     }
 
-	// @Transactional(readOnly = true)
-	// public List<PaperFile> findAllPaperFilesByPaperId(int paperId) throws DataAccessException {
-	// 	return paperFileRepository.findByPaperId(paperId);
-	// }
-
-    // @Transactional(readOnly = true)
-    // public PaperFile findByPaperFileIdAndPaperId(int paperId, int paperFileId) throws DataAccessException {
-    //     List<PaperFile> paperFiles = findAllPaperFilesByPaperId(paperId);
-    //     Optional<PaperFile> paperFile = paperFiles.stream().filter(f -> f.id == paperFileId).findFirst();
-    //     if (paperFile.isPresent()) return paperFile.get();
-    //     else throw new ResourceNotFoundException("File not found with ID: " + paperFileId);
-    // }
-
 
     @Override
     public PaperFile upload(MultipartFile file, Paper paper, Integer paperId) throws IOException {

@@ -47,7 +47,7 @@ public class Paper extends BaseEntity {
 	@JoinColumn(name = "type_id")
 	private PaperType type;
 
-	@Column(name="abstract_content")
+	@Column(name="abstract_content", length = 1000)
 	private String abstractContent;
 
 	private String publicationData;

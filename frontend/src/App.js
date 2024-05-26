@@ -15,8 +15,11 @@ import UserPaperEdit from "./user/papers/myPaperEdit";
 import {UserPaperList} from "./user/papers/myPaperList";
 import UserDetail from "./public/users";
 import UserProfile from "./user/profile";
+import SwaggerDocs from "./public/swagger";
 import AboutUs from "./public/others/aboutUs";
 import LoginLinkedIn from "./auth/login/LinkedIn/loginLinkedin";
+import UserListAdmin from "./admin/users/UserListAdmin";
+import UserEditAdmin from "./admin/users/UserEditAdmin";
 
 function ErrorFallback({ error, resetErrorBoundary }) {
   return (
@@ -47,6 +50,8 @@ function App() {
     if (role === "ADMIN") {
       adminRoutes = (
         <>
+        <Route path="/users" exact={true} element={<PrivateRoute><UserListAdmin /></PrivateRoute>} />
+        <Route path="/users/:username" exact={true} element={<PrivateRoute><UserEditAdmin /></PrivateRoute>} />
         </>)
     }
 
@@ -78,6 +83,7 @@ function App() {
         <Route path="/papers/filtered/:search" exact={true} element={<Papers />} />
         <Route path="/papers/:id" exact={true} element={<PaperDetail />} />
         <Route path="/papers/:id/download/:paperFileId" exact={true} element={<PaperDetail />} />
+        <Route path="/admin/users/:id" exact={true} element={<UserEditAdmin />} />
         <Route path="/users/:id" exact={true} element={<UserDetail />} />
         <Route path="/about" exact={true} element={<AboutUs />} />
       </>
@@ -90,6 +96,7 @@ function App() {
         <AppNavbar />
         <Routes>
           <Route path="/" exact={true} element={<Home />} />
+          <Route path="/docs" element={<SwaggerDocs />} />
           {publicRoutes}
           {userRoutes}
           {adminRoutes}

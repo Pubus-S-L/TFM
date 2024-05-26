@@ -15,8 +15,8 @@ public interface PaperRepository extends CrudRepository<Paper, Integer> {
 	@Query("SELECT ptype FROM PaperType ptype ORDER BY ptype.name")
 	List<PaperType> findPaperTypes() throws DataAccessException;
 
-	// @Query("SELECT ptype FROM PaperType ptype WHERE ptype.name LIKE :name")
-	// Optional<PaperType> findPaperTypeByName(String name) throws DataAccessException;
+	@Query("SELECT ptype FROM PaperType ptype WHERE ptype.name LIKE :name")
+	Optional<PaperType> findPaperTypeByName(String name) throws DataAccessException;
 
 	@Query("SELECT p FROM Paper p WHERE LOWER(p.abstractContent) LIKE %:word%")
 	List<Paper> findAllPapersByAbstractWord(@Param("word") String word);
@@ -36,16 +36,16 @@ public interface PaperRepository extends CrudRepository<Paper, Integer> {
 	@Query(("SELECT p FROM Paper p WHERE LOWER(p.authors) LIKE %:author%"))
 	List<Paper> findAllPapersByAuthor(@Param("author") String author);
 
-	@Query(("SELECT COUNT(p) FROM Paper p WHERE p.user.id = :id"))
-	public Integer countPapersByUser(int id);
+	// @Query(("SELECT COUNT(p) FROM Paper p WHERE p.user.id = :id"))
+	// public Integer countPapersByUser(int id);
 
-	@Query("SELECT COUNT(p) FROM Paper p")
-	public Integer countAll();
+	// @Query("SELECT COUNT(p) FROM Paper p")
+	// public Integer countAll();
 
-	@Query("SELECT COUNT(u) FROM User u")
-	public Integer countAllUsers();
+	// @Query("SELECT COUNT(u) FROM User u")
+	// public Integer countAllUsers();
 
-	@Query("SELECT NEW MAP(p.type.name as type, cast(COUNT(p) as string) as papers) FROM Paper p GROUP BY p.type")
-	public List<Map<String, String>> countPapersGroupedByType();
+	// @Query("SELECT NEW MAP(p.type.name as type, cast(COUNT(p) as string) as papers) FROM Paper p GROUP BY p.type")
+	// public List<Map<String, String>> countPapersGroupedByType();
 
 }

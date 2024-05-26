@@ -16,7 +16,6 @@ public class AuthoritiesService {
 		this.authoritiesRepository = authoritiesRepository;
 	}
 
-
 	@Transactional(readOnly = true)
 	public Iterable<Authorities> findAll() {
 		return this.authoritiesRepository.findAll();
