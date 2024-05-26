@@ -230,7 +230,7 @@ useEffect(() => {
                 className="auth-button purple"
                 style={{ display: "inline-block"}}
                 >
-                Import Papers by Excell
+                Import Papers by Excel
               </button>
              </div>
         </div>
