@@ -148,14 +148,14 @@ useEffect(() => {
     });
 }
 
-  const handleGenerateText = async (title,paperId, red_social) => {
+  const handleGenerateText = async (title,abstract,paperId, red_social) => {
  
-      let prompt = "You are an enthusiastic researcher and you write a social media post about your new paper"+title+"";
+      let prompt = "You are an enthusiastic researcher and you write a social media post about your new paper"+title+"about"+abstract+"";
       const model = "gpt-3.5-turbo-instruct";
       let maxTokens = 300;
       const url = `http://localhost:3000/papers/${paperId}`;
       if(red_social==="twitter"){
-        prompt = "You are an enthusiastic researcher and you write a social media post on 190 characteres about your new paper"+title+"";
+        prompt = "You are an enthusiastic researcher and you write a social media post on 190 characteres about your new paper"+title+"about"+abstract+"";
       }
       const requestOptions = {
         method: 'POST',
@@ -226,7 +226,10 @@ useEffect(() => {
               Add Paper
             </Link>
               <button 
-                onClick={() => inputFileRef.current.click()}
+                onClick={() => {
+                  console.log(inputFileRef)
+                  console.log(inputFileRef.current);
+                  inputFileRef.current?.click()}}
                 className="auth-button purple"
                 style={{ display: "inline-block"}}
                 >
@@ -257,16 +260,9 @@ useEffect(() => {
                     style={{ textDecoration: "none" }}
                   >
                     Edit
-                  </Link>
-                  <input
-                  type="file"
-                  accept=".xlsx, .xls"
-                  onChange={handleImportExcel}
-                  style={{ display: "none" }} // Ocultar el input, puedes personalizarlo como desees
-                  ref={inputFileRef}
-                />                  
+                  </Link>              
                 <button 
-                onClick={() => handleGenerateText(paper.title,paper.id,linkedIn)}
+                onClick={() => handleGenerateText(paper.title,paper.abstractContent,paper.id,linkedIn)}
                 className="auth-button linkedIn"
               >
                 <svg className="share-icon" xmlns="http://www.w3.org/2000/svg" style={{width:30}} viewBox="0 0 512 512" aria-label="ln" role="img">
@@ -303,6 +299,13 @@ useEffect(() => {
         ) : (
           <p>Papers not found.</p>
         )}
+                <input
+                  type="file"
+                  accept=".xlsx, .xls"
+                  onChange={handleImportExcel}
+                  style={{ display: "none" }} // Ocultar el input, puedes personalizarlo como desees
+                  ref={inputFileRef}
+                />    
 
         <Modal isOpen={modalShow} toggle={handleShow} keyboard={false}>
           <ModalHeader

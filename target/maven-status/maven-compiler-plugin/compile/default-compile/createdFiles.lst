@@ -3,6 +3,7 @@ org\springframework\samples\pubus\company\CompanyRestController.class
 org\springframework\samples\pubus\company\CompanyService.class
 org\springframework\samples\pubus\configuration\SecurityConfiguration.class
 org\springframework\samples\pubus\user\AuthoritiesService.class
+org\springframework\samples\pubus\paper\PaperFileServiceImpl$1.class
 org\springframework\samples\pubus\user\Authorities.class
 org\springframework\samples\pubus\user\AuthoritiesRepository.class
 org\springframework\samples\pubus\paper\PaperFileService.class

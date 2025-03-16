@@ -12,10 +12,8 @@ import FormGenerator from "../../../components/formGenerator/formGenerator";
 import { paperEditFormInputs } from "./form/paperEditFormInputs";
 import "../../../static/css/user/myPaperEdit.css";
 import "../../../static/css/auth/authButton.css"
-import useFetchState from "../../../util/useFetchState";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import tokenService from "../../../services/token.service";
-import axios from 'axios';
 
 export default function UserPaperEdit(){
   let pathArray = window.location.pathname.split("/");
@@ -40,6 +38,7 @@ export default function UserPaperEdit(){
   const [userId, setUserId] = useState(user.id)
   const editPaperFormRef=useRef();
   const [files,setFiles] = useState([]);
+
   const uploadFiles=e=>{
     setFiles(e);
   }
@@ -140,11 +139,11 @@ export default function UserPaperEdit(){
       scopus: values['scoupus'],
       user: paper.user,
 
-
     };
          
     const f = new FormData();
     if(files != null){
+
       for(let index = 0; index < files.length; index++){
         f.append('files', files[index]);
       }

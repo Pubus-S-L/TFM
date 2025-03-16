@@ -267,7 +267,8 @@ public class PaperRestController {
 
 	@PostMapping("/importPaper/{userId}")
 	public ResponseEntity<MessageResponse> importPapersByExcell(@PathVariable("userId") Integer userId, @RequestBody List<List<String>> jsonData) {
-		List<String> oldTitles = paperService.findAllPapersByUserId(userId).stream().map(x-> x.getTitle()).toList();
+		List<String> oldTitles = new ArrayList<>();
+		oldTitles = paperService.findAllPapersByUserId(userId).stream().map(x-> x.getTitle()).toList();
 		User user = userService.findUser(userId);
 		for(Integer i=1; i<jsonData.size(); i++ ){
 			String title = jsonData.get(i).get(1).toString();
@@ -346,7 +347,10 @@ public class PaperRestController {
 	public ResponseEntity<MessageResponse> importPapersByDOI(@PathVariable("userId") Integer userId,
 		@RequestParam("searchTerm") String searchTerm){
 			String url = "https://api.crossref.org/works/"+searchTerm;
-			List<String> oldTitles = paperService.findAllPapersByUserId(userId).stream().map(x-> x.getTitle()).toList();
+			List<String> oldTitles = new ArrayList<>();
+			oldTitles.addAll(paperService.findAllPapersByUserId(userId).stream().map(x-> x.getTitle()).toList());
+
+
 			try {
 				String response = restTemplate.getForObject(url, String.class);
 	
@@ -397,5 +401,22 @@ public class PaperRestController {
 				return new ResponseEntity<>(new MessageResponse("Paper can not be added"), HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		}
+
+//LIKE
+
+		@PostMapping("{userId}/like/{paperId}")
+		public void likePaper(@PathVariable("paperId") Integer paperId,@PathVariable("userId") String userId){
+			Paper paper = paperService.findPaperById(paperId);
+			Integer userIdInt = Integer.parseInt(userId);
+			User user = userService.findUser(userIdInt);
+			if(!user.getPapersIdLiked().contains(paperId)){
+				paper.setLikes(paper.getLikes()+1);
+				user.getPapersIdLiked().add(paper.getId());
+				paperService.savePaper(paper);
+				userService.saveUser(user);
+			}
+
+		}
+
 
 }

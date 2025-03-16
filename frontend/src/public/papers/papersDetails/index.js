@@ -3,10 +3,15 @@ import { useEffect, useState, useRef } from "react";
 import "../../../static/css/user/myPaperList.css";
 import "../../../static/css/auth/authButton.css";
 import { Link } from "react-router-dom";
+import like from "../../../static/images/like.png";
+import tokenService from "../../../services/token.service";
+
 export default function PaperDetail() {
     let pathArray = window.location.pathname.split("/");
     const [paper,setPaper] = useState();  
     const [paperId,setPaperId] = useState(pathArray[2]);
+    const jwt = JSON.parse(window.localStorage.getItem("jwt"));
+    const user = tokenService.getUser();
 
     function downloadFile(fileId,fileName) {
         fetch(`/api/v1/papers/${paperId}/download/${fileId}`, {
@@ -65,6 +70,26 @@ export default function PaperDetail() {
     useEffect(() => {
         setUp();
     },);
+
+
+    async function likePaper(){
+        try {
+            let response = await fetch(`/api/v1/papers/${user.id}/like/${paperId}`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${jwt}`,
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                },
+            });
+    
+            if (!response.ok) {
+                throw new Error(`Error fetching data: ${response.statusText}`);
+            }
+        } catch (error) {
+            console.error("Error during data fetching:", error);
+        }
+    }
 
     return (
         <div className="paper-row">
@@ -127,6 +152,13 @@ export default function PaperDetail() {
                   >
                     View Profile
                   </Link>
+                  <button 
+                    onClick={() => likePaper()}
+                    className="auth-button like"
+                    style={{ display: "inline-block"}}
+                    >
+                    <img src={like} alt="Like" style={{ height: 30, width: 30 }} />
+                </button>
                 </div>
             </>
             )}

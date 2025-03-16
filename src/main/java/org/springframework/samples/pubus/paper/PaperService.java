@@ -103,27 +103,27 @@ public class PaperService {
 		paperRepository.delete(toDelete);
 	}
 
-	// public Map<String, Object> getPapersStats() {
-	// 	Map<String, Object> res = new HashMap<>();
-	// 	Integer countAll = this.paperRepository.countAll();
-	// 	int users = this.paperRepository.countAllUsers();
-	// 	Double avgPapersByUser = (double) countAll / users;
-	// 	Map<String, Integer> papersByType = getPapersByType();
+	public Map<String, Object> getPapersStats() {
+		Map<String, Object> res = new HashMap<>();
+		Integer countAll = this.paperRepository.countAll();
+		int users = this.paperRepository.countAllUsers();
+		Double avgPapersByUser = (double) countAll / users;
+		Map<String, Integer> papersByType = getPapersByType();
 
-	// 	res.put("totalPapers", countAll);
-	// 	res.put("avgPapersByUser", avgPapersByUser);
-	// 	res.put("papersByType", papersByType);
+		res.put("totalPapers", countAll);
+		res.put("avgPapersByUser", avgPapersByUser);
+		res.put("papersByType", papersByType);
 
-	// 	return res;
-	// }
+		return res;
+	}
 
-	// private Map<String, Integer> getPapersByType() {
-	// 	Map<String, Integer> unsortedPapersByType = new HashMap<>();
-	// 	this.paperRepository.countPapersGroupedByType().forEach(m -> {
-	// 		String key = m.get("type");
-	// 		Integer value = Integer.parseInt(m.get("papers"));
-	// 		unsortedPapersByType.put(key, value);
-	// 	});
-	// 	return unsortedPapersByType;
-	// }
+	private Map<String, Integer> getPapersByType() {
+		Map<String, Integer> unsortedPapersByType = new HashMap<>();
+		this.paperRepository.countPapersGroupedByType().forEach(m -> {
+			String key = m.get("type");
+			Integer value = Integer.parseInt(m.get("papers"));
+			unsortedPapersByType.put(key, value);
+		});
+		return unsortedPapersByType;
+	}
 }

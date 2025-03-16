@@ -9,6 +9,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.samples.pubus.model.BaseEntity;
@@ -48,6 +49,8 @@ public class User extends BaseEntity {
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "authority")
 	Authorities authority;
+
+	List<Integer> papersIdLiked = new ArrayList<>();
 
 
 }

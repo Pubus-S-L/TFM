@@ -3,6 +3,8 @@ import { useEffect, useState, useRef } from "react";
 import "../../static/css/user/myProfile.css";
 import "../../static/css/auth/authButton.css";
 import { Link } from "react-router-dom";
+import Chat from "./chat";
+
 export default function UserDetail() {
     let pathArray = window.location.pathname.split("/");
     const [user,setUser] = useState();  
@@ -91,15 +93,21 @@ export default function UserDetail() {
                     </Link>
                     </div>
                 </div>
+                
+                
                 );
             })
             ) : (
             <p>No papers found</p>
             )}
+                <h1>Ask me!</h1>
+                <Chat />
+ 
                 </span>
                 </>
                 )}
             </div>
         </div>
+        
         );
 }

@@ -4,6 +4,7 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -59,6 +60,12 @@ public class Paper extends BaseEntity {
 	private String scopus;
 
 	private String source;
+
+	private Integer likes = 0;
+
+	@Lob
+    @Column(name = "embedding")
+	private byte[] embedding;
 
 
 	@Valid

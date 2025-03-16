@@ -3,6 +3,7 @@ import "../../../static/css/auth/authButton.css";
 import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
+import like from "../../../static/images/like.png";
 
 export default function Papers() {
   let [papers, setPapers] = useState([]);
@@ -126,6 +127,7 @@ export default function Papers() {
               <div key={paper.id} className="paper-row">
                 <div className="paper-data">
                   <h4 className="paper-name">{paper.title}</h4>
+                  
                   <span>
                     <strong>Authors:</strong> {paper.authors}
                   </span>
@@ -135,6 +137,10 @@ export default function Papers() {
                   <span>
                     <strong>Type:</strong> {paper.type.name}
                   </span>
+                  <h7 className="paper-name">{paper.likes!=null && paper.likes>0? paper.likes: null}
+                    {paper.likes!=null && paper.likes>0?
+                    <img src={like} alt="Like" style={{ height: 15, width: 15 }} />:null}
+                  </h7>
                 </div>
                 <div className="paper-options">
                   <Link
@@ -145,6 +151,7 @@ export default function Papers() {
                     Details
                   </Link>
                 </div>
+                
               </div>
             );
           })
