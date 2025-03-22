@@ -5,10 +5,35 @@ import "../../static/css/user/chat.css";
 // import CohereClient from "cohere-ai";
 
 const Chat = () => {
+  let pathArray = window.location.pathname.split("/"); 
+  const [userId,setUserId] = useState(pathArray[2]);
   const [messages, setMessages] = useState([]); // Lista de mensajes del chat
   const [input, setInput] = useState(""); // Mensaje que escribe el usuario
   const apiKey = secret.OPENAI_API_KEY;
   // const cohereKey = secret.COHERE_API_KEY;
+
+  const prompt = async function createPrompt(userMessage) {
+    const params = new URLSearchParams({ text: userMessage });
+    let data = "";
+    try {
+        let response = await fetch(`/api/v1/papers/users/${userId}/prompt?${params.toString()}`, {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error fetching data: ${response.statusText}`);
+        }
+        data = await response.json();
+        
+    } catch (error) {
+        console.error("Error during data fetching:", error);
+    }
+    return data.prompt;
+}
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -17,6 +42,11 @@ const Chat = () => {
     setMessages((prev) => [...prev, userMessage]);
 
     const model = "gpt-3.5-turbo";
+
+    const contextResponse = await prompt(input);
+    console.log(contextResponse)
+
+    const context = contextResponse? contextResponse : input;
 
     const requestOptions = {
       method: 'POST',
@@ -27,6 +57,7 @@ const Chat = () => {
       body: JSON.stringify({
         model,
         messages: [
+          { role: "system", content: `${context}` },
           ...messages.map((msg) => ({ role: msg.sender === "user" ? "user" : "assistant", content: msg.text })),
           { role: "user", content: input },
         ],

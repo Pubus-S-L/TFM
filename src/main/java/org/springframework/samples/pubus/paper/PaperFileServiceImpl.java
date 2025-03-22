@@ -2,6 +2,11 @@ package org.springframework.samples.pubus.paper;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
+import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +30,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -57,22 +62,6 @@ public class PaperFileServiceImpl implements PaperFileService {
 
     @Override
     public PaperFile upload(MultipartFile file, Paper paper, Integer paperId) throws IOException {
-
-        //Embedding
-        if(file.getContentType().equals("application/pdf")){
-            String extractedText = extractTextFromPdf(file);
-            int tokenCount = estimateTokenCount(extractedText);
-            if (tokenCount > MAX_TOKENS){
-                List<String> chunks = splitTextIntoChunks(extractedText);
-                for (String chunk : chunks) {
-                    addEmbedding(chunk, paper);
-                }
-            }else{
-                addEmbedding(extractedText, paper);
-            }
-            
-        }
-
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
 
        PaperFile paperFile = PaperFile.builder()
@@ -81,29 +70,40 @@ public class PaperFileServiceImpl implements PaperFileService {
        .data(file.getBytes())
        .paper(paper)
        .build();
-       List<PaperFile> paperFiles = paper.getPaperFiles();
-       paperFiles.add(paperFile);
-       paper.setPaperFiles(paperFiles);
-       paperService.updatePaper(paper, paperId);
+
+
+        //Embedding
+        Map<String, byte[]> embeddingMap = new HashMap<>();
+        if(file.getContentType().equals("application/pdf")){
+            String extractedText = extractTextFromPdf(file);
+            int tokenCount = estimateTokenCount(extractedText);
+            if (tokenCount > MAX_TOKENS){
+                List<String> chunks = splitTextIntoChunks(extractedText);
+                for (String chunk : chunks) {
+                    embeddingMap = addEmbedding(chunk, paperFile, embeddingMap);
+                }
+            }else{
+                embeddingMap = addEmbedding(extractedText, paperFile, embeddingMap);
+            }
+            
+        }
+        paperFile.setEmbeddings(embeddingMap);
+        List<PaperFile> paperFiles = paper.getPaperFiles();
+        paperFiles.add(paperFile);
+        paper.setPaperFiles(paperFiles);
+        paperService.updatePaper(paper, paperId);
+
        return paperFileRepository.save(paperFile);
     }
 
-    private void addEmbedding(String text, Paper paper){
+    private Map<String,byte[]> addEmbedding(String text, PaperFile paperfile, Map<String,byte[]> embeddingMap) {
         try {
             byte[] embedding = getEmbeddingFromOpenAI(text);
-            if(paper.getEmbedding()==null){
-                paper.setEmbedding(embedding);
-            }
-            else{
-                byte[] byte1 = paper.getEmbedding();
-                byte[] combined = new byte[byte1.length + embedding.length];
-                System.arraycopy(byte1, 0, combined, 0, byte1.length);
-                System.arraycopy(embedding, 0, combined, byte1.length, embedding.length);
-                paper.setEmbedding(combined);
-            }
+            embeddingMap.put(text, embedding);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return embeddingMap;
     }
 
     @Override
@@ -145,87 +145,136 @@ public class PaperFileServiceImpl implements PaperFileService {
         .orElseThrow(() -> new ResourceNotFoundException("File not found with ID: " + id));
     }
 
-        // Método para extraer texto del PDF
-        private String extractTextFromPdf(MultipartFile file) throws IOException {
-            try (PDDocument document = PDDocument.load(file.getInputStream())) {
-                PDFTextStripper stripper = new PDFTextStripper();
-                return stripper.getText(document);
-            }
+    // Método para extraer texto del PDF
+    private String extractTextFromPdf(MultipartFile file) throws IOException {
+        try (PDDocument document = PDDocument.load(file.getInputStream())) {
+            PDFTextStripper stripper = new PDFTextStripper();
+            return stripper.getText(document);
         }
+    }
     
-        // Método para interactuar con la API de OpenAI y obtener el embedding
-        private byte[] getEmbeddingFromOpenAI(String text) throws IOException {
-            // Crear el cuerpo de la solicitud como un mapa de datos
-            Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("model", "text-embedding-ada-002");
-            requestBody.put("input", text);
+    // Método para interactuar con la API de OpenAI y obtener el embedding
+    public byte[] getEmbeddingFromOpenAI(String text) throws IOException {
+        // Crear el cuerpo de la solicitud como un mapa de datos
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("model", "text-embedding-ada-002");
+        requestBody.put("input", text);
 
-            // Convertir el mapa a JSON utilizando ObjectMapper
-            ObjectMapper objectMapper = new ObjectMapper();
-            String jsonRequestBody = objectMapper.writeValueAsString(requestBody);
+        // Convertir el mapa a JSON utilizando ObjectMapper
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonRequestBody = objectMapper.writeValueAsString(requestBody);
 
-            RestTemplate restTemplate = new RestTemplate();
-            String url = "https://api.openai.com/v1/embeddings";
+        RestTemplate restTemplate = new RestTemplate();
+        String url = "https://api.openai.com/v1/embeddings";
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", "Bearer " + openaiApiKey);
-            headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + openaiApiKey);
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-            HttpEntity<String> request = new HttpEntity<>(jsonRequestBody, headers);
+        HttpEntity<String> request = new HttpEntity<>(jsonRequestBody, headers);
 
-            // Hacer la solicitud y obtener la respuesta
-            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
+        // Hacer la solicitud y obtener la respuesta
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
 
-            // Procesar la respuesta
-            byte[] embedding = convertEmbeddingToBinary(response.getBody());
+        // Procesar la respuesta
+        byte[] embedding = convertEmbeddingToBinary(response.getBody());
 
-            return embedding; // Retornar el array binario
-        }
+        return embedding; // Retornar el array binario
+    }
 
-        public byte[] convertEmbeddingToBinary(String responseBody) throws IOException {
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode rootNode = objectMapper.readTree(responseBody);
-            JsonNode embeddingNode = rootNode.path("data").get(0).path("embedding");
-    
-            if (embeddingNode.isArray()) {
-                List<Double> embeddingList = objectMapper.convertValue(embeddingNode, new TypeReference<List<Double>>() {});
-                ByteBuffer buffer = ByteBuffer.allocate(embeddingList.size() * Double.BYTES);
-                embeddingList.forEach(buffer::putDouble);   
-                return buffer.array(); 
-            } else {
-                throw new IOException("El campo 'embedding' no es un array válido.");
-            }
-        }
+    private byte[] convertEmbeddingToBinary(String responseBody) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode root = objectMapper.readTree(responseBody);
+        JsonNode embeddingNode = root.path("data").get(0).path("embedding");
+        String jsonString = embeddingNode.toString();
+        byte[] jsonBytes = jsonString.getBytes(StandardCharsets.UTF_8);
+        return jsonBytes;
+    }
 
-        private List<String> splitTextIntoChunks(String text) {
-            List<String> chunks = new ArrayList<>();
-            String[] sentences = text.split("(?<=[.!?])\\s+"); // Divide en frases
+    private List<String> splitTextIntoChunks(String text) {
+        List<String> chunks = new ArrayList<>();
+        String[] sentences = text.split("(?<=[.!?])\\s+"); // Divide en frases
         
-            StringBuilder currentChunk = new StringBuilder();
-            int currentTokenCount = 0;
+        StringBuilder currentChunk = new StringBuilder();
+        int currentTokenCount = 0;
         
-            for (String sentence : sentences) {
-                int sentenceTokens = estimateTokenCount(sentence);
+        for (String sentence : sentences) {
+            int sentenceTokens = estimateTokenCount(sentence);
         
-                if (currentTokenCount + sentenceTokens > MAX_TOKENS) {
-                    chunks.add(currentChunk.toString());
-                    currentChunk = new StringBuilder();
-                    currentTokenCount = 0;
-                }
-        
-                currentChunk.append(sentence).append(" ");
-                currentTokenCount += sentenceTokens;
-            }
-        
-            if (currentChunk.length() > 0) {
+            if (currentTokenCount + sentenceTokens > MAX_TOKENS) {
                 chunks.add(currentChunk.toString());
+                currentChunk = new StringBuilder();
+                currentTokenCount = 0;
             }
         
-            return chunks;
+            currentChunk.append(sentence).append(" ");
+            currentTokenCount += sentenceTokens;
+        }
+        
+        if (currentChunk.length() > 0) {
+            chunks.add(currentChunk.toString());
+        }
+        
+        return chunks;
+    }
+
+    private int estimateTokenCount(String text) {
+        return text.length() / 4;
+    }
+
+    public String getContext(byte[] data, Integer userId) throws JsonProcessingException {
+        List<PaperFile> files = getAllFilesByUserId(userId);
+        float[] queryEmbedding = deserializeToFloatArray(data);
+        String closestKey = "";
+        double bestSimilarity = -1.0;
+        
+        List<Map<String, byte[]>> embeddingList = files.stream().map(f -> f.getEmbeddings()).toList();
+        for(Map<String, byte[]> embeddings : embeddingList){
+            for(Map.Entry<String, byte[]> entry : embeddings.entrySet()){
+                float[] dbEmbedding = deserializeToFloatArray(entry.getValue());
+                    double similarity = cosineSimilarity(queryEmbedding,dbEmbedding);
+                    if(similarity > bestSimilarity){
+                        bestSimilarity = similarity;
+                        closestKey = entry.getKey();
+                    }        
+            } 
+        }
+        
+        return closestKey;
         }
 
-        private int estimateTokenCount(String text) {
-            return text.length() / 4;
+    private List<PaperFile> getAllFilesByUserId(Integer userId) {
+        return paperFileRepository.findByUserId(userId);
+           
+    }
+
+    private float[] deserializeToFloatArray(byte[] data) throws JsonProcessingException {
+        String jsonStringFromDb = new String(data, StandardCharsets.UTF_8);
+        JsonNode restoredJsonNode;
+        ObjectMapper objectMapper = new ObjectMapper();
+            try {
+                restoredJsonNode = objectMapper.readTree(jsonStringFromDb);
+
+            float[] embedding = new float[restoredJsonNode.size()];
+            for (int i = 0; i < restoredJsonNode.size(); i++) {
+                JsonNode valueNode = restoredJsonNode.get(i);
+                embedding[i] = valueNode.floatValue(); // Convertir a float
+            }
+            return embedding;
+        } catch (JsonProcessingException e) {
+            throw new JsonProcessingException("Error al procesar JSON") {};
         }
+    }
+
+    private double cosineSimilarity(float[] vec1, float[] vec2) {
+        if (vec1.length != vec2.length) throw new IllegalArgumentException("Vector sizes must match");
+        double dot = 0.0, norm1 = 0.0, norm2 = 0.0;
+        for (int i = 0; i < vec1.length; i++) {
+            dot += vec1[i] * vec2[i];
+            norm1 += vec1[i] * vec1[i];
+            norm2 += vec2[i] * vec2[i];
+        }
+        return dot / (Math.sqrt(norm1) * Math.sqrt(norm2));
+    }
 
 }

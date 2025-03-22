@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -418,5 +419,22 @@ public class PaperRestController {
 
 		}
 
+//PROMPT
 
+		@GetMapping("/users/{userId}/prompt")
+		public ResponseEntity<Map<String,String>> createPrompt(@RequestParam("text") String text, @PathVariable("userId") Integer userId){
+			try{
+				byte [] embedding = paperFileService.getEmbeddingFromOpenAI(text);
+				String context = paperFileService.getContext(embedding, userId);
+				String prompt = "Resolve this request: "+text + " with this context " + context;
+				Map<String, String> response = new HashMap<>();
+				response.put("prompt", prompt);
+				
+				return ResponseEntity.ok(response);
+
+			}catch(Exception e){
+				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Error"));
+			}
+
+		}
 }
