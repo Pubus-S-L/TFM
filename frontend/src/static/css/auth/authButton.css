@@ -58,6 +58,10 @@
 }
 
 .linkedIn{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   border: solid 2px var(--main-linkedIn-color) !important;
   box-shadow: 0px 15px 20px rgba(31, 44, 224, 0.63);
 
@@ -69,6 +73,10 @@
 }
 
 .twitter{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   border: solid 2px var(--main-twitter-color) !important;
   box-shadow: 0px 15px 20px rgba(7, 2, 19, 0.4);
 }

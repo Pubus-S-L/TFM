@@ -13,11 +13,10 @@ import { userEditFormInputs } from "./form/userEditFormInputs";
 import "../../static/css/user/myPaperEdit.css";
 import "../../static/css/auth/authButton.css";
 import tokenService from "../../services/token.service";
-import useFetchState from "../../util/useFetchState";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import axios from 'axios';
 
-export default function UserProfile() {
+
+export default function EditProfile() {
     const user = tokenService.getUser();
     const jwt = tokenService.getLocalAccessToken();
   

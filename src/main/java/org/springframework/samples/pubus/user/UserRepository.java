@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.samples.pubus.paper.Paper;
 
 public interface UserRepository extends  CrudRepository<User, String>{
 
@@ -24,5 +25,8 @@ public interface UserRepository extends  CrudRepository<User, String>{
 
 	@Query("SELECT DISTINCT u.authority FROM User u")
 	List<String> findAllAuthorities();
+
+	@Query("SELECT p FROM Paper p WHERE p.id IN (SELECT u.favorites FROM User u WHERE u.id = :userId)")
+	List<Paper> findFavouritePaperByUser(Integer userId);
 	
 }

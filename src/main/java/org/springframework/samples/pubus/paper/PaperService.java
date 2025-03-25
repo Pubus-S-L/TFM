@@ -40,8 +40,8 @@ public class PaperService {
 	}
 
 	@Transactional(readOnly = true)
-	public Paper findPaperByTitle(String title) throws DataAccessException {
-		return paperRepository.findByTitle(title).orElseThrow(() -> new ResourceNotFoundException("Paper", "Title", title));
+	public List<Paper> findPaperByTitle(String title) {
+		return paperRepository.findByTitle(title);
 	}
 
 	@Transactional(readOnly = true)
@@ -67,6 +67,26 @@ public class PaperService {
 	@Transactional(readOnly = true)
 	public List<Paper> findAllPapersByUserId(int id) throws DataAccessException {
 		return paperRepository.findAllPapersByUserId(id);
+	}
+
+	@Transactional(readOnly = true)
+	public List<Paper> findPaperByTitleAndUser(String title, Integer id) throws DataAccessException {
+		return paperRepository.findByTitleAndUser(title, id);
+	}
+
+	@Transactional(readOnly = true)
+	public List<Paper> findAllPapersAbstractWordAndUser(String word, Integer id) throws DataAccessException {
+		return paperRepository.findAllPapersByAbstractWordAndUser(word,id);
+	}
+
+	@Transactional(readOnly = true)
+	public List<Paper> findAllPapersByKeywordAndUser(String keyword, Integer id) throws DataAccessException {
+		return paperRepository.findAllPapersByKeyWordAndUser(keyword,id);
+	}
+
+	@Transactional(readOnly = true)
+	public List<Paper> findAllPapersByAuthorAndUser(String author, Integer id) throws DataAccessException {
+		return paperRepository.findAllPapersByAuthorAndUser(author,id);
 	}
 
 	@Transactional(rollbackFor = DuplicatedPaperTitleException.class)

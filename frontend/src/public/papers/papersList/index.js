@@ -102,6 +102,7 @@ export default function Papers() {
           placeholder="Search papers"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          className="search-input"
         />
          <div className="type-row">
       <span>

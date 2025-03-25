@@ -14,7 +14,7 @@
   }
   
   .chat-header {
-    background-color: #4caf50;
+    background-color: #000000;
     color: white;
     padding: 10px 15px;
     font-size: 18px;
@@ -52,7 +52,7 @@
   }
   
   .message.user .message-bubble {
-    background-color: #4caf50;
+    background-color: #000000;
     color: white;
     border-bottom-right-radius: 0;
   }
@@ -83,7 +83,7 @@
   
   .chat-footer button {
     padding: 10px 15px;
-    background-color: #4caf50;
+    background-color: #000000;
     color: white;
     border: none;
     border-radius: 5px;
@@ -93,6 +93,9 @@
   }
   
   .chat-footer button:hover {
-    background-color: #45a049;
+    background-color: #ffffff;
+    color: rgb(0, 0, 0);
+    border:rgb(0, 0, 0) solid 1px
+
   }
   

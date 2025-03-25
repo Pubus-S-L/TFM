@@ -102,13 +102,16 @@ public class PaperServiceTest {
         // Arrange
         String title = "Test Paper";
         Paper paper = new Paper();
-        when(paperRepository.findByTitle(title)).thenReturn(Optional.of(paper));
+        paper.setTitle(title);
+        List<Paper> paperList = new ArrayList<>();
+        paperList.add(paper);
+        when(paperRepository.findByTitle(title)).thenReturn(paperList);
 
         // Act
-        Paper result = paperService.findPaperByTitle(title);
+        List<Paper> result = paperService.findPaperByTitle(title);
 
         // Assert
-        assertEquals(paper, result);
+        assertEquals(paperList, result);
     }
 
         @Test

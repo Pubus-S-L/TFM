@@ -18,8 +18,22 @@
 }
 
 .paper-list-title{
-    margin-bottom: 2rem;
+    font-size: 2rem;
+   
 }
+
+.search-input {
+    border: 1px solid gray; 
+    padding: 8px; 
+    border-radius: 4px;
+    outline: none; 
+    width: 110%;
+    max-width: 600px;
+  }
+  
+  .search-input:focus {
+    border-color: #6c757d; /* Cambiar el color del borde al hacer foco (opcional) */
+  }
 
 .paper-row{
     width: 50%;

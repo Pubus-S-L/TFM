@@ -25,7 +25,7 @@ public interface PaperRepository extends CrudRepository<Paper, Integer> {
 	List<Paper> findAllPapersByKeyWord(@Param("word") String word);
 
 	@Query("SELECT p FROM Paper p WHERE LOWER(p.title) LIKE %:title%")
-	Optional<Paper> findByTitle(@Param("title")String title);
+	List<Paper> findByTitle(@Param("title")String title);
 
 	@Query("SELECT p FROM Paper p WHERE p.type.name LIKE :name")
 	List<Paper> findAllPapersByPaperType(@Param("name") String name) throws DataAccessException;
@@ -50,5 +50,17 @@ public interface PaperRepository extends CrudRepository<Paper, Integer> {
 
 	@Query("SELECT NEW MAP(p.type.name as type, cast(COUNT(p) as string) as papers) FROM Paper p GROUP BY p.type")
 	public List<Map<String, String>> countPapersGroupedByType();
+
+	@Query("SELECT p FROM Paper p WHERE LOWER(p.abstractContent) LIKE %:word% AND p.user.id = :id")
+	List<Paper> findAllPapersByAbstractWordAndUser(@Param("word") String word, @Param("id") int id);
+
+	@Query("SELECT p FROM Paper p WHERE LOWER(p.keywords) LIKE %:word AND p.user.id = :id")
+	List<Paper> findAllPapersByKeyWordAndUser(@Param("word") String word, @Param("id") int id);
+
+	@Query("SELECT p FROM Paper p WHERE LOWER(p.title) LIKE %:title AND p.user.id = :id")
+	List<Paper> findByTitleAndUser(@Param("title")String title, @Param("id") int id);
+
+	@Query(("SELECT p FROM Paper p WHERE LOWER(p.authors) LIKE %:author AND p.user.id = :id"))
+	List<Paper> findAllPapersByAuthorAndUser(@Param("author") String author, @Param("id") int id);
 
 }

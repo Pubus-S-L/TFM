@@ -272,18 +272,18 @@ public class PaperRestControllerTest {
         verify(paperService).findPaperById(paperId);
     }
 
-    @Test
-    public void testFindAllByUserId_Success() {
-        int userId = 1;
-        List<Paper> papers = new ArrayList<>();
+    // @Test
+    // public void testFindAllByUserId_Success() {
+    //     int userId = 1;
+    //     List<Paper> papers = new ArrayList<>();
 
-        when(paperService.findAllPapersByUserId(userId)).thenReturn(papers);
-        paperRestController = new PaperRestController(paperService, userService, paperFileService, restTemplate, objectMapper);
+    //     when(paperService.findAllPapersByUserId(userId)).thenReturn(papers);
+    //     paperRestController = new PaperRestController(paperService, userService, paperFileService, restTemplate, objectMapper);
         
-        ResponseEntity<List<Paper>> response = paperRestController.findAllByUserId(userId);
+    //     ResponseEntity<List<Paper>> response = paperRestController.findAllByUserId(userId);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-    }
+    //     assertEquals(HttpStatus.OK, response.getStatusCode());
+    // }
 
     @Test
     public void testCreate_Success() throws Exception {

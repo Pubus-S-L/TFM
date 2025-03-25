@@ -82,7 +82,7 @@ const Chat = () => {
 
   return (
     <div className="chat-container">
-      <div className="chat-header">Chat con OpenAI</div>
+      <div className="chat-header">Chat con Pubus</div>
       <div className="chat-messages">
         {messages.map((msg, index) => (
           <div key={index} className={`message ${msg.sender}`}>

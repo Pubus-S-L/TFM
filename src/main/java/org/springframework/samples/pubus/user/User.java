@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -36,21 +37,25 @@ public class User extends BaseEntity {
 	@NotEmpty
 	protected String username;
 
-	String studies;
+	@OneToMany
+	List<Studies> studies;
 
-	String job;
+	@OneToOne
+	Job job;
 
 	@Column(unique = true)
 	String email;
 
 	String password;
 
+	String profilePicture;
+
 	@NotNull
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "authority")
 	Authorities authority;
 
-	List<Integer> papersIdLiked = new ArrayList<>();
+	List<Integer> favorites = new ArrayList<>();
 
 
 }
