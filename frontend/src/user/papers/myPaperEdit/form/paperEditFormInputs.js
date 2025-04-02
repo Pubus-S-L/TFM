@@ -37,7 +37,7 @@ export const paperEditFormInputs = [
     tag: "Publication Year",
     name: "publicationYear",
     type: "number",
-    defaultValue: 2024,
+    defaultValue: 2025,
     isRequired: true,
     validators: [formValidators.date],
   },

@@ -4,12 +4,14 @@ import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import like from "../../../static/images/like.png";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../components/ui/card.tsx"
 
 export default function Papers() {
   let [papers, setPapers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [types, setTypes] = useState([]);
   const [typesSelected, setTypeSelected] = useState([]);
+   const [isLoading, setIsLoading] = useState(true);
   
   async function setUpTypes() {
     let types = await (
@@ -42,6 +44,7 @@ export default function Papers() {
 
 
   async function setUp() {
+    setIsLoading(true);
     let papersFilteredByType = []
     if (typesSelected.length > 0) {
       for(const paperType of typesSelected){
@@ -79,6 +82,7 @@ export default function Papers() {
 
 
     setPapers(papersRes)
+    setIsLoading(false);
   }
 
   useEffect(() => {
@@ -104,62 +108,71 @@ export default function Papers() {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="search-input"
         />
-         <div className="type-row">
-      <span>
-        <strong>Filter by Type:  </strong>
-      </span>
-            {types.map((type, index) => (
-      <label key={index}>
-          <strong>  </strong>
-        <input
-          type="checkbox"
-          value={type.name}
-          checked={typesSelected.includes(type.name)}
-          onChange={(e) => changeCheckbox(e)}
-        />
-        {type.name}
-        <strong className="separator"> </strong>
-      </label>
-    ))}
-    </div>
-        {papers && papers.length > 0 ? (
-          papers.map((paper) => {
-            return (
-              <div key={paper.id} className="paper-row">
-                <div className="paper-data">
-                  <h4 className="paper-name">{paper.title}</h4>
-                  
-                  <span>
-                    <strong>Authors:</strong> {paper.authors}
-                  </span>
-                  <span>
-                    <strong>Publication Year:</strong> {paper.publicationYear}
-                  </span>
-                  <span>
-                    <strong>Type:</strong> {paper.type.name}
-                  </span>
-                  <h7 className="paper-name" style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
-                    {paper.likes != null && paper.likes > 0 ? paper.likes : null}
-                    {paper.likes != null && paper.likes > 0 ? <img src={like} alt="Like" style={{ height: 15, width: 15 }} /> : null}
-                </h7>
-                </div>
-                <div className="paper-options">
-                  <Link
-                    to={"/papers/" + paper.id}
-                    className="auth-button blue"
-                    style={{ textDecoration: "none" }}
-                  >
-                    Details
-                  </Link>
+       
+       <Card className="flex items-center mt-3 p-2 shadow-lg border border-gray-200 bg-white">
+        <CardHeader className="pr-1">
+          <CardTitle className="text-sm font-bold whitespace-nowrap">Filter by:</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-row items-center justify-center gap-1.5 p-0">
+          {types.map((type, index) => (
+            <label key={index} className="flex justify-center gap-1 text-xs">
+              <input
+                type="checkbox"
+                value={type.name}
+                checked={typesSelected.includes(type.name)}
+                onChange={(e) => changeCheckbox(e)}
+              />
+              {type.name}
+            </label>
+          ))}
+        </CardContent>
+      </Card>
+
+    {isLoading ? (
+      <Card className="w-4/5 p-4 text-center mx-auto">
+        <CardContent>
+          <p className="text-lg font-semibold">Loading papers...</p>
+        </CardContent>
+      </Card>
+        ) : papers && papers.length > 0 ? (
+          papers.map((paper) => (
+            <Card key={paper.id} className="w-4/5 mx-auto mt-6 mb-1 shadow-lg border border-gray-200">
+              <CardHeader>
+                <CardTitle className="text-xl font-bold">{paper.title}</CardTitle>
+              </CardHeader>
+              <CardContent className="pb-0">
+                <CardDescription>
+                  <p><strong>Authors:</strong> {paper.authors}</p>
+                  <p><strong>Publication Year:</strong> {paper.publicationYear}</p>
+                  <p><strong>Type:</strong> {paper.type.name}</p>
+                  <strong className="paper-name" style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                {paper.likes != null && paper.likes > 0 ? paper.likes : null}
+                {paper.likes != null && paper.likes > 0 ? <img src={like} alt="Like" style={{ height: 15, width: 15 }} /> : null}
+                  </strong>
+                </CardDescription>
+              </CardContent>
+              <CardFooter className="flex justify-center gap-10">
+                <Link
+                  to={"/papers/" + paper.id}
+                  className="auth-button blue"
+                  style={{ textDecoration: "none" }}
+                >
+                  Details
+                </Link>
+              </CardFooter>
+            </Card>
+          ))
+          ) : (
+            <Card className="w-full p-4 text-center">
+              <CardContent>
+                <p className="text-lg font-semibold">No papers available</p>
+              </CardContent>
+            </Card>
+              )
+                  }
                 </div>
                 
               </div>
             );
-          })
-        ) : (
-          <p>No papers found</p>
-        )}
-      </div>
-    </div>
-  );
+
 }

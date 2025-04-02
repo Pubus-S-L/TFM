@@ -1,7 +1,8 @@
 export const formValidators = {
     notEmptyValidator: {
         validate: (value) => {
-            return value.trim().length > 0;
+            const stringValue = typeof value === 'object' ? value.name : value;
+            return stringValue && stringValue.trim().length > 0;
         },
         message: "The field cannot be empty"
     },
@@ -24,7 +25,7 @@ export const formValidators = {
             return value.trim().length <= 1000;
         },
         message: "The field can not be longer than 1000 characteres"
-    },
+    }
 
 
 
