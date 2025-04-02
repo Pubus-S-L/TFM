@@ -85,9 +85,6 @@ public class CompanyServiceTest {
         when(companyRepository.findById(id)).thenReturn(Optional.of(company));
         when(companyRepository.save(company)).thenReturn(updatedCompany);
 
-        Company result = companyService.updateCompany(updatedCompany, id);
-
-        
         assertEquals("Updated Name", updatedCompany.getName());
         verify(companyRepository, times(1)).findById(id);
         verify(companyRepository, times(1)).save(company);

@@ -138,10 +138,10 @@ export default function Papers() {
                   <span>
                     <strong>Type:</strong> {paper.type.name}
                   </span>
-                  <h7 className="paper-name">{paper.likes!=null && paper.likes>0? paper.likes: null}
-                    {paper.likes!=null && paper.likes>0?
-                    <img src={like} alt="Like" style={{ height: 15, width: 15 }} />:null}
-                  </h7>
+                  <h7 className="paper-name" style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                    {paper.likes != null && paper.likes > 0 ? paper.likes : null}
+                    {paper.likes != null && paper.likes > 0 ? <img src={like} alt="Like" style={{ height: 15, width: 15 }} /> : null}
+                </h7>
                 </div>
                 <div className="paper-options">
                   <Link

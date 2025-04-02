@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.samples.pubus.model.BaseEntity;
-import org.springframework.samples.pubus.paper.Paper;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,12 +1,7 @@
 package org.springframework.samples.pubus.paper;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +11,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DataAccessException;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -31,9 +26,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -51,6 +43,7 @@ public class PaperFileServiceImpl implements PaperFileService {
     private PaperFileRepository paperFileRepository;
     
     @Autowired
+    @Lazy
     private PaperService paperService;
 
     @Transactional
@@ -80,10 +73,10 @@ public class PaperFileServiceImpl implements PaperFileService {
             if (tokenCount > MAX_TOKENS){
                 List<String> chunks = splitTextIntoChunks(extractedText);
                 for (String chunk : chunks) {
-                    embeddingMap = addEmbedding(chunk, paperFile, embeddingMap);
+                    embeddingMap = addEmbedding(chunk, embeddingMap);
                 }
             }else{
-                embeddingMap = addEmbedding(extractedText, paperFile, embeddingMap);
+                embeddingMap = addEmbedding(extractedText, embeddingMap);
             }
             
         }
@@ -95,8 +88,8 @@ public class PaperFileServiceImpl implements PaperFileService {
 
        return paperFileRepository.save(paperFile);
     }
-
-    private Map<String,byte[]> addEmbedding(String text, PaperFile paperfile, Map<String,byte[]> embeddingMap) {
+    @Override
+    public Map<String,byte[]> addEmbedding(String text, Map<String,byte[]> embeddingMap) {
         try {
             byte[] embedding = getEmbeddingFromOpenAI(text);
             embeddingMap.put(text, embedding);
@@ -242,6 +235,35 @@ public class PaperFileServiceImpl implements PaperFileService {
         
         return closestKey;
         }
+
+    @Override
+    public String[] getContextRecommended(List<byte[]> data) throws JsonProcessingException {
+        List<Paper> papers = paperService.findAll().stream().toList();
+        List<float[]> queryEmbeddings = new ArrayList<>();
+        for(byte[] d : data){
+            queryEmbeddings.add(deserializeToFloatArray(d));
+        }
+        String[] closestKey = new String[]{"", "", ""};
+        double[] bestSimilarity = new double[]{-1.0, -1.0, -1.0};
+        for(Paper paper : papers){
+            Integer counter =0;
+            for(float[] f : queryEmbeddings){
+                if(paper.getEmbeddings() != null){
+                    Map<String, byte[]> embeddings = paper.getEmbeddings();
+                    for(Map.Entry<String, byte[]> entry : embeddings.entrySet()){
+                        float[] dbEmbedding = deserializeToFloatArray(entry.getValue());
+                        double similarity = cosineSimilarity(f,dbEmbedding);
+                        if(similarity > bestSimilarity[counter] && similarity < 1.0){
+                            bestSimilarity[counter] = similarity;
+                            closestKey[counter] = entry.getKey();
+                        }        
+                    }
+                    counter++; 
+                }
+            }
+        }
+        return closestKey;
+    }
 
     private List<PaperFile> getAllFilesByUserId(Integer userId) {
         return paperFileRepository.findByUserId(userId);

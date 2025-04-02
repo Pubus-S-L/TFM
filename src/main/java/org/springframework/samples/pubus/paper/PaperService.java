@@ -1,5 +1,6 @@
 package org.springframework.samples.pubus.paper;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -10,17 +11,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.samples.pubus.exceptions.ResourceNotFoundException;
 import org.springframework.samples.pubus.paper.exceptions.DuplicatedPaperTitleException;
-import org.springframework.samples.pubus.user.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 @Service
 public class PaperService {
 
 	private PaperRepository paperRepository;
+	private PaperFileService paperFileService;
 
 	@Autowired
-	public PaperService(PaperRepository paperRepository) {
+	public PaperService(PaperRepository paperRepository, PaperFileService paperFileService) {
+		this.paperFileService = paperFileService;
 		this.paperRepository = paperRepository;
 	}
 
@@ -94,8 +98,12 @@ public class PaperService {
 		Paper otherPaper = getPaperWithTitleAndIdDifferent(paper);
 		if (otherPaper != null && !otherPaper.getId().equals(paper.getId())) {
 			throw new DuplicatedPaperTitleException();
-		} else
+		} else{
+			Map<String, byte[]> embeddings = paperFileService.addEmbedding(paper.getTitle(), new HashMap<>());
+			paper.setEmbeddings(embeddings);
 			paperRepository.save(paper);
+		}
+			
 		return paper;
 	}
 
@@ -113,6 +121,10 @@ public class PaperService {
 	@Transactional
 	public Paper updatePaper(Paper paper, int id) {
 		Paper toUpdate = findPaperById(id);
+		if (paper.getTitle() != toUpdate.getTitle()) {
+			Map<String, byte[]> embeddings = paperFileService.addEmbedding(paper.getTitle(), new HashMap<>());
+			toUpdate.setEmbeddings(embeddings);
+		}
 		BeanUtils.copyProperties(paper, toUpdate, "id");
 		return savePaper(toUpdate);
 	}
@@ -145,5 +157,31 @@ public class PaperService {
 			unsortedPapersByType.put(key, value);
 		});
 		return unsortedPapersByType;
+	}
+
+	public List<Paper> findRecommendedPapers(List<Paper> papers) {
+		List<Paper> recommendedPapers = new ArrayList<>();
+		if(papers.size()>3){
+			papers = papers.subList(0, 3);
+		}
+		List<byte[]> data = new ArrayList<>();
+		for (Paper paper : papers) {
+			for(Map.Entry<String, byte[]> entry : paper.getEmbeddings().entrySet()){
+				data.add(entry.getValue());
+			}
+		}
+		try {
+			String[] titles = paperFileService.getContextRecommended(data);
+			for(String t: titles){
+				if(t != ""){
+					Paper paper = paperRepository.findByExactTitle(t);
+					recommendedPapers.add(paper);
+				}
+			}
+
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		return recommendedPapers;
 	}
 }

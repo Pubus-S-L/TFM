@@ -2,7 +2,9 @@ package org.springframework.samples.pubus.user;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import jakarta.validation.Valid;
 
@@ -12,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.samples.pubus.auth.payload.response.MessageResponse;
 import org.springframework.samples.pubus.exceptions.AccessDeniedException;
 import org.springframework.samples.pubus.paper.Paper;
+import org.springframework.samples.pubus.paper.PaperService;
 import org.springframework.samples.pubus.util.RestPreconditions;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,14 +37,16 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 class UserRestController {
 
 	private final UserService userService;
+	private final PaperService paperService;
 	private final AuthoritiesService authService;
 	private final PasswordEncoder encoder;
 
 	@Autowired
-	public UserRestController(UserService userService, AuthoritiesService authService, PasswordEncoder encoder) {
+	public UserRestController(UserService userService, AuthoritiesService authService, PasswordEncoder encoder, PaperService paperService) {
 		this.userService = userService;
 		this.authService = authService;
 		this.encoder = encoder;
+		this.paperService = paperService;
 	}
 
 	@GetMapping
@@ -99,7 +104,18 @@ class UserRestController {
 
 	@GetMapping("/{userId}/recommended")
 	public ResponseEntity<List<Paper>> findRecommended(@PathVariable("userId") Integer id) {
-		return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
+		List<Paper> recommendedList = new ArrayList<>();
+		recommendedList = paperService.findAll().stream().sorted(Comparator.comparingInt(Paper::getLikes).reversed()).limit(3).collect(Collectors.toList());
+		
+		try{
+			if(userService.findFavoritePaperByUser(id).size()>0){
+				List<Paper> papers = userService.findFavoritePaperByUser(id);
+				recommendedList = paperService.findRecommendedPapers(papers);
+			}			
+		}
+		catch (Exception e) {
+		}
+		return new ResponseEntity<>(recommendedList, HttpStatus.OK);
 	}
 
 	@PostMapping("/{userId}/upload")

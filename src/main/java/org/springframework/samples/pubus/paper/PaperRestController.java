@@ -1,34 +1,23 @@
 package org.springframework.samples.pubus.paper;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.Optional;
-
-import jakarta.annotation.Resource;
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.pubus.auth.payload.response.MessageResponse;
-import org.springframework.samples.pubus.exceptions.AccessDeniedException;
 import org.springframework.samples.pubus.exceptions.ResourceNotOwnedException;
 import org.springframework.samples.pubus.paper.exceptions.DuplicatedPaperTitleException;
 import org.springframework.samples.pubus.user.User;
@@ -38,7 +27,6 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.MatrixVariable;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -52,7 +40,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import io.swagger.v3.core.util.Json;
+import io.micrometer.core.ipc.http.HttpSender.Response;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.client.RestTemplate;
@@ -429,7 +417,7 @@ public class PaperRestController {
 //LIKE
 
 		@PostMapping("{userId}/like/{paperId}")
-		public void likePaper(@PathVariable("paperId") Integer paperId,@PathVariable("userId") String userId){
+		public ResponseEntity<String> likePaper(@PathVariable("paperId") Integer paperId, @PathVariable(value = "userId", required = false) String userId){
 			Paper paper = paperService.findPaperById(paperId);
 			Integer userIdInt = Integer.parseInt(userId);
 			User user = userService.findUser(userIdInt);
@@ -438,6 +426,13 @@ public class PaperRestController {
 				user.getFavorites().add(paper.getId());
 				paperService.savePaper(paper);
 				userService.saveUser(user);
+				return ResponseEntity.ok("You liked this paper");
+			}else{
+				paper.setLikes(paper.getLikes()-1);
+				user.getFavorites().remove(paper.getId());
+				paperService.savePaper(paper);
+				userService.saveUser(user);
+				return ResponseEntity.ok("You took off your like");
 			}
 
 		}

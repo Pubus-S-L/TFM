@@ -13,17 +13,10 @@ import java.util.List;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.samples.pubus.exceptions.ResourceNotFoundException;
-import static org.junit.Assert.*;
 import java.util.Optional;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.core.context.SecurityContext;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 
 @SpringBootTest
 @AutoConfigureTestDatabase

@@ -409,10 +409,10 @@ export default function UserProfile() {
             </div>
           </TabsContent>
 
-            <TabsContent value="recommended" className="space-y-4">
+            <TabsContent value="recommended" className="space-y-4 bg-white-900">
               {recommendedPapers.map((paper, index) => (
                 <Link to={`/papers/${paper.id}`} key={index}>
-                <div className="bg-gray-900 rounded-lg p-4">
+                <div className="bg-white-900 rounded-lg p-4 border border-gray-900 mb-2">
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="text-black font-medium">{paper.title}</h3>

@@ -15,7 +15,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -29,14 +28,11 @@ import org.springframework.samples.pubus.configuration.jwt.AuthTokenFilter;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 // import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationProvider;
 // import org.springframework.security.oauth2.client.web.OAuth2LoginConfigurer;
 // import org.springframework.security.oauth2.client.web.OAuth2LoginConfigurer.AuthorizationEndpointConfig;
 // import org.springframework.security.oauth2.client.web.OAuth2LoginConfigurer.RedirectUriConfigurer;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 
 
 @Configuration

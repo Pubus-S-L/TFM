@@ -1,43 +1,24 @@
 package org.springframework.samples.pubus.user;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.pubus.auth.AuthService;
 import org.springframework.samples.pubus.auth.payload.response.MessageResponse;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import java.util.List;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.samples.pubus.auth.payload.response.MessageResponse;
 import org.springframework.samples.pubus.exceptions.AccessDeniedException;
-import org.springframework.samples.pubus.exceptions.ResourceNotFoundException;
-import org.springframework.samples.pubus.user.Authorities;
-import org.springframework.samples.pubus.user.AuthoritiesService;
-import org.springframework.samples.pubus.user.User;
-import org.springframework.samples.pubus.user.UserService;
+import org.springframework.samples.pubus.paper.PaperService;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest
@@ -56,6 +37,9 @@ public class UserRestControllerTest {
     @Mock
     private PasswordEncoder encoderMock;
 
+    @Mock
+    private PaperService paperService;
+
     @InjectMocks
     private UserRestController userRestController;
 
@@ -73,7 +57,7 @@ public class UserRestControllerTest {
         users.add(new User());
         when(userService.findAll()).thenReturn(users);
 
-        userRestController = new UserRestController(userService, authoritiesService, encoderMock);
+        userRestController = new UserRestController(userService, authoritiesService, encoderMock, paperService);
 
         // Ejecución del método bajo prueba
         ResponseEntity<List<User>> response = userRestController.findAll(null);
@@ -93,7 +77,7 @@ public class UserRestControllerTest {
         currentUser.setId(2);
         when(userService.findUser(userId)).thenReturn(currentUser);
         when(userService.findCurrentUser()).thenReturn(currentUser);
-        userRestController = new UserRestController(userService, authoritiesService, encoderMock);
+        userRestController = new UserRestController(userService, authoritiesService, encoderMock, paperService);
 
         // Ejecución del método bajo prueba
         ResponseEntity<MessageResponse> response = userRestController.delete(userId);
@@ -111,7 +95,7 @@ public class UserRestControllerTest {
         currentUser.setId(userId);
         when(userService.findUser(userId)).thenReturn(new User());
         when(userService.findCurrentUser()).thenReturn(currentUser);
-        userRestController = new UserRestController(userService, authoritiesService, encoderMock);
+        userRestController = new UserRestController(userService, authoritiesService, encoderMock, paperService);
 
         // Ejecución y verificación
         assertThrows(AccessDeniedException.class, () -> {
@@ -126,7 +110,7 @@ public class UserRestControllerTest {
         users.add(new User());
         users.add(new User());
         when(userService.findAll()).thenReturn(users);
-        userRestController = new UserRestController(userService, authoritiesService, encoderMock);
+        userRestController = new UserRestController(userService, authoritiesService, encoderMock, paperService);
 
         // Act
         ResponseEntity<List<User>> response = userRestController.findAll(null);
@@ -144,7 +128,7 @@ public class UserRestControllerTest {
         users.add(new User());
         users.add(new User());
         when(userService.findAllByAuthority(authority)).thenReturn(users);
-        userRestController = new UserRestController(userService, authoritiesService, encoderMock);
+        userRestController = new UserRestController(userService, authoritiesService, encoderMock, paperService);
 
         // Act
         ResponseEntity<List<User>> response = userRestController.findAll(authority);
@@ -163,7 +147,7 @@ public class UserRestControllerTest {
     auth2.setAuthority("ADMIN");
 
     when(authoritiesService.findAll()).thenReturn(authorities);
-    userRestController = new UserRestController(userService, authoritiesService, encoderMock);
+    userRestController = new UserRestController(userService, authoritiesService, encoderMock, paperService);
 
     ResponseEntity<List<Authorities>> response = userRestController.findAllAuths();
 
@@ -174,7 +158,7 @@ public class UserRestControllerTest {
     @Test
     public void testFindAllAuths_EmptyList() {
         when(authoritiesService.findAll()).thenReturn(Collections.emptyList());
-        userRestController = new UserRestController(userService, authoritiesService, encoderMock);
+        userRestController = new UserRestController(userService, authoritiesService, encoderMock, paperService);
         ResponseEntity<List<Authorities>> response = userRestController.findAllAuths();
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -188,7 +172,7 @@ public class UserRestControllerTest {
         user.setUsername("test_user");
 
         when(userService.findUser(1)).thenReturn(user);
-        userRestController = new UserRestController(userService, authoritiesService, encoderMock);
+        userRestController = new UserRestController(userService, authoritiesService, encoderMock, paperService);
         ResponseEntity<User> response = userRestController.findById(1);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -234,7 +218,7 @@ public class UserRestControllerTest {
 
         when(userService.findUser(1)).thenReturn(existingUser);
         when(userService.updateUser(updatedUser, 1)).thenReturn(updatedUser);
-        userRestController = new UserRestController(userService, authoritiesService, encoderMock);
+        userRestController = new UserRestController(userService, authoritiesService, encoderMock, paperService);
         ResponseEntity<User> response = userRestController.update(1, updatedUser);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());

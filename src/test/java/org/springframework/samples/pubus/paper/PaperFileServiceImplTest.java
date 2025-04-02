@@ -19,7 +19,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.samples.pubus.exceptions.ResourceNotFoundException;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -51,15 +50,15 @@ public class PaperFileServiceImplTest {
         paper.setTitle("Sample Paper");
         paper.setPaperFiles(new ArrayList<>());
 
-        MultipartFile file = new MockMultipartFile(
-            "file", 
-            "testfile.pdf", 
-            "application/pdf", 
-            "test content".getBytes()
-        );
+        // MultipartFile file = new MockMultipartFile(
+        //     "file", 
+        //     "testfile.pdf", 
+        //     "application/pdf", 
+        //     "test content".getBytes()
+        // );
     }
 
-    private ResponseFile responseFile;
+    // private ResponseFile responseFile;
 
     @Test
     public void testSave() {

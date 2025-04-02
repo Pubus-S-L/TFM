@@ -24,12 +24,10 @@ import org.springframework.samples.pubus.exceptions.ResourceNotFoundException;
 import org.springframework.samples.pubus.paper.Paper;
 import org.springframework.samples.pubus.paper.PaperRepository;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.samples.pubus.configuration.services.UserDetailsImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class UserService {
@@ -156,7 +154,6 @@ public class UserService {
 	public List<Paper> findFavoritePaperByUser(Integer userId) {
 		List<Paper> favoritePaper = new ArrayList<>();
 		List<Integer> favoritePaperId = findUser(userId).getFavorites();
-		Collections.reverse(favoritePaperId);
 		if(favoritePaperId.size()>0){
 			Collections.reverse(favoritePaperId);
 			Iterable<Paper> itPaper = paperRepository.findAllById(favoritePaperId);	

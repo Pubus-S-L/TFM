@@ -2,6 +2,7 @@ package org.springframework.samples.pubus.paper;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
@@ -17,4 +18,6 @@ public interface PaperFileService {
     PaperFile getPaperFileById(Integer id);
     byte[] getEmbeddingFromOpenAI(String text) throws IOException;
     String getContext(byte[] data, Integer userId) throws JsonProcessingException;
+    Map<String, byte[]> addEmbedding(String text, Map<String, byte[]> embeddingMap);
+    String[] getContextRecommended(List<byte[]> data) throws JsonProcessingException;
 }

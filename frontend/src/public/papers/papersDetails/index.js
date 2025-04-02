@@ -1,10 +1,12 @@
 import React from "react";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState} from "react";
 import "../../../static/css/user/myPaperList.css";
 import "../../../static/css/auth/authButton.css";
 import { Link } from "react-router-dom";
 import like from "../../../static/images/like.png";
 import tokenService from "../../../services/token.service";
+import { Terminal } from "lucide-react"
+import {Alert,AlertTitle} from "../../../components/ui/alert.tsx"
 
 export default function PaperDetail() {
     let pathArray = window.location.pathname.split("/");
@@ -12,6 +14,7 @@ export default function PaperDetail() {
     const [paperId,setPaperId] = useState(pathArray[2]);
     const jwt = JSON.parse(window.localStorage.getItem("jwt"));
     const user = tokenService.getUser();
+    const [title, setTitle] = useState("");
 
     function downloadFile(fileId,fileName) {
         fetch(`/api/v1/papers/${paperId}/download/${fileId}`, {
@@ -73,6 +76,10 @@ export default function PaperDetail() {
 
 
     async function likePaper(){
+        if (!user || !user.id) {
+            setTitle("You must be logged in to like a paper.");
+            return;
+        }
         try {
             let response = await fetch(`/api/v1/papers/${user.id}/like/${paperId}`, {
                 method: "POST",
@@ -82,7 +89,8 @@ export default function PaperDetail() {
                     "Content-Type": "application/json",
                 },
             });
-    
+            const message = await response.text();
+            setTitle(message);
             if (!response.ok) {
                 throw new Error(`Error fetching data: ${response.statusText}`);
             }
@@ -92,7 +100,18 @@ export default function PaperDetail() {
     }
 
     return (
+        <>
+        {/* Mostrar alerta si title tiene contenido */}
+        {title && (
+            <Alert>
+                <div className="flex items-center gap-2">
+                    <Terminal className="h-4 w-4" />
+                    <AlertTitle>{String(title)}</AlertTitle>
+                </div>
+            </Alert>
+        )}
         <div className="paper-row">
+
             <div className="paper-data">
             {paper && (
                 <>
@@ -155,14 +174,15 @@ export default function PaperDetail() {
                   <button 
                     onClick={() => likePaper()}
                     className="auth-button like"
-                    style={{ display: "inline-block"}}
+                    style={{ display: "inline-block", position: "relative", zIndex: 10 }}
                     >
                     <img src={like} alt="Like" style={{ height: 30, width: 30 }} />
                 </button>
-                </div>
-            </>
-            )}
+                    </div>
+                </>
+                )}
             </div>
         </div>
+        </>
         );
 }

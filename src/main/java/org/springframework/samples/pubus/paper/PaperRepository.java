@@ -24,6 +24,9 @@ public interface PaperRepository extends CrudRepository<Paper, Integer> {
 	@Query("SELECT p FROM Paper p WHERE LOWER(p.keywords) LIKE %:word%")
 	List<Paper> findAllPapersByKeyWord(@Param("word") String word);
 
+	@Query("SELECT p FROM Paper p WHERE p.title = :title")
+	Paper findByExactTitle(@Param("title")String title);
+
 	@Query("SELECT p FROM Paper p WHERE LOWER(p.title) LIKE %:title%")
 	List<Paper> findByTitle(@Param("title")String title);
 

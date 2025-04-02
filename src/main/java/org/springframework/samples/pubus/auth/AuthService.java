@@ -1,11 +1,7 @@
 package org.springframework.samples.pubus.auth;
 
-import java.text.Normalizer;
-import java.util.ArrayList;
-
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.samples.pubus.auth.payload.request.SignupRequest;
 import org.springframework.samples.pubus.user.Authorities;
@@ -14,7 +10,6 @@ import org.springframework.samples.pubus.user.User;
 import org.springframework.samples.pubus.user.UserService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.samples.pubus.configuration.jwt.JwtUtils;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.stereotype.Service;
 

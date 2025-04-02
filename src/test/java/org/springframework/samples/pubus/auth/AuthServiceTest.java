@@ -1,11 +1,5 @@
 package org.springframework.samples.pubus.auth;
 
-import static org.junit.Assert.*;
-
-import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Optional;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -13,21 +7,14 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.samples.pubus.auth.AuthService;
 import org.springframework.samples.pubus.auth.payload.request.SignupRequest;
 import org.springframework.samples.pubus.configuration.jwt.JwtUtils;
-import org.springframework.samples.pubus.exceptions.ResourceNotFoundException;
 import org.springframework.samples.pubus.user.Authorities;
 import org.springframework.samples.pubus.user.AuthoritiesService;
 import org.springframework.samples.pubus.user.User;
 import org.springframework.samples.pubus.user.UserService;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.client.RestTemplate;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
