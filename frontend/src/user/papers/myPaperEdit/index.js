@@ -1,28 +1,33 @@
 "use client"
 import { useEffect, useState, useRef } from "react"
-import { Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap"
-import FormGenerator from "../../../components/formGenerator/formGenerator"
 import { paperEditFormInputs } from "./form/paperEditFormInputs"
 import "bootstrap/dist/css/bootstrap.min.css"
 import tokenService from "../../../services/token.service"
-import { FileText, Upload, Trash2 } from "lucide-react"
-import "../../../static/css/user/myPaperEdit.css";
+import { FileText, Upload, Trash2, Loader, X } from "lucide-react"
+import "../../../static/css/user/myPaperEdit.css"
 
 export default function UserPaperEdit({ id, onSave }) {
+  // Estilo para los mensajes de error
+  const errorStyle = {
+    color: "red",
+    fontSize: "0.875rem",
+    marginTop: "0.25rem",
+  }
+
   const pathArray = window.location.pathname.split("/")
   const emptyItem = {
     id: null,
     title: "",
     authors: "",
     publicationYear: "",
-    type: {name: "None"},
+    type: { name: "None" },
     abstractContent: "",
     keywords: "",
     notes: "",
     user: {},
   }
   const user = tokenService.getUser()
-  const jwt = JSON.parse(window.localStorage.getItem("jwt"))
+  const jwt = typeof window !== 'undefined' ? JSON.parse(window.localStorage.getItem("jwt") || '""') : ""
   const [modalShow, setModalShow] = useState(false)
   const [types, setTypes] = useState([])
   const [paper, setPaper] = useState(emptyItem)
@@ -30,36 +35,125 @@ export default function UserPaperEdit({ id, onSave }) {
   const [userId, setUserId] = useState(user.id)
   const editPaperFormRef = useRef()
   const [files, setFiles] = useState([])
-  const [formErrors, setFormErrors] = useState({});
+  const [formErrors, setFormErrors] = useState({})
+  const [paperLoaded, setPaperLoaded] = useState(false)
+  const [touchedFields, setTouchedFields] = useState({})
+  // Estado para controlar el spinner de carga
+  const [isSaving, setIsSaving] = useState(false)
 
-  const validateField = (name, value) => {
-    const field = paperEditFormInputs.find((input) => input.name === name);
-    if (!field) return "";
+  const validateField = (name, value, isEditing = false, isTouched = false) => {
+    const field = paperEditFormInputs.find((input) => input.name === name)
+    if (!field) return ""
 
-    let errorMessage = "";
-
-    if (field.isRequired && !value) {
-      errorMessage = `${field.tag} is required.`;
+    // Si estamos editando y el campo no ha sido tocado, no mostrar error
+    if (isEditing && !isTouched && paperId) {
+      return ""
     }
 
-    for (const validatorObject of field.validators || []) {
-      const isValid = validatorObject.validate(value);
-      if (!isValid) {
-        errorMessage = validatorObject.message;
-        break;
+    let errorMessage = ""
+
+    // Validación para campos requeridos
+    if (field.isRequired) {
+      if (name === "type") {
+        // Caso especial para el campo type que es un objeto
+        if (!value || value === "None") {
+          errorMessage = `${field.tag} is required.`
+        }
+      } else {
+        // Para otros campos requeridos
+        if (value === undefined || value === null || value === "") {
+          errorMessage = `${field.tag} is required.`
+        }
       }
     }
 
-    return errorMessage;
-  };
+    // Si no hay error de campo requerido, ejecutar los validadores personalizados
+    if (!errorMessage && field.validators && field.validators.length > 0) {
+      for (const validatorObject of field.validators) {
+        // Solo ejecutar el validador si hay un valor o si el campo es requerido
+        if ((value !== undefined && value !== null && value !== "") || field.isRequired) {
+          const isValid = validatorObject.validate(value)
+          if (!isValid) {
+            errorMessage = validatorObject.message
+            break
+          }
+        }
+      }
+    }
 
-  const uploadFiles = (e) => {
-    setFiles(e)
+    // Validación específica para abstractContent - límite de 1000 caracteres
+    if (name === "abstractContent" && value && value.length > 1000) {
+      return `The field can not be longer than 1000 caracteres (actual: ${value.length})`
+    }
+    if (name === "title" && value && value.length > 200) {
+      return `The field can not be longer than 200 characteres (actual: ${value.length})`
+    }
+    if (name === "authors" && value && value.length > 500) {
+      return `The field can not be longer than 500 characteres (actual: ${value.length})`
+    }
+
+    return errorMessage
+  }
+
+  // Funciones para manejar el drag and drop
+  const handleDragOver = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    e.currentTarget.classList.add("drag-over")
+  }
+
+  const handleDragEnter = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    e.currentTarget.classList.add("drag-over")
+  }
+
+  const handleDragLeave = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    e.currentTarget.classList.remove("drag-over")
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    e.currentTarget.classList.remove("drag-over")
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      uploadFiles(e.dataTransfer.files)
+      e.dataTransfer.clearData()
+    }
+  }
+
+  // Modificar la función uploadFiles para manejar mejor los archivos
+  const uploadFiles = (fileList) => {
+    // Convertir FileList a Array para mejor manejo
+    const filesArray = Array.from(fileList);
+  
+    // Concatenar los archivos nuevos a los existentes, evitando duplicados
+    setFiles(prevFiles => {
+      // Filtrar los archivos ya existentes (si quieres evitar duplicados)
+      const newFiles = filesArray.filter(newFile => 
+        !prevFiles.some(existingFile => existingFile.name === newFile.name)
+      );
+      return [...prevFiles, ...newFiles];
+    });
+  };
+  // Nueva función para eliminar un archivo seleccionado
+  const removeSelectedFile = (indexToRemove) => {
+    setFiles(prevFiles => prevFiles.filter((_, index) => index !== indexToRemove))
   }
 
   useEffect(() => setupPaper(), [])
 
   function removePaperFile(id) {
+    // Eliminar inmediatamente el archivo de la UI
+    setPaper((prevPaper) => ({
+      ...prevPaper,
+      paperFiles: prevPaper.paperFiles.filter((file) => file.id !== id),
+    }))
+
+    // Luego enviar la solicitud al servidor para eliminar el archivo
     fetch(`/api/v1/papers/${paperId}/delete/${id}`, {
       method: "DELETE",
       headers: {
@@ -69,17 +163,30 @@ export default function UserPaperEdit({ id, onSave }) {
       },
     })
       .then((response) => {
-        if (response.status === 200) {
-          const updatedFiles = [...files].filter((i) => i.id !== id)
-          setFiles(updatedFiles)
+        if (!response.ok) {
+          throw new Error("Error al eliminar el archivo")
         }
         return response.json()
       })
-      .then((data) => {
+      .catch((error) => {
+        console.error("Error al eliminar archivo:", error)
         setModalShow(true)
+
+        // Si hay un error, restaurar el archivo en la UI
+        fetch(`/api/v1/papers/${paperId}`, {
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+          },
+        })
+          .then((response) => response.json())
+          .then((updatedPaper) => {
+            if (!updatedPaper.message) {
+              setPaper(updatedPaper)
+            }
+          })
+          .catch((error) => console.error("Error al recuperar datos del paper:", error))
       })
   }
-
   function setupPaper() {
     if (paperId !== "" && paper.id == null) {
       const paper = fetch(`/api/v1/papers/${paperId}`, {
@@ -95,14 +202,20 @@ export default function UserPaperEdit({ id, onSave }) {
             setPaper(p)
             setPaperId(p.id)
             if (!p.type || !p.type.name) {
-              p.type = { name: "None" };
+              p.type = { name: "None" }
             }
+            // Marcar que el paper se ha cargado completamente
+            setPaperLoaded(true)
           }
         })
         .catch((m) => {
           setModalShow(true)
         })
+    } else {
+      // Si no hay paperId, estamos creando uno nuevo, así que también marcamos como cargado
+      setPaperLoaded(true)
     }
+
     if (types.length === 0) {
       fetch(`/api/v1/papers/types`, {
         headers: {
@@ -120,36 +233,83 @@ export default function UserPaperEdit({ id, onSave }) {
     }
   }
 
+  // Función handleChange mejorada para validar en tiempo real
   function handleChange(event) {
-    const { name, value } = event.target;
-    const error = validateField(name, value);
-    setFormErrors((prevErrors) => ({
-      ...prevErrors,
-      [name]: error,
-    }));
-    setPaper((prevPaper) => ({
-      ...prevPaper,
-      [name]: name === "type" ? types.find((t) => t.name === value) || { name: "None", id: -1 } : value,
-    }));
+    const { name, value } = event.target
+
+    // Marcar el campo como tocado
+    setTouchedFields((prev) => ({
+      ...prev,
+      [name]: true,
+    }))
+
+    // Actualizar el estado del paper
+    setPaper((prevPaper) => {
+      const updatedPaper = {
+        ...prevPaper,
+        [name]: name === "type" ? types.find((t) => t.name === value) || { name: "None", id: -1 } : value,
+      }
+
+      // Validar el campo con el nuevo valor
+      const error = validateField(
+        name,
+        name === "type" ? updatedPaper.type.name : updatedPaper[name],
+        !!paperId, // isEditing
+        true, // isTouched (siempre true en handleChange)
+      )
+
+      // Actualizar el estado de errores
+      setFormErrors((prevErrors) => ({
+        ...prevErrors,
+        [name]: error,
+      }))
+
+      return updatedPaper
+    })
   }
 
+  // Función handleSubmit mejorada para validar todos los campos antes de enviar
   async function handleSubmit() {
-    const currentFormErrors = {};
-    let hasErrors = false;
-    paperEditFormInputs.forEach(input => {
-      const error = validateField(input.name, paper[input.name]);
-      if (error) {
-        currentFormErrors[input.name] = error;
-        hasErrors = true;
-      }
-    });
-    setFormErrors(currentFormErrors);
+    // Activar el spinner de carga
+    setIsSaving(true)
 
+    // Marcar todos los campos como tocados para la validación
+    const allTouched = {}
+    paperEditFormInputs.forEach((input) => {
+      allTouched[input.name] = true
+    })
+    setTouchedFields(allTouched)
+
+    const currentFormErrors = {}
+    let hasErrors = false
+
+    // Validar todos los campos
+    paperEditFormInputs.forEach((input) => {
+      const fieldName = input.name
+      const fieldValue = fieldName === "type" ? paper.type?.name : paper[fieldName]
+      const error = validateField(
+        fieldName,
+        fieldValue,
+        false, // En submit siempre validamos, independientemente de si es edición
+        true, // En submit consideramos todos los campos como tocados
+      )
+
+      if (error) {
+        currentFormErrors[fieldName] = error
+        hasErrors = true
+      }
+    })
+
+    setFormErrors(currentFormErrors)
+
+    // Si hay errores de validación, detener aquí y no llamar a la base de datos
     if (hasErrors) {
-      console.log("Formulario con errores, no se envía al backend.");
-      return;
+      console.log("Form has validation errors, database call prevented:", currentFormErrors)
+      setIsSaving(false) // Desactivar el spinner si hay errores
+      return
     }
 
+    // Continuar con la llamada a la base de datos solo si la validación pasa
     const mypaper = {
       id: paper.id,
       title: paper.title,
@@ -164,20 +324,20 @@ export default function UserPaperEdit({ id, onSave }) {
       source: paper.source,
       scopus: paper.scopus,
       user: paper.user,
-    };
-
-    const f = new FormData();
-    if (files != null) {
-      for (let index = 0; index < files.length; index++) {
-        f.append("files", files[index]);
-      }
-    } else {
-      const nofiles = [];
-      f.append("files", nofiles);
     }
 
-    f.append("paper", new Blob([JSON.stringify(mypaper)], { type: "application/json" }));
-    f.append("userId", userId.toString());
+    const f = new FormData()
+    if (files != null) {
+      for (let index = 0; index < files.length; index++) {
+        f.append("files", files[index])
+      }
+    } else {
+      const nofiles = []
+      f.append("files", nofiles)
+    }
+
+    f.append("paper", new Blob([JSON.stringify(mypaper)], { type: "application/json" }))
+    f.append("userId", userId.toString())
 
     try {
       const response = await fetch("/api/v1/papers" + (paperId !== "" ? "/" + paperId : ""), {
@@ -187,24 +347,29 @@ export default function UserPaperEdit({ id, onSave }) {
           Accept: "application/json",
         },
         body: f,
-      });
+      })
+
+      // Desactivar el spinner independientemente del resultado
+      setIsSaving(false)
 
       if (response.ok) {
-        const submit = await response.json();
+        const submit = await response.json()
         if (submit.message) {
-          setModalShow(true);
-        } else window.location.href = `/myPapers`;
+          setModalShow(true)
+        } else window.location.href = `/myPapers`
       } else if (response.status === 400) {
-        const errorData = await response.json();
-        console.error("Errores de validación del backend:", errorData);
-        setModalShow(true);
+        const errorData = await response.json()
+        console.error("Errores de validación del backend:", errorData)
+        setModalShow(true)
       } else if (response.status === 500) {
-        console.error("Error del servidor:", response);
-        setModalShow(true);
+        console.error("Error del servidor:", response)
+        setModalShow(true)
       }
     } catch (error) {
-      console.error("Error de conexión:", error);
-      setModalShow(true);
+      // Desactivar el spinner en caso de error
+      setIsSaving(false)
+      console.error("Error de conexión:", error)
+      setModalShow(true)
     }
   }
 
@@ -232,17 +397,73 @@ export default function UserPaperEdit({ id, onSave }) {
     setModalShow(false)
   }
 
-  const basicInfoInputs = [paperEditFormInputs[0], paperEditFormInputs[1], paperEditFormInputs[5]]
+  // Reorganizar los inputs para que el título esté primero
+  const titleInput = paperEditFormInputs.find((input) => input.name === "title")
+  const authorsInput = paperEditFormInputs.find((input) => input.name === "authors")
+  const typeInput = paperEditFormInputs.find((input) => input.name === "type")
+
+  // Crear un nuevo array con el orden deseado
+  const basicInfoInputs = titleInput
+    ? [titleInput, authorsInput, typeInput]
+    : [paperEditFormInputs[0], paperEditFormInputs[1], paperEditFormInputs[5]]
+
   const publicationInfoInputs = [paperEditFormInputs[2], paperEditFormInputs[3], paperEditFormInputs[4]]
   const contentInfoInputs = [paperEditFormInputs[6], paperEditFormInputs[7], paperEditFormInputs[8]]
   const additionalInfoInputs = [paperEditFormInputs[9], paperEditFormInputs[10]]
 
   const handleSaveClick = () => {
-    handleSubmit();
+    handleSubmit()
+  }
+
+  // Función para validar todos los campos al cargar el formulario
+  // Ahora solo se ejecuta cuando paperLoaded cambia a true
+  useEffect(() => {
+    if (paperLoaded) {
+      // Si estamos editando un paper existente, no mostramos errores inicialmente
+      if (paperId) {
+        // No hacemos nada, esperamos a que el usuario interactúe con los campos
+        console.log("Paper cargado para edición, esperando interacción del usuario")
+      } else {
+        // Si es un nuevo paper, podemos validar los campos requeridos
+        const initialErrors = {}
+        let hasInitialErrors = false
+
+        paperEditFormInputs.forEach((input) => {
+          if (input.isRequired) {
+            const fieldName = input.name
+            const fieldValue = fieldName === "type" ? paper.type?.name : paper[fieldName]
+            const error = validateField(fieldName, fieldValue, false, false)
+
+            if (error) {
+              initialErrors[fieldName] = error
+              hasInitialErrors = true
+            }
+          }
+        })
+
+        if (hasInitialErrors) {
+          setFormErrors(initialErrors)
+        }
+      }
+    }
+  }, [paperLoaded])
+
+  // Helper para truncar nombres de archivo largos
+  const truncateFileName = (fileName, maxLength = 25) => {
+    if (fileName.length <= maxLength) return fileName;
+    const extension = fileName.split('.').pop();
+    const nameWithoutExtension = fileName.substring(0, fileName.lastIndexOf('.'));
+    const truncatedName = nameWithoutExtension.substring(0, maxLength - extension.length - 3) + '...';
+    return `${truncatedName}.${extension}`;
   };
 
   return (
     <div className="paper-edit-container">
+      {/* Loading Spinner */}
+      {isSaving && (
+        <span class="loader"></span>
+      )}
+
       <h2 className="page-title">{paper.id ? "Edit Paper" : "Add Paper"}</h2>
       <p className="page-description">Make changes to your paper information here. Click save when you're done.</p>
 
@@ -252,36 +473,44 @@ export default function UserPaperEdit({ id, onSave }) {
 
         <div className="form-fields">
           {basicInfoInputs.map((input, index) => (
-            <div key={index} className="form-field-wrapper">
+            <div
+              key={index}
+              className={`form-field-wrapper ${input.name === "title" ? "full-width" : ""}`}
+              data-field={input.name}
+            >
               <label htmlFor={input.name} className="form-label">
-                {input.tag}
+                {input.tag} {input.isRequired && <span className="text-danger">*</span>}
               </label>
               {input.type === "select" ? (
-                <select
-                  id={input.name}
-                  name={input.name}
-                  className="form-input"
-                  value={paper.type.name}
-                  onChange={input.handleChange}
-                >
-                  {input.values.map((value, i) => (
-                    <option key={i} value={value}>
-                      {value}
-                    </option>
-                  ))}
-                </select>
+                <>
+                  <select
+                    id={input.name}
+                    name={input.name}
+                    className={`form-input ${formErrors[input.name] ? "is-invalid" : ""}`}
+                    value={paper.type.name}
+                    onChange={input.handleChange}
+                    required={input.isRequired}
+                  >
+                    {input.values.map((value, i) => (
+                      <option key={i} value={value}>
+                        {value}
+                      </option>
+                    ))}
+                  </select>
+                  {formErrors[input.name] && <div style={errorStyle}>{formErrors[input.name]}</div>}
+                </>
               ) : (
                 <>
                   <input
                     type={input.type}
                     id={input.name}
                     name={input.name}
-                    className={`form-input ${formErrors[input.name] ? 'is-invalid' : ''}`}
+                    className={`form-input ${formErrors[input.name] ? "is-invalid" : ""}`}
                     defaultValue={input.defaultValue}
                     onChange={input.handleChange}
                     required={input.isRequired}
                   />
-                  {formErrors[input.name] && <div className="invalid-feedback">{formErrors[input.name]}</div>}
+                  {formErrors[input.name] && <div style={errorStyle}>{formErrors[input.name]}</div>}
                 </>
               )}
             </div>
@@ -297,19 +526,19 @@ export default function UserPaperEdit({ id, onSave }) {
           {publicationInfoInputs.map((input, index) => (
             <div key={index} className="form-field-wrapper">
               <label htmlFor={input.name} className="form-label">
-                {input.tag}
+                {input.tag} {input.isRequired && <span className="text-danger">*</span>}
               </label>
               <>
                 <input
                   type={input.type}
                   id={input.name}
                   name={input.name}
-                  className={`form-input ${formErrors[input.name] ? 'is-invalid' : ''}`}
+                  className={`form-input ${formErrors[input.name] ? "is-invalid" : ""}`}
                   defaultValue={input.defaultValue}
                   onChange={input.handleChange}
                   required={input.isRequired}
                 />
-                {formErrors[input.name] && <div className="invalid-feedback">{formErrors[input.name]}</div>}
+                {formErrors[input.name] && <div style={errorStyle}>{formErrors[input.name]}</div>}
               </>
             </div>
           ))}
@@ -324,18 +553,18 @@ export default function UserPaperEdit({ id, onSave }) {
           {contentInfoInputs.map((input, index) => (
             <div key={index} className="form-field-wrapper full-width">
               <label htmlFor={input.name} className="form-label">
-                {input.tag}
+                {input.tag} {input.isRequired && <span className="text-danger">*</span>}
               </label>
               <>
                 <textarea
                   id={input.name}
                   name={input.name}
-                  className={`form-textarea ${formErrors[input.name] ? 'is-invalid' : ''}`}
+                  className={`form-textarea ${formErrors[input.name] ? "is-invalid" : ""}`}
                   defaultValue={input.defaultValue}
                   onChange={input.handleChange}
                   required={input.isRequired}
                 />
-                {formErrors[input.name] && <div className="invalid-feedback">{formErrors[input.name]}</div>}
+                {formErrors[input.name] && <div style={errorStyle}>{formErrors[input.name]}</div>}
               </>
             </div>
           ))}
@@ -350,19 +579,19 @@ export default function UserPaperEdit({ id, onSave }) {
           {additionalInfoInputs.map((input, index) => (
             <div key={index} className="form-field-wrapper">
               <label htmlFor={input.name} className="form-label">
-                {input.tag}
+                {input.tag} {input.isRequired && <span className="text-danger">*</span>}
               </label>
               <>
                 <input
                   type={input.type}
                   id={input.name}
                   name={input.name}
-                  className={`form-input ${formErrors[input.name] ? 'is-invalid' : ''}`}
+                  className={`form-input ${formErrors[input.name] ? "is-invalid" : ""}`}
                   defaultValue={input.defaultValue}
                   onChange={input.handleChange}
                   required={input.isRequired}
                 />
-                {formErrors[input.name] && <div className="invalid-feedback">{formErrors[input.name]}</div>}
+                {formErrors[input.name] && <div style={errorStyle}>{formErrors[input.name]}</div>}
               </>
             </div>
           ))}
@@ -373,7 +602,13 @@ export default function UserPaperEdit({ id, onSave }) {
         <h3 className="section-title">Files</h3>
         <p className="section-description">Upload or manage paper files</p>
 
-        <div className="upload-area">
+        <div
+          className="upload-area"
+          onDragOver={handleDragOver}
+          onDragEnter={handleDragEnter}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
           <label htmlFor="file-upload" className="upload-label">
             <Upload className="upload-icon" />
             <p className="upload-text">Click to upload or drag and drop</p>
@@ -389,9 +624,24 @@ export default function UserPaperEdit({ id, onSave }) {
           </label>
         </div>
 
+        {/* Modified file selection display - now shows each file with a delete button */}
         {files && files.length > 0 && (
-          <div className="files-selected">
-            <p>{files.length} file(s) selected</p>
+          <div className="selected-files-list">
+            {files.map((file, index) => (
+              <div key={index} className="selected-file-item">
+                <div className="selected-file-info">
+                  <FileText className="file-icon" />
+                  <span className="selected-file-name">{truncateFileName(file.name)}</span>
+                </div>
+                <button
+                  className="remove-file-button"
+                  onClick={() => removeSelectedFile(index)}
+                  title="Remove file"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            ))}
           </div>
         )}
 
@@ -415,13 +665,10 @@ export default function UserPaperEdit({ id, onSave }) {
       </div>
 
       <div className="save-button-container">
-        <button
-          className="save-button"
-          onClick={handleSaveClick}
-        >
-          Save
+        <button className="save-button" onClick={handleSaveClick} disabled={isSaving}>
+          {isSaving ? "Guardando..." : "Save"}
         </button>
       </div>
     </div>
-  );
+  )
 }

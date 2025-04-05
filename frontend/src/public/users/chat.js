@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import secret from "../../secret.json"
 import "../../static/css/user/chat.css";
@@ -80,6 +80,20 @@ const Chat = () => {
     setInput(""); // Limpiar el input
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleSend();
+    }
+  };
+
+  useEffect(() => {
+    const welcomeMessage = {
+      sender: "bot",
+      text: "¡Hola! Soy Pubus 🤖. ¿En qué puedo ayudarte hoy?",
+    };
+    setMessages([welcomeMessage]);
+  }, []);
+
   return (
     <div className="chat-container">
       <div className="chat-header">Chat con Pubus</div>
@@ -95,6 +109,7 @@ const Chat = () => {
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder="Escribe tu mensaje..."
         />
         <button onClick={handleSend}>Enviar</button>

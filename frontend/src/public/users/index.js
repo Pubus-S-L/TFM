@@ -122,7 +122,7 @@ export default function UserDetail() {
                 <SheetHeader>
                     <SheetTitle>Chat con PubusChat</SheetTitle>
                     <SheetDescription>
-                      You can ask anything about papers publishied by {user?.firstName} {user?.lastName}
+                      You can ask anything about papers published by {user?.firstName} {user?.lastName}
                     </SheetDescription>
                   </SheetHeader>
                 <div>
