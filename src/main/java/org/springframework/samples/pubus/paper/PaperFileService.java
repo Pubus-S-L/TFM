@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
+import org.springframework.data.util.Pair;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -17,7 +18,7 @@ public interface PaperFileService {
     void deletePaperFile(Integer id);
     PaperFile getPaperFileById(Integer id);
     byte[] getEmbeddingFromOpenAI(String text) throws IOException;
-    String getContext(byte[] data, Integer userId) throws JsonProcessingException;
+    Pair<Integer,String> getContext(byte[] data, Integer userId) throws JsonProcessingException;
     Map<String, byte[]> addEmbedding(String text, Map<String, byte[]> embeddingMap);
     String[] getContextRecommended(List<byte[]> data) throws JsonProcessingException;
 }

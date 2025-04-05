@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -28,6 +29,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.persistence.Tuple;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -215,25 +218,30 @@ public class PaperFileServiceImpl implements PaperFileService {
         return text.length() / 4;
     }
 
-    public String getContext(byte[] data, Integer userId) throws JsonProcessingException {
+    public Pair<Integer,String> getContext(byte[] data, Integer userId) throws JsonProcessingException {
+ 
         List<PaperFile> files = getAllFilesByUserId(userId);
         float[] queryEmbedding = deserializeToFloatArray(data);
         String closestKey = "";
+        Integer closesPaperFileId=0;
         double bestSimilarity = -1.0;
         
-        List<Map<String, byte[]>> embeddingList = files.stream().map(f -> f.getEmbeddings()).toList();
-        for(Map<String, byte[]> embeddings : embeddingList){
-            for(Map.Entry<String, byte[]> entry : embeddings.entrySet()){
-                float[] dbEmbedding = deserializeToFloatArray(entry.getValue());
+        for(PaperFile file : files){
+            if(file.getEmbeddings() != null){
+                Map<String, byte[]> embedding = file.getEmbeddings();
+                for(Map.Entry<String, byte[]> entry : embedding.entrySet()){
+                    float[] dbEmbedding = deserializeToFloatArray(entry.getValue());
                     double similarity = cosineSimilarity(queryEmbedding,dbEmbedding);
                     if(similarity > bestSimilarity){
                         bestSimilarity = similarity;
                         closestKey = entry.getKey();
+                        closesPaperFileId = file.getId();
                     }        
             } 
         }
-        
-        return closestKey;
+    }
+        Pair<Integer, String> result = Pair.of(closesPaperFileId, closestKey);
+        return result;
         }
 
     @Override

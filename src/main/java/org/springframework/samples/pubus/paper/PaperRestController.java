@@ -14,6 +14,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -441,10 +442,14 @@ public class PaperRestController {
 		public ResponseEntity<Map<String,String>> createPrompt(@RequestParam("text") String text, @PathVariable("userId") Integer userId){
 			try{
 				byte [] embedding = paperFileService.getEmbeddingFromOpenAI(text);
-				String context = paperFileService.getContext(embedding, userId);
-				String prompt = "Resolve this request: "+text + " with this context " + context;
+				Pair<Integer,String> context = paperFileService.getContext(embedding, userId);
+				Paper paper = paperFileService.getPaperFileById(context.getFirst()).getPaper();
+				String enlace = (paper.getDOI()!="" && paper.getDOI()!=null) ? "https://doi.org/" + paper.getDOI() : "http://localhost:3000/papers/" + paper.getId();
+				String apa = paper.getAuthors() + ". (" + paper.getPublicationYear() + "). " + paper.getTitle() + ". " + enlace;
+				String prompt = "Your are an asistant. Resolve this request: "+text + " using this context " + context.getSecond();;
 				Map<String, String> response = new HashMap<>();
 				response.put("prompt", prompt);
+				response.put("reference", apa);
 				
 				return ResponseEntity.ok(response);
 

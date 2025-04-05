@@ -14,7 +14,7 @@ const Chat = () => {
 
   const prompt = async function createPrompt(userMessage) {
     const params = new URLSearchParams({ text: userMessage });
-    let data = "";
+    let data = [{}];
     try {
         let response = await fetch(`/api/v1/papers/users/${userId}/prompt?${params.toString()}`, {
             method: "GET",
@@ -32,7 +32,7 @@ const Chat = () => {
     } catch (error) {
         console.error("Error during data fetching:", error);
     }
-    return data.prompt;
+    return data;
 }
 
   const handleSend = async () => {
@@ -46,7 +46,10 @@ const Chat = () => {
     const contextResponse = await prompt(input);
     console.log(contextResponse)
 
-    const context = contextResponse? contextResponse : input;
+    const context = contextResponse? contextResponse.prompt : input;
+    console.log(context)
+    const reference = contextResponse? contextResponse.reference : input;
+    console.log(reference)
 
     const requestOptions = {
       method: 'POST',
@@ -69,7 +72,7 @@ const Chat = () => {
       const response = await fetch('https://api.openai.com/v1/chat/completions', requestOptions);
       // Agregar la respuesta de la API a la lista de mensajes
       const data = await response.json();
-      const botMessage = { sender: "bot", text: data.choices[0].message.content };
+      const botMessage = { sender: "bot", text: data.choices[0].message.content, reference: reference };
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
       console.error("Error al comunicarse con OpenAI:", error);
@@ -98,11 +101,19 @@ const Chat = () => {
     <div className="chat-container">
       <div className="chat-header">Chat con Pubus</div>
       <div className="chat-messages">
-        {messages.map((msg, index) => (
-          <div key={index} className={`message ${msg.sender}`}>
-            <div className="message-bubble">{msg.text}</div>
+      {messages.map((msg, index) => (
+        <div key={index} className={`message ${msg.sender}`}>
+          <div className="message-bubble">
+            {msg.text}
+            {/* Mostrar referencia si existe */}
+            {msg.sender === "bot" && msg.reference && (
+              <div className="reference">
+                📚 <strong>Referencia:</strong> {msg.reference}
+              </div>
+            )}
           </div>
-        ))}
+        </div>
+      ))}
       </div>
       <div className="chat-footer">
         <input
