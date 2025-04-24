@@ -7,6 +7,9 @@ import static org.springframework.security.config.Customizer.withDefaults;
  * and open the template in the editor.
  */
 
+import java.util.Arrays;
+import java.util.List;
+
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +24,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.core.annotation.Order;
 import org.springframework.samples.pubus.configuration.jwt.AuthEntryPointJwt;
 import org.springframework.samples.pubus.configuration.jwt.AuthTokenFilter;
@@ -61,28 +67,29 @@ public class SecurityConfiguration {
 	}
 
 
-    @SuppressWarnings({ "removal", "deprecation" })
-	@Bean
+   @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .addFilterBefore(oAuth2AuthorizationRequestRedirectFilter(), OAuth2LoginAuthenticationFilter.class)
-            .oauth2Login(oauth2 -> {
-                oauth2
-                    .authorizationEndpoint(authorizationEndpoint -> {
-                        authorizationEndpoint.baseUri("/oauth2/authorize-client");
-                    })
-                    .redirectionEndpoint(redirectionEndpoint -> {
-                        redirectionEndpoint.baseUri("/oauth2/callback/*");
-                    })
-                    .clientRegistrationRepository(clientRegistrationRepository)
-                    .authorizedClientRepository(authorizedClientRepository);
-            })
-			.cors(withDefaults())		
-			.csrf(AbstractHttpConfigurer::disable)
-			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))			
-			.headers((headers) -> headers.frameOptions((frameOptions) -> frameOptions.disable()));
-            
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(AbstractHttpConfigurer::disable)
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/**").permitAll() // Permitir acceso público a todas las rutas
+            )
+            .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()));
+
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // Reemplaza con el origen de tu frontend
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
 

@@ -20,6 +20,7 @@ import AboutUs from "./public/others/aboutUs";
 import LoginLinkedIn from "./auth/login/LinkedIn/loginLinkedin";
 import UserListAdmin from "./admin/users/UserListAdmin";
 import UserEditAdmin from "./admin/users/UserEditAdmin";
+import ChatList from "./public/users/room";
 import "./styles/globals.css";
 
 function ErrorFallback({ error, resetErrorBoundary }) {
@@ -87,6 +88,7 @@ function App() {
         <Route path="/admin/users/:id" exact={true} element={<UserEditAdmin />} />
         <Route path="/users/:id" exact={true} element={<UserDetail />} />
         <Route path="/about" exact={true} element={<AboutUs />} />
+        <Route path="/chats" exact={true} element={<ChatList />} />
       </>
     )
   }

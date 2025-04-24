@@ -9,16 +9,25 @@ import { Button } from "../../components/ui/button.tsx"
 import { User} from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar.tsx"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "../../components/ui/sheet.tsx";
+import tokenService from "../../services/token.service";
+import ChatMessage from "./messages"
+
+
 export default function UserDetail() {
     let pathArray = window.location.pathname.split("/");
     const [user,setUser] = useState();  
-    const [userId,setUserId] = useState(pathArray[2]);
+    const [userId, setUserId]= useState(pathArray[2]);
     const [papers,setPapers] = useState([]); 
     const [currentPage, setCurrentPage] = useState(0);
     const [searchTerm, setSearchTerm] = useState("");
     const itemsPerPage = 2;
     const totalPages = Math.ceil(papers.length / itemsPerPage);
-    const [imageUrl, setImageUrl] = useState("")
+    const [imageUrl, setImageUrl] = useState("");
+    const currentUser = tokenService.getUser()
+    const [otherUserId,setOtherUserId] = useState(currentUser.id);
+    const [room, setRoom] = useState(null)
+    const [roomExist, setRoomExist] = useState(false)
+    const [hasFetched, setHasFetched] = useState(false);
   
     // Reiniciar la página si la lista de papers cambia
     useEffect(() => {
@@ -72,9 +81,7 @@ export default function UserDetail() {
                 },
             });
     
-            if (!response.ok) {
-                throw new Error(`Error fetching data: ${response.statusText}`);
-            }
+           
     
             let papers = await response.json();
             setPapers(papers);
@@ -86,6 +93,51 @@ export default function UserDetail() {
     useEffect(() => {
         setUpPapers();
     },  [userId]);
+
+
+    useEffect(() => {
+      if (currentUser && !hasFetched) {
+        // Cargar lista de chats del usuario
+        fetch(`/api/v1/chat/users/${currentUser.id}/chats`)
+          .then(response => response.json())
+          .then(data => {
+            console.log('DATA', data);
+            // Verificar si en alguno de los chats está el usuario con id igual a userId
+            const roomExists = data.some(chat =>
+              chat.users?.some(user => user.id === parseFloat(userId))
+            )
+            setRoomExist(roomExists);
+            if(roomExists){
+              const chatRoomEncontrado = data.find(chatRoom =>
+                chatRoom.users.some(user => user.id === currentUser.id)
+              );
+              setRoom(chatRoomEncontrado)
+          }
+            setHasFetched(true); // Marca que la petición se ha realizado
+          })
+          .catch(error => console.error('Error al cargar chats:', error));
+      }
+    }, [currentUser, userId, hasFetched]);
+
+    const handleCreateChat = async () => {
+      try {
+        const response = await fetch(`/api/v1/chat/create/${userId}/${otherUserId}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          }
+        })
+        const data = await response.json()
+        console.log(data)
+        setRoom(data)
+        setRoomExist(true)
+        console.log("Room ID:", data.id)
+      } catch (error) {
+        console.error("Error creating chat room:", error)
+      }
+    }
+
+    
 
     return (
     <div className="dark flex flex-col gap-4 max-w-5xl mx-auto p-4">
@@ -120,19 +172,37 @@ export default function UserDetail() {
                 </SheetTrigger>
                 <SheetContent className="w-full sm:max-w-xl overflow-y-auto bg-white">
                 <SheetHeader>
-                    <SheetTitle>Chat con PubusChat</SheetTitle>
+                    <SheetTitle>Chat with PubusChat</SheetTitle>
                     <SheetDescription>
                       You can ask anything about papers published by {user?.firstName} {user?.lastName}
                     </SheetDescription>
                   </SheetHeader>
                 <div>
-                    <Chat />
+                  <Chat/>
                 </div>
                 </SheetContent>
               </Sheet>
-              <Button className="bg-black text-white hover:bg-gray-800 transition-colors">
-                Contact Me
-              </Button>
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button onClick={() => {if (!roomExist) handleCreateChat()}}
+                  className="bg-black text-white hover:bg-gray-800 transition-colors">
+                    Contact Me
+                  </Button>
+                </SheetTrigger>
+                <SheetContent className="w-full sm:max-w-xl overflow-y-auto bg-white">
+                <SheetHeader>
+                    <SheetTitle>Chat with {user?.firstName} {user?.lastName}</SheetTitle>
+                  </SheetHeader>
+                  { roomExist ? (
+                    <ChatMessage
+                      currentUser={currentUser} 
+                      chatId={room.id} 
+                      receiver={user}
+                    />
+                ): (<p>Loading chat...</p>)} 
+                </SheetContent>
+              </Sheet>
+
             </div>
         </div>
       </div>
