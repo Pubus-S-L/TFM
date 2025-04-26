@@ -1,12 +1,28 @@
-mysql:
-  image: mysql:5.7
-  ports:
-    - "3306:3306"
-  environment:
-    - MYSQL_ROOT_PASSWORD=
-    - MYSQL_ALLOW_EMPTY_PASSWORD=true
-    - MYSQL_USER=pubus
-    - MYSQL_PASSWORD=pubus
-    - MYSQL_DATABASE=pubus
-  volumes:
-    - "./conf.d:/etc/mysql/conf.d:ro"
+version: '3.8'
+
+services:
+  pubus-app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY} 
+    volumes:
+      - ./data:/data
+    networks:
+      - app-network
+
+  h2:
+    image: oscarfonts/h2
+    environment:
+      - H2_OPTIONS=-ifNotExists
+    volumes:
+      - ./data:/opt/h2-data
+    ports:
+      - "1521:1521"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

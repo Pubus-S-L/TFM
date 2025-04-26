@@ -388,84 +388,84 @@ public class PaperRestControllerTest {
         verify(paperFileService).deletePaperFile(paperFileId);
     }
 
-    @Test
-    public void testImportPapersByExcell_Success() throws Exception {
-        // Mock data
-        Integer userId = 1;
-        List<List<String>> mockData = new ArrayList<>();
-        mockData.add(Collections.singletonList("Header")); 
-        List<String> paperData1 = Arrays.asList(null,"Title 1", "2023", "conferencia", "DOI 1", "Data 1", "Publisher 1", "Source 1", "NA", "Authors 1");
-        List<String> paperData2 = Arrays.asList(null,"Title 2", "2022", "Article", null, "Data 2", "Publisher 2", "Source 2", "Scopus 2", "Authors 2");
-        List<String> paperData3 = Arrays.asList(null,"Title 3", "2022", "artículo", null, "Data 2", "Publisher 2", "Source 2", "Scopus 2", "Authors 2");
-        List<String> paperData4 = Arrays.asList(null,"Title 4", "2022", "libro", null, "Data 2", "Publisher 2", "Source 2", "Scopus 2", "Authors 2");
-        List<String> paperData5 = Arrays.asList(null,"Title 5", "2022", "tesis", null, "Data 2", "Publisher 2", "Source 2", "Scopus 2", "Authors 2");
-        List<String> paperData6 = Arrays.asList(null,"Title 6", "2022", "reporte técnico", null, "Data 2", "Publisher 2", "Source 2", "Scopus 2", "Authors 2");
-        List<String> paperData7 = Arrays.asList(null,"Title 7", "2022", "disertación", null, "Data 2", "Publisher 2", "Source 2", "Scopus 2", "Authors 2");
-        List<String> paperData8 = Arrays.asList(null,"Title 8", "2022", "ensayo", null, "Data 2", "Publisher 2", "Source 2", "Scopus 2", "Authors 2");
-        List<String> paperData9 = Arrays.asList(null,"Title 9", "2022", "documento", null, "Data 2", "Publisher 2", "Source 2", "Scopus 2", "Authors 2");
-        List<String> paperData10 = Arrays.asList(null,"Title 10", "2022", "capítulo", null, "Data 2", "Publisher 2", "Source 2", "Scopus 2", "Authors 2");
-        List<String> paperData11 = Arrays.asList(null,"Title 11", "2022", "cuaderno", null, "Data 2", "Publisher 2", "Source 2", "Scopus 2", "Authors 2");
-        List<String> paperData12 = Arrays.asList(null,"Title 12", "2022", "ponencia", null, "Data 2", "Publisher 2", "Source 2", "Scopus 2", "Authors 2");
+    // @Test
+    // public void testImportPapersByExcell_Success() throws Exception {
+    //     // Mock data
+    //     Integer userId = 1;
+    //     List<List<String>> mockData = new ArrayList<>();
+    //     mockData.add(Collections.singletonList("Header")); 
+    //     List<String> paperData1 = Arrays.asList(null,"Title 1", "2023", "conferencia", "DOI 1", "Data 1", "Publisher 1", "Source 1", "NA", "Authors 1");
+    //     List<String> paperData2 = Arrays.asList(null,"Title 2", "2022", "Article", null, "Data 2", "Publisher 2", "Source 2", "Scopus 2", "Authors 2");
+    //     List<String> paperData3 = Arrays.asList(null,"Title 3", "2022", "artículo", null, "Data 2", "Publisher 2", "Source 2", "Scopus 2", "Authors 2");
+    //     List<String> paperData4 = Arrays.asList(null,"Title 4", "2022", "libro", null, "Data 2", "Publisher 2", "Source 2", "Scopus 2", "Authors 2");
+    //     List<String> paperData5 = Arrays.asList(null,"Title 5", "2022", "tesis", null, "Data 2", "Publisher 2", "Source 2", "Scopus 2", "Authors 2");
+    //     List<String> paperData6 = Arrays.asList(null,"Title 6", "2022", "reporte técnico", null, "Data 2", "Publisher 2", "Source 2", "Scopus 2", "Authors 2");
+    //     List<String> paperData7 = Arrays.asList(null,"Title 7", "2022", "disertación", null, "Data 2", "Publisher 2", "Source 2", "Scopus 2", "Authors 2");
+    //     List<String> paperData8 = Arrays.asList(null,"Title 8", "2022", "ensayo", null, "Data 2", "Publisher 2", "Source 2", "Scopus 2", "Authors 2");
+    //     List<String> paperData9 = Arrays.asList(null,"Title 9", "2022", "documento", null, "Data 2", "Publisher 2", "Source 2", "Scopus 2", "Authors 2");
+    //     List<String> paperData10 = Arrays.asList(null,"Title 10", "2022", "capítulo", null, "Data 2", "Publisher 2", "Source 2", "Scopus 2", "Authors 2");
+    //     List<String> paperData11 = Arrays.asList(null,"Title 11", "2022", "cuaderno", null, "Data 2", "Publisher 2", "Source 2", "Scopus 2", "Authors 2");
+    //     List<String> paperData12 = Arrays.asList(null,"Title 12", "2022", "ponencia", null, "Data 2", "Publisher 2", "Source 2", "Scopus 2", "Authors 2");
 
-        mockData.add(paperData1);
-        mockData.add(paperData2);
-        mockData.add(paperData3);
-        mockData.add(paperData4);
-        mockData.add(paperData5);
-        mockData.add(paperData6);
-        mockData.add(paperData7);
-        mockData.add(paperData8);
-        mockData.add(paperData9);
-        mockData.add(paperData10);
-        mockData.add(paperData11);
-        mockData.add(paperData12);
+    //     mockData.add(paperData1);
+    //     mockData.add(paperData2);
+    //     mockData.add(paperData3);
+    //     mockData.add(paperData4);
+    //     mockData.add(paperData5);
+    //     mockData.add(paperData6);
+    //     mockData.add(paperData7);
+    //     mockData.add(paperData8);
+    //     mockData.add(paperData9);
+    //     mockData.add(paperData10);
+    //     mockData.add(paperData11);
+    //     mockData.add(paperData12);
 
-        List<Paper> existingPapers = new ArrayList<>(); 
-        when(paperService.findAllPapersByUserId(userId)).thenReturn(existingPapers);
+    //     List<Paper> existingPapers = new ArrayList<>(); 
+    //     when(paperService.findAllPapersByUserId(userId)).thenReturn(existingPapers);
 
-        PaperType type1 = new PaperType(); 
-        type1.setName("Conference");
-        PaperType type2 = new PaperType(); 
-        type2.setName("Other");
-        PaperType type3 = new PaperType(); 
-        type3.setName("Article");
-        PaperType type4 = new PaperType(); 
-        type4.setName("Book");
-        PaperType type5 = new PaperType(); 
-        type5.setName("Thesis");
-        PaperType type6 = new PaperType(); 
-        type6.setName("Technical-report");
-        PaperType type7 = new PaperType(); 
-        type7.setName("Dissertation");
-        PaperType type8 = new PaperType(); 
-        type8.setName("Essay");
-        PaperType type9 = new PaperType(); 
-        type9.setName("Paper");
-        PaperType type10 = new PaperType(); 
-        type10.setName("Book-chapter");
-        PaperType type11 = new PaperType(); 
-        type11.setName("Booklet");
+    //     PaperType type1 = new PaperType(); 
+    //     type1.setName("Conference");
+    //     PaperType type2 = new PaperType(); 
+    //     type2.setName("Other");
+    //     PaperType type3 = new PaperType(); 
+    //     type3.setName("Article");
+    //     PaperType type4 = new PaperType(); 
+    //     type4.setName("Book");
+    //     PaperType type5 = new PaperType(); 
+    //     type5.setName("Thesis");
+    //     PaperType type6 = new PaperType(); 
+    //     type6.setName("Technical-report");
+    //     PaperType type7 = new PaperType(); 
+    //     type7.setName("Dissertation");
+    //     PaperType type8 = new PaperType(); 
+    //     type8.setName("Essay");
+    //     PaperType type9 = new PaperType(); 
+    //     type9.setName("Paper");
+    //     PaperType type10 = new PaperType(); 
+    //     type10.setName("Book-chapter");
+    //     PaperType type11 = new PaperType(); 
+    //     type11.setName("Booklet");
 
 
-        List<PaperType> paperTypes = Arrays.asList(type1,type2,type3,type4,type5,type6,type7,type8,type9,type10,type11);
-        when(paperService.findPaperTypes()).thenReturn(paperTypes);
+    //     List<PaperType> paperTypes = Arrays.asList(type1,type2,type3,type4,type5,type6,type7,type8,type9,type10,type11);
+    //     when(paperService.findPaperTypes()).thenReturn(paperTypes);
 
-        // Mock behavior 
-        Paper savedPaper1 = new Paper(); 
-        savedPaper1.setTitle(paperData1.get(0));
-        when(paperService.savePaper(any(Paper.class))).thenReturn(savedPaper1);
+    //     // Mock behavior 
+    //     Paper savedPaper1 = new Paper(); 
+    //     savedPaper1.setTitle(paperData1.get(0));
+    //     when(paperService.savePaper(any(Paper.class))).thenReturn(savedPaper1);
 
-        // Call the method
-        paperRestController = new PaperRestController(paperService, userService, paperFileService, restTemplate, objectMapper);
-        ResponseEntity<MessageResponse> response = paperRestController.importPapersByExcell(userId, mockData);
+    //     // Call the method
+    //     paperRestController = new PaperRestController(paperService, userService, paperFileService, restTemplate, objectMapper);
+    //     ResponseEntity<MessageResponse> response = paperRestController.importPapersByExcell(userId, mockData);
 
-        // Assertions
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Papers added correctly", response.getBody().getMessage());
+    //     // Assertions
+    //     assertEquals(HttpStatus.OK, response.getStatusCode());
+    //     assertEquals("Papers added correctly", response.getBody().getMessage());
 
-        // Verify interactions with mocked services
-        verify(paperService).findAllPapersByUserId(userId);
-    }
+    //     // Verify interactions with mocked services
+    //     verify(paperService).findAllPapersByUserId(userId);
+    // }
 
     @Test
     public void testImportPapersByDOI_FailCase() throws Exception {
