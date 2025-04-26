@@ -22,7 +22,7 @@ export default function Login() {
   async function loginLinkedIn(code) {
     const reqBody = { code }; // Aquí estás creando el cuerpo de la solicitud con el código de autorización
     setMessage(null);
-    await fetch("/api/v1/auth/loginLinkedIn", {
+    await fetch("https://tfm-m1dn.onrender.com/api/v1/auth/loginLinkedIn", {
       headers: { "Content-Type": "application/json" },
       method: "POST",
       body: JSON.stringify(reqBody),
@@ -44,7 +44,7 @@ export default function Login() {
 
     const reqBody = values;
     setMessage(null);
-    await fetch("/api/v1/auth/signin", {
+    await fetch("https://tfm-m1dn.onrender.com/api/v1/auth/signin", {
       headers: { "Content-Type": "application/json" },
       method: "POST",
       body: JSON.stringify(reqBody),

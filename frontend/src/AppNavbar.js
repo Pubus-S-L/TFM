@@ -18,11 +18,11 @@ function AppNavbar() {
             setRoles(jwt_decode(jwt).authorities);
             setUsername(jwt_decode(jwt).sub);
             const currentUser = tokenService.getUser();
-        fetch(`/api/v1/chat/users/${currentUser.id}/chats`)
+        fetch(`https://tfm-m1dn.onrender.com/api/v1/chat/users/${currentUser.id}/chats`)
             .then(response => response.json())
             .then(data => {
                 const fetchUnreadPromises = data.map(chat => 
-                    fetch(`/api/v1/message/${chat.id}/unread/${currentUser.id}`)
+                    fetch(`https://tfm-m1dn.onrender.com/api/v1/message/${chat.id}/unread/${currentUser.id}`)
                         .then(res => res.json())
                         .then(messages => messages.length > 0) // true si hay mensajes no leídos
                 );

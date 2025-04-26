@@ -48,7 +48,7 @@ export default function UserProfile() {
 
   async function setUpUser() {
     try {
-      const response = await fetch(`/api/v1/users/${userId}`, {
+      const response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/users/${userId}`, {
         headers: {},
       });
 
@@ -79,7 +79,7 @@ export default function UserProfile() {
     console.log("Profile being sent:", updatedProfile);
     try {
 
-      const response = await fetch(`/api/v1/users/${userId}`, {
+      const response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/users/${userId}`, {
         method: "PUT",
         headers: {
           Accept: "application/json",
@@ -103,7 +103,7 @@ export default function UserProfile() {
 
   async function setUpFavorite() {
     try {
-      const response = await fetch(`/api/v1/users/${userId}/favorite`, {
+      const response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/users/${userId}/favorite`, {
         headers: {
         },
       });
@@ -131,7 +131,7 @@ export default function UserProfile() {
 
   async function setUpRecommended() {
     try {
-      const response = await fetch(`/api/v1/users/${userId}/recommended`, {
+      const response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/users/${userId}/recommended`, {
         headers: {
         },
       });
@@ -178,7 +178,7 @@ export default function UserProfile() {
       const formData = new FormData()
       formData.append("file", file)
 
-      const response = await fetch(`/api/v1/users/${user.id}/upload`, {
+      const response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/users/${user.id}/upload`, {
         method: "POST",
         body: formData,
       })
@@ -215,7 +215,7 @@ export default function UserProfile() {
   // Función para eliminar la foto de perfil
   const handleDeleteAvatar = async () => {
     try {
-      const response = await fetch(`/api/v1/users/${user.id}/delete`, {
+      const response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/users/${user.id}/delete`, {
         method: "DELETE",
       })
 

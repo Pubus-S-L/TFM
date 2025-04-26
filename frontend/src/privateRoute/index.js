@@ -8,7 +8,7 @@ const PrivateRoute = ({ children }) => {
     const [isValid, setIsValid] = useState(null);
     const [message, setMessage] = useState(null);
     if (jwt) {
-        fetch(`/api/v1/auth/validate?token=${jwt}`, {
+        fetch(`https://tfm-m1dn.onrender.com/api/v1/auth/validate?token=${jwt}`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',

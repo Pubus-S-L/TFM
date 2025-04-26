@@ -23,7 +23,7 @@ function ChatList() {
     useEffect(() => {
       setLoading(true)
       // Cargar lista de chats del usuario
-      fetch(`/api/v1/chat/users/${currentUser.id}/chats`)
+      fetch(`https://tfm-m1dn.onrender.com/api/v1/chat/users/${currentUser.id}/chats`)
         .then(response => response.json())
         .then(data => {
             console.log('DATA', data);
@@ -46,7 +46,7 @@ function ChatList() {
 
     // Función para obtener mensajes no leídos
     const fetchUnreadMessages = (chatId) => {
-      fetch(`/api/v1/message/${chatId}/unread/${currentUser.id}`)
+      fetch(`https://tfm-m1dn.onrender.com/api/v1/message/${chatId}/unread/${currentUser.id}`)
         .then(response => response.json())
         .then(data => {
           setUnreadMessages(prev => ({
@@ -63,7 +63,7 @@ function ChatList() {
       
       // Marcar mensajes como leídos
       if (unreadMessages[chatId]) {
-        fetch(`/api/v1/message/${chatId}/markread/${currentUser.id}`, {
+        fetch(`https://tfm-m1dn.onrender.com/api/v1/message/${chatId}/markread/${currentUser.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
@@ -117,7 +117,7 @@ function ChatList() {
 
     useEffect(() => {
       chats.forEach(chat => {
-        fetch(`/api/v1/message/${chat.id}/messages`)
+        fetch(`https://tfm-m1dn.onrender.com/api/v1/message/${chat.id}/messages`)
           .then(response => response.json())
           .then(data => {
             if (data.length > 0) {
@@ -141,7 +141,7 @@ function ChatList() {
         timestamp: new Date().toISOString(),
       }
   
-      fetch(`/api/v1/message/${selectedChatId}`, {
+      fetch(`https://tfm-m1dn.onrender.com/api/v1/message/${selectedChatId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -16,7 +16,7 @@ export default function Papers() {
   
   async function setUpTypes() {
     let types = await (
-      await fetch(`/api/v1/papers/types`, {
+      await fetch(`https://tfm-m1dn.onrender.com/api/v1/papers/types`, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -51,7 +51,7 @@ export default function Papers() {
       for(const paperType of typesSelected){
         console.log(paperType)
         let papersByType = await (
-          await fetch(`/api/v1/papers/types/${paperType}`, {
+          await fetch(`https://tfm-m1dn.onrender.com/api/v1/papers/types/${paperType}`, {
             headers: {
               "Content-Type": "application/json",
             },
@@ -62,7 +62,7 @@ export default function Papers() {
     }
   
     let papersFiltered = await (
-      await fetch(`/api/v1/papers?search=${searchTerm}`, {
+      await fetch(`https://tfm-m1dn.onrender.com/api/v1/papers?search=${searchTerm}`, {
         headers: {
           "Content-Type": "application/json",
         },

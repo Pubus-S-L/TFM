@@ -33,7 +33,7 @@ export default function LoginLinkedIn() {
         const reqBody = { code };
         setMessage(null);
         try {
-          const response = await fetch("/api/v1/auth/loginLinkedIn", {
+          const response = await fetch("https://tfm-m1dn.onrender.com/api/v1/auth/loginLinkedIn", {
             headers: { "Content-Type": "application/json" },
             method: "POST",
             body: JSON.stringify(reqBody),

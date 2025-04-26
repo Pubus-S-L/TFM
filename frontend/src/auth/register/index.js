@@ -15,7 +15,7 @@ export default function Register() {
     request["authority"] = 'user';
     let state = "";
 
-    fetch("/api/v1/auth/signup", {
+    fetch("https://tfm-m1dn.onrender.com/api/v1/auth/signup", {
       headers: { "Content-Type": "application/json" },
       method: "POST",
       body: JSON.stringify(request),
@@ -26,7 +26,7 @@ export default function Register() {
           username: request.username,
           password: request.password,
         };
-        fetch("/api/v1/auth/signin", {
+        fetch("https://tfm-m1dn.onrender.com/api/v1/auth/signin", {
           headers: { "Content-Type": "application/json" },
           method: "POST",
           body: JSON.stringify(loginRequest),

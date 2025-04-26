@@ -14,7 +14,7 @@ export default function UserListAdmin() {
   const [visible, setVisible] = useState(false);
   const [users, setUsers] = useFetchState(
     [],
-    `/api/v1/users`,
+    `https://tfm-m1dn.onrender.com/api/v1/users`,
     jwt,
     setMessage,
     setVisible
@@ -43,7 +43,7 @@ export default function UserListAdmin() {
               aria-label={"delete-" + user.id}
               onClick={() =>
                 deleteFromList(
-                  `/api/v1/users/${user.id}`,
+                  `https://tfm-m1dn.onrender.com/api/v1/users/${user.id}`,
                   user.id,
                   [users, setUsers],
                   [alerts, setAlerts],

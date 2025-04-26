@@ -9,7 +9,7 @@ export default function AboutUs() {
 
     async function setUp() {
         try {
-            let response = await fetch(`/api/v1/company`, {
+            let response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/company`, {
                 method: "GET",
                 headers: {
                     Accept: "application/json",
