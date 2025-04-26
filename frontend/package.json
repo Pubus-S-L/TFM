@@ -83,6 +83,7 @@
     "vaul": "^0.9.6",
     "web-vitals": "^3.1.1",
     "websocket": "^1.0.35",
+    "xlsx": "^0.18.5",
     "zod": "^3.24.1"
   },
   "devDependencies": {
