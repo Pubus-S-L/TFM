@@ -1,24 +1,33 @@
-FROM node:23-alpine as builder
+# Etapa 1: Build de la app
+FROM node:20-alpine AS build
 
 WORKDIR /app
 
-COPY package*.json .
-
+# Copiamos package.json e instalamos dependencias
+COPY package.json package-lock.json ./
 RUN npm install
 
+# Copiamos todo el código
 COPY . .
 
-RUN --mount=type=secret,id=openai_api_key,env=VITE_OPENAI_API_KEY \
-    --mount=type=secret,id=websocket_server,env=VITE_WS_URI npm run build
+# Pasamos la API KEY como variable de entorno para el build
+ARG REACT_APP_OPENAI_API_KEY
+ENV REACT_APP_OPENAI_API_KEY=${OPENAI_API_KEY}
 
-FROM node:23-alpine
+# Construimos la app de React
+RUN npm run build
 
-RUN npm i -g serve
+# Etapa 2: Servir la app con nginx
+FROM nginx:stable-alpine
 
-WORKDIR /app
+# Copiamos la build generada en la imagen de nginx
+COPY --from=build /app/dist /usr/share/nginx/html
 
-COPY --from=builder /app/dist /app/dist
+# Copiamos un nginx.conf personalizado (opcional, si quieres configurar mejor nginx)
+# COPY nginx.conf /etc/nginx/nginx.conf
 
-EXPOSE 3000
+# Exponemos el puerto 80
+EXPOSE 80
 
-CMD ["serve", "-s", "/app/dist"]
+# Iniciamos nginx
+CMD ["nginx", "-g", "daemon off;"]
