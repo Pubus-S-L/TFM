@@ -31,15 +31,10 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.samples.pubus.configuration.jwt.AuthEntryPointJwt;
 import org.springframework.samples.pubus.configuration.jwt.AuthTokenFilter;
-//import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
-// import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationProvider;
-// import org.springframework.security.oauth2.client.web.OAuth2LoginConfigurer;
-// import org.springframework.security.oauth2.client.web.OAuth2LoginConfigurer.AuthorizationEndpointConfig;
-// import org.springframework.security.oauth2.client.web.OAuth2LoginConfigurer.RedirectUriConfigurer;
 
 
 @Configuration
@@ -68,33 +63,38 @@ public class SecurityConfiguration {
 	}
 
 
-   @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    @Bean
+     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(AbstractHttpConfigurer::disable)
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.POST, "/api/v1/auth/signup").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/v1/auth/signin").permitAll()
-                .requestMatchers("/**").permitAll()
-            )
-            .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()));
-
+            .cors(cors -> cors.configurationSource(request -> {
+                CorsConfiguration config = new CorsConfiguration();
+                config.addAllowedOrigin("https://tfm-pubus.onrender.com"); // Origen permitido
+                config.addAllowedMethod("*"); // Permitir todos los métodos HTTP
+                config.addAllowedHeader("*"); // Permitir todos los encabezados
+                config.setAllowCredentials(true); // Permitir credenciales
+                return config;
+            }))
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .headers((headers) -> headers.frameOptions((frameOptions) -> frameOptions.disable()));
+            
         return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://tfm-pubus.onrender.com"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true);
+        configuration.addAllowedOrigin("https://tfm-pubus.onrender.com"); // Origen permitido (frontend)
+        configuration.addAllowedMethod("*"); // Permitir todos los métodos HTTP
+        configuration.addAllowedHeader("*"); // Permitir todos los encabezados
+        configuration.setAllowCredentials(true); // Permitir credenciales
         configuration.setExposedHeaders(Arrays.asList("Authorization"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/**", configuration); // Aplica a todas las rutas
         return source;
     }
+
 
 
 	@Bean

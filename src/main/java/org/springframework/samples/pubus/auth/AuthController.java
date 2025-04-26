@@ -185,6 +185,4 @@ public class AuthController {
 		authService.createUser(signUpRequest);
 		return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
 	}
-
-
 }
