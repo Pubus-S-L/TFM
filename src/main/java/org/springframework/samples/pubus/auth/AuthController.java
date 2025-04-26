@@ -30,7 +30,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.security.authentication.BadCredentialsException;
 
-@CrossOrigin("*")
 @RestController
 @RequestMapping("/api/v1/auth")
 @Tag(name = "Authentication", description = "The Authentication API based on JWT")
@@ -178,6 +177,7 @@ public class AuthController {
 	
 	@PostMapping("/signup")	
 	public ResponseEntity<MessageResponse> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+		System.out.println("Signup request received: " + signUpRequest.getUsername());
 		if (userService.existsUser(signUpRequest.getUsername()).equals(true)) {
 			return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
 		}

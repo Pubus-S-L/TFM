@@ -28,6 +28,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.samples.pubus.configuration.jwt.AuthEntryPointJwt;
 import org.springframework.samples.pubus.configuration.jwt.AuthTokenFilter;
 //import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -73,7 +74,9 @@ public class SecurityConfiguration {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/**").permitAll() // Permitir acceso público a todas las rutas
+                .requestMatchers(HttpMethod.POST, "/api/v1/auth/signup").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/auth/signin").permitAll()
+                .requestMatchers("/**").permitAll()
             )
             .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()));
 
