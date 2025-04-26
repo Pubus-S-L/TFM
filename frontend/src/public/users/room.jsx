@@ -1,24 +1,83 @@
 import React, { useState, useEffect } from 'react';
 import Chat from './messages.jsx';
 import tokenService from "../../services/token.service";
-import '../../static/css/user/chatList.css'; // We'll create this file for styling
+import { Search, Send, MessageSquare } from "lucide-react"
+import { Button } from "../../components/ui/button.tsx"
+import { Input } from "../../components/ui/input.tsx"
+import '../../static/css/user/chatList.css'; 
+
 
 function ChatList() {
     const currentUser = tokenService.getUser();
     const [chats, setChats] = useState([]);
     const [selectedChatId, setSelectedChatId] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [lastMessages, setLastMessages] = useState({});
+    const [loading, setLoading] = useState(true)
+    const [messages, setMessages] = useState({})
+    const [newMessage, setNewMessage] = useState("")
+    const [imageUrl, setImageUrl] = useState("");
+    const [unreadMessages, setUnreadMessages] = useState({});
+    const[hasUnreadChats, setHasUnreadChats] = useState(false);
   
     useEffect(() => {
+      setLoading(true)
       // Cargar lista de chats del usuario
       fetch(`/api/v1/chat/users/${currentUser.id}/chats`)
         .then(response => response.json())
         .then(data => {
             console.log('DATA', data);
             setChats(data);
+            setLoading(false)
+            
+            // Obtener los mensajes no leídos para cada chat
+            data.forEach(chat => {
+              fetchUnreadMessages(chat.id);
+            });
         })
         .catch(error => console.error("Error fetching chats:", error));
+        setLoading(false)
     }, [currentUser]);
+
+    useEffect(() => {
+      const anyUnread = Object.values(unreadMessages).some(count => count > 0);
+      setHasUnreadChats(anyUnread);
+    }, [unreadMessages]);
+
+    // Función para obtener mensajes no leídos
+    const fetchUnreadMessages = (chatId) => {
+      fetch(`/api/v1/message/${chatId}/unread/${currentUser.id}`)
+        .then(response => response.json())
+        .then(data => {
+          setUnreadMessages(prev => ({
+            ...prev,
+            [chatId]: data.length > 0
+          }));
+        })
+        .catch(error => console.error("Error fetching unread messages:", error));
+    };
+
+    // Marcar mensajes como leídos cuando se selecciona un chat
+    const handleSelectChat = (chatId) => {
+      setSelectedChatId(chatId);
+      
+      // Marcar mensajes como leídos
+      if (unreadMessages[chatId]) {
+        fetch(`/api/v1/message/${chatId}/markread/${currentUser.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(() => {
+          setUnreadMessages(prev => ({
+            ...prev,
+            [chatId]: false
+          }));
+        })
+        .catch(error => console.error("Error marking messages as read:", error));
+      }
+    };
 
     // Filter chats based on search term
     const filteredChats = chats.filter(chat => {
@@ -29,8 +88,8 @@ function ChatList() {
     });
 
     const getLastMessage = (chat) => {
-      // Placeholder for last message - in a real app, you would get this from your chat data
-      return chat.lastMessage || "No messages yet";
+      const lastMsg = lastMessages[chat.id];
+      return lastMsg ? lastMsg.content : "No messages yet";
     };
 
     const formatTime = (timestamp) => {
@@ -40,67 +99,167 @@ function ChatList() {
       return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
     };
 
+    const formatMessageTime = (timestamp) => {
+      if (!timestamp) return ""
+      const date = new Date(timestamp)
+      return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    }
+
     const getUserDisplayName = (user) => {
       if (!user) return "Unknown User";
       return user.name || user.username || user.email || `User ${user.id}`;
     };
+
+    const getUserProfileImage = (user) => {
+      if (!user || !user.profilePicture) return null;
+      return "http://localhost:8080/" + user.profilePicture;
+    };
+
+    useEffect(() => {
+      chats.forEach(chat => {
+        fetch(`/api/v1/message/${chat.id}/messages`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.length > 0) {
+              setLastMessages(prev => ({
+                ...prev,
+                [chat.id]: data[data.length - 1]
+              }));
+            }
+          })
+          .catch(err => console.error("Error cargando mensajes:", err));
+      });
+    }, [chats]);
+
+    const handleSendMessage = () => {
+      if (!newMessage.trim() || !selectedChatId) return
+  
+      const messageData = {
+        chatId: selectedChatId,
+        sender: currentUser.id,
+        content: newMessage,
+        timestamp: new Date().toISOString(),
+      }
+  
+      fetch(`/api/v1/message/${selectedChatId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(messageData),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          // Add the new message to the messages state
+          setMessages((prev) => ({
+            ...prev,
+            [selectedChatId]: [...(prev[selectedChatId] || []), data],
+          }))
+  
+          // Update last message
+          setLastMessages((prev) => ({
+            ...prev,
+            [selectedChatId]: data,
+          }))
+  
+          // Clear input
+          setNewMessage("")
+        })
+        .catch((error) => console.error("Error sending message:", error))
+    }
+  
   
     return (
-      <div className="chat-container">
+      <div className="chat-container mt-3">
+        {/* Sidebar */}
         <div className="chat-sidebar">
-          <div className="chat-header">
-            <h2>Conversations</h2>
-            <div className="search-container">
-              <input
-                type="text"
-                placeholder="Search conversations..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
-              />
-              <i className="search-icon">🔍</i>
-            </div>
+        <div className="chat-header">
+          <h2 style={{ color: 'black' }}>Conversations</h2>
+          <div className="search-container">
+          <Search className="search-icon" size={16} />
+          <div style={{ marginLeft: '20px' }}>
+          <Input
+            type="text"
+            placeholder="Search conversations..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="border-none search-input"
+            style={{border: "none !important"}}
+            withBorder={false} 
+          />
           </div>
-          
+        </div>
+        </div>
+  
           <div className="chat-list">
-            {filteredChats.length > 0 ? (
-              filteredChats.map(chat => {
-                const otherUser = chat.users.find(u => u.id !== currentUser.id);
-                const isActive = selectedChatId === chat.id;
-                
-                return (
-                  <div 
-                    key={chat.id} 
-                    className={`chat-item ${isActive ? 'active' : ''}`}
-                    onClick={() => setSelectedChatId(chat.id)}
-                  >
-                    <div className="avatar">
-                      {/* Use the first letter of the user's name as avatar placeholder */}
-                      {getUserDisplayName(otherUser).charAt(0).toUpperCase()}
-                    </div>
-                    <div className="chat-info">
-                      <div className="chat-top-row">
-                        <span className="chat-name">{getUserDisplayName(otherUser)}</span>
-                        <span className="chat-time">{formatTime(chat.lastMessageTime)}</span>
+            {loading ? (
+              <div className="loading-container">
+                <div className="loading-skeleton">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="loading-item">
+                      <div className="loading-avatar"></div>
+                      <div className="loading-content">
+                        <div className="loading-line loading-line-name"></div>
+                        <div className="loading-line loading-line-message"></div>
                       </div>
-                      <div className="chat-bottom-row">
-                        <p className="last-message">{getLastMessage(chat)}</p>
-                        {chat.unreadCount > 0 && (
-                          <span className="unread-badge">{chat.unreadCount}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : filteredChats.length > 0 ? (
+              filteredChats.map((chat) => {
+                const otherUser = chat.users.find((u) => u.id !== currentUser.id)
+                const isActive = selectedChatId === chat.id
+                const profileImageUrl = getUserProfileImage(otherUser);
+                const hasUnread = unreadMessages[chat.id];
+  
+                return (
+                  <div
+                    key={chat.id}
+                    className={`chat-item ${isActive ? "active" : ""}`}
+                    onClick={() => handleSelectChat(chat.id)}
+                  >
+                    <div className="avatar-container position-relative">
+                      <div className="avatar">
+                        {profileImageUrl ? (
+                          <img 
+                            src={profileImageUrl} 
+                            alt={getUserDisplayName(otherUser)}
+                            className="profile-image"
+                          />
+                        ) : (
+                          getUserDisplayName(otherUser).charAt(0).toUpperCase()
                         )}
                       </div>
                     </div>
+                    <div className="chat-info-container">
+                      <div className="chat-top-row">
+                        <span className="chat-name">{getUserDisplayName(otherUser)}</span>
+                        <span className="chat-time">{formatTime(lastMessages[chat.id]?.timestamp)}</span>
+                      </div>
+                      <div className="chat-bottom-row">
+                        <p className={`last-message ${hasUnread ? 'unread-message' : ''}`}>
+                          {getLastMessage(chat)}
+                        </p>
+                      </div>
+
+                      {/* Mueve esto FUERA de las filas, pero dentro de chat-info-container */}
+                      {hasUnread && (
+                      <div className="unread-dot">
+                        {chat.unreadCount > 9 ? '9+' : chat.unreadCount}
+                      </div>
+                    )}
+                    </div>
                   </div>
-                );
+                )
               })
             ) : (
-              <div className="no-chats">
-                {searchTerm ? "No conversations match your search" : "No conversations yet"}
-              </div>
+              <div className="no-chats">{searchTerm ? "No conversations match your search" : "No conversations yet"}</div>
             )}
           </div>
         </div>
-        
+  
+        {/* Main Chat Area */}
         <div className="chat-main">
           {selectedChatId ? (
             <Chat 
@@ -110,14 +269,16 @@ function ChatList() {
             />
           ) : (
             <div className="no-chat-selected">
-              <div className="placeholder-icon">💬</div>
+              <div className="placeholder-icon">
+                <MessageSquare size={48} />
+              </div>
               <h3>Select a conversation</h3>
               <p>Choose a conversation from the list to start chatting</p>
             </div>
           )}
         </div>
       </div>
-    );
+    )
   }
   
   function getReceiverFromChat(chat, currentUser) {

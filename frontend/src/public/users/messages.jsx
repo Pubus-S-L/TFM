@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
+import { Send, RefreshCw, Wifi, WifiOff } from 'lucide-react';
+import '../../static/css/user/chatMessage.css';
 import '../../static/css/user/chatMessage.css';
 
 function ChatMessage({ currentUser, chatId, receiver }) {
@@ -291,11 +293,17 @@ function ChatMessage({ currentUser, chatId, receiver }) {
       
       return `[${isFromCurrentUser ? 'MÍO' : 'OTRO'}] - Sender: ${senderInfo}`;
     };
+
+    const formatMessageTime = (timestamp) => {
+      if (!timestamp) return ""
+      const date = new Date(timestamp)
+      return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    }
   
     return (
       <div className="chat-message-container">
         <div className="chat-header">
-          <h3>{getReceiverDisplayName()}</h3>
+        <h3 style={{ color: 'black' }}>{getReceiverDisplayName()}</h3>
           <div className={`connection-status ${connectionStatus === 'Conectado' ? 'connected' : 'disconnected'}`}>
             {connectionStatus}
           </div>
@@ -320,9 +328,9 @@ function ChatMessage({ currentUser, chatId, receiver }) {
                   key={msg.id || index}
                   className={`message ${isMine ? 'outgoing' : 'incoming'}`}
                 >
-                  <div className="message-content">{msg.content}</div>
+                  <div className="message-content mr-4">{msg.content}</div>
                   <div className="message-time">
-                    {new Date(msg.timestamp).toLocaleTimeString()}
+                    <span className="message-time">{formatMessageTime(msg.timestamp)}</span>
                   </div>
                 </div>
               );

@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import like from "../../../static/images/like.png";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../components/ui/card.tsx"
+import { Input } from "../../../components/ui/input.tsx";
 
 export default function Papers() {
   let [papers, setPapers] = useState([]);
@@ -101,12 +102,15 @@ export default function Papers() {
         <div className="title-and-add">
           <h1 className="paper-list-title">Papers</h1>
         </div>
-        <input
+        <Input
           type="text"
           placeholder="Search papers"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="search-input"
+          style={{
+            maxWidth: "800px",
+          }}
         />
        
        <Card className="flex items-center mt-3 p-2 shadow-lg border border-gray-200 bg-white">
@@ -136,31 +140,33 @@ export default function Papers() {
       </Card>
         ) : papers && papers.length > 0 ? (
           papers.map((paper) => (
-            <Card key={paper.id} className="w-4/5 mx-auto mt-6 mb-1 shadow-lg border border-gray-200">
-              <CardHeader>
-                <CardTitle className="text-xl font-bold">{paper.title}</CardTitle>
-              </CardHeader>
-              <CardContent className="pb-0">
-                <CardDescription>
-                  <p><strong>Authors:</strong> {paper.authors}</p>
-                  <p><strong>Publication Year:</strong> {paper.publicationYear}</p>
-                  <p><strong>Type:</strong> {paper.type.name}</p>
-                  <strong className="paper-name" style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
-                {paper.likes != null && paper.likes > 0 ? paper.likes : null}
-                {paper.likes != null && paper.likes > 0 ? <img src={like} alt="Like" style={{ height: 15, width: 15 }} /> : null}
-                  </strong>
-                </CardDescription>
-              </CardContent>
-              <CardFooter className="flex justify-center gap-10">
-                <Link
-                  to={"/papers/" + paper.id}
-                  className="auth-button blue"
-                  style={{ textDecoration: "none" }}
-                >
-                  Details
-                </Link>
-              </CardFooter>
-            </Card>
+            <Link
+              key={paper.id}
+              to={"/papers/" + paper.id}
+              style={{ textDecoration: "none", display: "block", width: "100%" }}
+            >
+              <Card className="w-4/5 mx-auto mt-6 mb-1 shadow-lg border border-gray-200 hover:bg-gray-200 transition-colors">
+                <CardHeader>
+                  <CardTitle className="text-xl font-bold">{paper.title}</CardTitle>
+                </CardHeader>
+                <CardContent className="pb-0">
+                  <CardDescription>
+                    <p><strong>Authors:</strong> {paper.authors}</p>
+                    <p><strong>Publication Year:</strong> {paper.publicationYear}</p>
+                    <p><strong>Type:</strong> {paper.type.name}</p>
+                    <strong
+                      className="paper-name"
+                      style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}
+                    >
+                      {paper.likes != null && paper.likes > 0 ? paper.likes : null}
+                      {paper.likes != null && paper.likes > 0 ? (
+                        <img src={like} alt="Like" style={{ height: 15, width: 15 }} />
+                      ) : null}
+                    </strong>
+                  </CardDescription>
+                </CardContent>
+              </Card>
+            </Link>
           ))
           ) : (
             <Card className="w-full p-4 text-center">

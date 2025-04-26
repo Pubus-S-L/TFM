@@ -15,8 +15,9 @@
     justify-content: space-between;
     align-items: center;
     padding: 15px;
-    background-color: #f5f5f5;
+    background-color: #f5f5f5 !important;
     border-bottom: 1px solid #ddd;
+    position: relative;
   }
   
   .chat-header h3 {
@@ -28,6 +29,9 @@
     font-size: 12px;
     padding: 4px 8px;
     border-radius: 12px;
+  }
+  .message-content {
+    margin-right: 4rem; /* o el valor que prefieras */
   }
   
   .connection-status.connected {
@@ -123,4 +127,22 @@
   .send-button:disabled {
     background-color: #cccccc;
     cursor: not-allowed;
+  }
+
+  .refresh-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 5px;
+    border-radius: 4px;
+    transition: transform 0.2s ease;
+    z-index: 1; /* Asegura que el botón esté por encima de otros elementos */
+  }
+  
+  .refresh-button:active {
+    transform: rotate(360deg);
   }

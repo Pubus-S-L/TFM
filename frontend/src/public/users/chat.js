@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import secret from "../../secret.json"
 import "../../static/css/user/chat.css";
-// import CohereClient from "cohere-ai";
 
 const Chat = () => {
   let pathArray = window.location.pathname.split("/"); 
@@ -10,7 +8,6 @@ const Chat = () => {
   const [messages, setMessages] = useState([]); // Lista de mensajes del chat
   const [input, setInput] = useState(""); // Mensaje que escribe el usuario
   const apiKey = secret.OPENAI_API_KEY;
-  // const cohereKey = secret.COHERE_API_KEY;
 
   const prompt = async function createPrompt(userMessage) {
     const params = new URLSearchParams({ text: userMessage });
@@ -98,16 +95,16 @@ const Chat = () => {
   }, []);
 
   return (
-    <div className="chat-container">
-      <div className="chat-header">Chat con Pubus</div>
-      <div className="chat-messages">
+    <div className="pubus-chat-container">
+      <div className="pubus-chat-header">Chat con Pubus</div>
+      <div className="pubus-chat-messages">
       {messages.map((msg, index) => (
-        <div key={index} className={`message ${msg.sender}`}>
-          <div className="message-bubble">
+        <div key={index} className={`pubus-message ${msg.sender}`}>
+          <div className="pubus-message-bubble">
             {msg.text}
             {/* Mostrar referencia si existe */}
             {msg.sender === "bot" && msg.reference && (
-              <div className="reference">
+              <div className="pubus-reference">
                 📚 <strong>Referencia:</strong> {msg.reference}
               </div>
             )}
@@ -115,7 +112,7 @@ const Chat = () => {
         </div>
       ))}
       </div>
-      <div className="chat-footer">
+      <div className="pubus-chat-footer">
         <input
           type="text"
           value={input}

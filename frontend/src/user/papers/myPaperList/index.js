@@ -11,6 +11,7 @@ import { LoadingBar } from "../../../components/ui/loading-bar.tsx"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "../../../components/ui/sheet.tsx";
 import {PencilIcon, Trash2} from "lucide-react";
 import UserPaperEdit from "../myPaperEdit/index.js";
+import { Input } from "../../../components/ui/input.tsx";
 
 let exportTitles = []
 
@@ -226,18 +227,32 @@ useEffect(() => {
 
           {/* Search and Import by DOI */}
           <div style={{ display: "flex", marginBottom: "2rem" }}>
-            <form onSubmit={(event) => {
+            <form
+              onSubmit={(event) => {
                 event.preventDefault();
                 importPaperByDOI(searchTerm);
-            }} className="doi-form">
-              <input
+              }}
+              className="doi-form"
+              style={{ display: "flex", flex: 1 }} // Importante: el form también flex
+            >
+              <Input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Write down the DOI to import"
                 className="search-input"
+                style={{
+                  flex: 1,               // <-- el input se expande todo lo que pueda
+                  textAlign: "left",
+                  paddingLeft: "0.5rem",
+                  minWidth: "250px",     // <-- un mínimo para que siempre sea grande
+                }}
               />
-              <button type="submit" className="auth-button pink">
+              <button
+                type="submit"
+                className="auth-button pink"
+                style={{ marginLeft: "8px", whiteSpace: "nowrap" }} // espacio entre input y botón
+              >
                 Import by DOI
               </button>
             </form>

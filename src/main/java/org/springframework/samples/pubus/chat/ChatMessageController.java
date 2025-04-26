@@ -15,6 +15,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -46,5 +47,17 @@ public class ChatMessageController {
     @GetMapping("/{chatId}/messages")
     public ResponseEntity<List<ChatMessage>> getChatHistory(@PathVariable Integer chatId) {
         return ResponseEntity.ok(messageService.getChatMessages(chatId));
+    }
+
+    @GetMapping("/{chatId}/unread/{userId}")
+    public ResponseEntity<List<ChatMessage>> getUnreadMessages(@PathVariable Integer chatId, @PathVariable Integer userId) {
+        return ResponseEntity.ok(messageService.getUnreadMessagesByChatIdAndUserId(chatId, userId));
+    }
+
+    // Nuevo endpoint para marcar mensajes como leídos
+    @PutMapping("/{chatId}/markread/{userId}")
+    public ResponseEntity<?> markMessagesAsRead(@PathVariable Integer chatId, @PathVariable Integer userId) {
+        messageService.markMessagesAsRead(chatId, userId);
+        return ResponseEntity.ok().build();
     }
 }

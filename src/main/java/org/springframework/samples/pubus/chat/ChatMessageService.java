@@ -7,40 +7,35 @@ import java.util.Optional;
 import org.springframework.samples.pubus.user.User;
 import org.springframework.samples.pubus.user.UserRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public class ChatMessageService {
     
     private final ChatMessageRepository messageRepository;
-    //private final ChatRoomRepository chatRoomRepository;
-    //private final UserRepository userRepository;
 
     public ChatMessageService(ChatMessageRepository messageRepository) {
         this.messageRepository = messageRepository;
-        //this.chatRoomRepository = chatRoomRepository;
-        //this.userRepository = userRepository;
     }
-
-    // public void saveMessage(Message message, Integer roomId) {
-    //     ChatMessage chatMessage = new ChatMessage();
-    //     chatMessage.setCreatedDate(LocalDateTime.now());
-    //     chatMessage.setMessage(message.getMessage());
-    //     Optional<User> user = userRepository.findByUsername(message.getSenderName());
-    //     chatMessage.setMessageCreator(user.get());
-    //     ChatRoom chatRoom = this.chatRoomRepository.findById(roomId).get();
-    //     chatMessage.setChatRoom(chatRoom);
-    //     this.messageRepository.save(chatMessage);
-    // }
-    // public List<ChatMessage> getAllMessagesFromRoom(Integer roomId) {
-    //     return this.messageRepository.findByChatRoomId(roomId);
-    // }
 
     public List<ChatMessage> getChatMessages(Integer chatId){
         return this.messageRepository.findByChatIdOrderByTimestampAsc(chatId);
     }
     public void save(ChatMessage chatMessage){
+        chatMessage.setIsRead(false);
         this.messageRepository.save(chatMessage);
     }
 
+    public List<ChatMessage> getUnreadMessagesByChatIdAndUserId(Integer chatId, Integer userId) {
+        // Buscar mensajes en el chat especificado que no fueron enviados por el usuario y que no están leídos
+        return messageRepository.findByChatIdAndSenderIdNotAndIsReadFalse(chatId, userId);
+    }
+    
+    // Nuevo método para marcar mensajes como leídos
+    @Transactional
+    public void markMessagesAsRead(Integer chatId, Integer userId) {
+        // Marcar como leídos todos los mensajes del chat que no fueron enviados por el usuario
+        messageRepository.updateMessagesSetReadByChatIdAndSenderIdNot(chatId, userId);
+    }
 
 }

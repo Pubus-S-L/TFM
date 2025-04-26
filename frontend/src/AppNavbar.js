@@ -9,6 +9,7 @@ function AppNavbar() {
     const [username, setUsername] = useState("");
     const jwt = tokenService.getLocalAccessToken();
     const [collapsed, setCollapsed] = useState(true);
+    const [hasUnreadChats, setHasUnreadChats] = useState(false);
 
     const toggleNavbar = () => setCollapsed(!collapsed);
 
@@ -16,6 +17,22 @@ function AppNavbar() {
         if (jwt) {
             setRoles(jwt_decode(jwt).authorities);
             setUsername(jwt_decode(jwt).sub);
+            const currentUser = tokenService.getUser();
+        fetch(`/api/v1/chat/users/${currentUser.id}/chats`)
+            .then(response => response.json())
+            .then(data => {
+                const fetchUnreadPromises = data.map(chat => 
+                    fetch(`/api/v1/message/${chat.id}/unread/${currentUser.id}`)
+                        .then(res => res.json())
+                        .then(messages => messages.length > 0) // true si hay mensajes no leídos
+                );
+                Promise.all(fetchUnreadPromises)
+                    .then(results => {
+                        const anyUnread = results.some(result => result === true);
+                        setHasUnreadChats(anyUnread);
+                    });
+            })
+            .catch(error => console.error("Error fetching unread chats:", error));
         }
     }, [jwt])
 
@@ -79,10 +96,15 @@ function AppNavbar() {
         userLogout = (
             <>
                 <NavItem>
-                    <NavLink style={{ color: "white" }} tag={Link} to="/chats">Chats</NavLink>
+                    <NavLink style={{ color: "white" }} tag={Link} to="/papers">Papers</NavLink>
                 </NavItem>
                 <NavItem>
-                    <NavLink style={{ color: "white" }} tag={Link} to="/papers">Papers</NavLink>
+                    <NavLink style={{ color: "white", position: "relative" }} tag={Link} to="/chats">
+                        Chats
+                        {hasUnreadChats && (
+                        <span style={{ marginLeft: '6px' }}>🔔</span>
+                        )}
+                    </NavLink>
                 </NavItem>
                 {/* <NavItem>
                     <NavLink style={{ color: "white" }} id="faq" tag={Link} to="/faq">FAQ</NavLink>

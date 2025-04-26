@@ -24,10 +24,11 @@ export default function UserDetail() {
     const totalPages = Math.ceil(papers.length / itemsPerPage);
     const [imageUrl, setImageUrl] = useState("");
     const currentUser = tokenService.getUser()
-    const [otherUserId,setOtherUserId] = useState(currentUser.id);
+    const [otherUserId,setOtherUserId] = useState(currentUser ? currentUser.id : null);
     const [room, setRoom] = useState(null)
     const [roomExist, setRoomExist] = useState(false)
     const [hasFetched, setHasFetched] = useState(false);
+    const [contactSheetOpen, setContactSheetOpen] = useState(false);
   
     // Reiniciar la página si la lista de papers cambia
     useEffect(() => {
@@ -177,14 +178,22 @@ export default function UserDetail() {
                       You can ask anything about papers published by {user?.firstName} {user?.lastName}
                     </SheetDescription>
                   </SheetHeader>
-                <div>
+                  <div style={{ width: '100%' }}>
                   <Chat/>
                 </div>
                 </SheetContent>
               </Sheet>
-              <Sheet>
+              <Sheet open={contactSheetOpen} onOpenChange={setContactSheetOpen}>
                 <SheetTrigger asChild>
-                  <Button onClick={() => {if (!roomExist) handleCreateChat()}}
+                  <Button onClick={(e) => {
+                    if (!currentUser){
+                      e.preventDefault();
+                      alert("You have to log in to use this feature");
+                    }else{
+                      if (!roomExist) handleCreateChat()
+                        setContactSheetOpen(true)
+                    }
+                  }}
                   className="bg-black text-white hover:bg-gray-800 transition-colors">
                     Contact Me
                   </Button>
@@ -202,7 +211,6 @@ export default function UserDetail() {
                 ): (<p>Loading chat...</p>)} 
                 </SheetContent>
               </Sheet>
-
             </div>
         </div>
       </div>
