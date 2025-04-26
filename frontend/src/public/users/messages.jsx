@@ -38,7 +38,7 @@ function ChatMessage({ currentUser, chatId, receiver }) {
   
         setConnectionStatus('Conectando...');
   
-        const socket = new SockJS('http://localhost:3000/ws');
+        const socket = new SockJS('https://tfm-m1dn.onrender.com/ws');
         const client = new Client({
           webSocketFactory: () => socket,
           debug: function (str) {
