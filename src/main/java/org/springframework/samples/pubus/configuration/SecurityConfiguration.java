@@ -75,7 +75,9 @@ public class SecurityConfiguration {
                 return config;
             }))
             .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+            .authorizeHttpRequests(auth -> auth
+            .requestMatchers(HttpMethod.POST, "/api/v1/auth/signup").permitAll()
+            .anyRequest().permitAll())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .headers((headers) -> headers.frameOptions((frameOptions) -> frameOptions.disable()));
             
