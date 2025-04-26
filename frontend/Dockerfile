@@ -12,7 +12,8 @@ COPY . .
 
 # Pasamos la API KEY como variable de entorno para el build
 ARG REACT_APP_OPENAI_API_KEY
-ENV REACT_APP_OPENAI_API_KEY=${OPENAI_API_KEY}
+ENV REACT_APP_OPENAI_API_KEY=${REACT_APP_OPENAI_API_KEY}
+
 
 # Construimos la app de React
 RUN npm run build

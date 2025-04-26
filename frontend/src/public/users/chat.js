@@ -7,7 +7,7 @@ const Chat = () => {
   const [userId,setUserId] = useState(pathArray[2]);
   const [messages, setMessages] = useState([]); // Lista de mensajes del chat
   const [input, setInput] = useState(""); // Mensaje que escribe el usuario
-  const apiKey = secret.OPENAI_API_KEY;
+  const apiKey = process.env.REACT_APP_OPENAI_API_KEY;
 
   const prompt = async function createPrompt(userMessage) {
     const params = new URLSearchParams({ text: userMessage });
