@@ -41,7 +41,7 @@ let exportTitles = []
   // };
 
   function removePaper(id) {
-    fetch(`https://tfm-m1dn.onrender.com/api/v1/papers/${id}`, {
+    fetch(`https://pubus.onrender.com/api/v1/papers/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${jwt}`,
@@ -69,7 +69,7 @@ let exportTitles = []
   async function setUp() {
     setIsLoading(true);
     try {
-      let response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/papers?userId=${user.id}`, {
+      let response = await fetch(`https://pubus.onrender.com/api/v1/papers?userId=${user.id}`, {
         headers: {
           Authorization: `Bearer ${jwt}`,
           "Content-Type": "application/json",
@@ -118,7 +118,7 @@ let exportTitles = []
         setTotalSteps(jsonData.length || 100); 
 
         for (let i = 0; i < jsonData.length; i++) {
-            await fetch(`https://tfm-m1dn.onrender.com/api/v1/papers/importPaper/${user.id}`, {
+            await fetch(`https://pubus.onrender.com/api/v1/papers/importPaper/${user.id}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(jsonData[i]),
@@ -156,7 +156,7 @@ useEffect(() => {
 
   function importPaperByDOI(searchTerm) {
     const params = new URLSearchParams({ searchTerm: searchTerm });
-    fetch(`https://tfm-m1dn.onrender.com/api/v1/papers/${user.id}/importByDOI?${params.toString()}`, {
+    fetch(`https://pubus.onrender.com/api/v1/papers/${user.id}/importByDOI?${params.toString()}`, {
         method: "POST",
         headers: {
             Authorization: `Bearer ${jwt}`,
