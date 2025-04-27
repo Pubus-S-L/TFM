@@ -38,7 +38,7 @@ function ChatMessage({ currentUser, chatId, receiver }) {
   
         setConnectionStatus('Conectando...');
   
-        const socket = new SockJS('https://pubus.onrender.com/ws');
+        const socket = new SockJS('https://tfm-m1dn.onrender.com/ws');
         const client = new Client({
           webSocketFactory: () => socket,
           debug: function (str) {
@@ -114,7 +114,7 @@ function ChatMessage({ currentUser, chatId, receiver }) {
   
     // Función específica para cargar mensajes del servidor
     const loadMessages = () => {
-      fetch(`https://pubus.onrender.com/api/v1/message/${chatId}/messages`)
+      fetch(`https://tfm-m1dn.onrender.com/api/v1/message/${chatId}/messages`)
         .then(response => response.json())
         .then(data => {
           console.log("Mensajes cargados:", data);
