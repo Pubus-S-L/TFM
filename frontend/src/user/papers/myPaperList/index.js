@@ -179,7 +179,7 @@ useEffect(() => {
       let prompt = "You are an enthusiastic researcher and you write a social media post about your new paper"+title+"about"+abstract+"";
       const model = "gpt-3.5-turbo-instruct";
       let maxTokens = 300;
-      const url = `http://localhost:3000/papers/${paperId}`;
+      const url = `https://pubus.onrender.com/papers/${paperId}`;
       if(red_social==="twitter"){
         prompt = "You are an enthusiastic researcher and you write a social media post on 190 characteres about your new paper"+title+"about"+abstract+"";
       }

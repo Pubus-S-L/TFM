@@ -80,7 +80,7 @@ export default function UserProfile() {
         const errorData = await response.json();
         throw new Error(errorData.message);
       }
-      const imageData = await response.json();
+      const imageData = await response.blob();
       const imageUrl = URL.createObjectURL(imageData);
       setAvatarSrc(imageUrl);
 
