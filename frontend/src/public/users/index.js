@@ -59,7 +59,6 @@ export default function UserDetail() {
             }
     
             let user = await response.json();
-            setImageUrl("http://localhost:8080/" + user.profilePicture);
             setUser(user);
         } catch (error) {
             console.error("Error during data fetching:", error);
@@ -91,8 +90,26 @@ export default function UserDetail() {
         }
     }
 
+    async function setUpAvatar() {
+      try {
+        const response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/users/${userId}/profileImage`, {
+          headers: {},
+        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message);
+        }
+        const imageData = await response.blob();
+        const imageUrl = URL.createObjectURL(imageData);
+        setImageUrl(imageUrl);
+  
+      } catch (error) {
+      }
+    }
+
     useEffect(() => {
         setUpPapers();
+        setUpAvatar();
     },  [userId]);
 
 

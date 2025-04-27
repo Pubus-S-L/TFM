@@ -41,7 +41,6 @@ export default function UserProfile() {
   useEffect(() => {
     if (user && user.id) {
       setUpUser();
-      setUpAvatar();
     } else {
       // Manejo de error si user.id no está disponible
       setMessage("Usuario no encontrado");
@@ -89,12 +88,6 @@ export default function UserProfile() {
       setModalShow(true);
     }
   }
-
-  useEffect(() => {
-    if (userId) {
-      setUpFavorite();
-    }
-  }, [userId]);
 
   async function saveProfile(updatedProfile) {
     console.log("Profile being sent:", updatedProfile);
@@ -147,6 +140,8 @@ export default function UserProfile() {
   useEffect(() => {
     if (userId) {
       setUpRecommended();
+      setUpFavorite();
+      setUpAvatar()
     }
   }, [userId]);
 
