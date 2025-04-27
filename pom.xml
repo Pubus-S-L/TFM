@@ -91,16 +91,22 @@
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>		
 		<!-- Databases - Use H2 by default -->		
-		<dependency>
+		<!-- <dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-		</dependency>
+		</dependency> -->
 		<!--dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<version>XXXX</version>
 			<scope>runtime</scope>
 		</dependency-->		
+		<!-- - Use MariaDB DataBase  -->
+		<dependency>
+			<groupId>org.mariadb.jdbc</groupId>
+			<artifactId>mariadb-java-client</artifactId>
+		</dependency>
+
 		<!-- caching -->
 		<dependency>
 			<groupId>javax.cache</groupId>
