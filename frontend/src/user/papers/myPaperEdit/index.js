@@ -5,6 +5,7 @@ import "bootstrap/dist/css/bootstrap.min.css"
 import tokenService from "../../../services/token.service"
 import { FileText, Upload, Trash2, Loader, X } from "lucide-react"
 import "../../../static/css/user/myPaperEdit.css"
+import { useNavigate } from 'react-router-dom';
 
 export default function UserPaperEdit({ id, onSave }) {
   // Estilo para los mensajes de error
@@ -40,6 +41,7 @@ export default function UserPaperEdit({ id, onSave }) {
   const [touchedFields, setTouchedFields] = useState({})
   // Estado para controlar el spinner de carga
   const [isSaving, setIsSaving] = useState(false)
+  const navigate = useNavigate();
 
   const validateField = (name, value, isEditing = false, isTouched = false) => {
     const field = paperEditFormInputs.find((input) => input.name === name)
@@ -356,7 +358,7 @@ export default function UserPaperEdit({ id, onSave }) {
         const submit = await response.json()
         if (submit.message) {
           setModalShow(true)
-        } else window.location.href = `/myPapers`
+        } else navigate('/myPapers');
       } else if (response.status === 400) {
         const errorData = await response.json()
         console.error("Errores de validación del backend:", errorData)

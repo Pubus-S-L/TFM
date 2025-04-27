@@ -14,11 +14,13 @@ import "../../static/css/user/myPaperEdit.css";
 import "../../static/css/auth/authButton.css";
 import tokenService from "../../services/token.service";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { useNavigate } from 'react-router-dom';
 
 
 export default function EditProfile() {
     const user = tokenService.getUser();
     const jwt = tokenService.getLocalAccessToken();
+    const navigate = useNavigate();
   
     const emptyItem = {
       id: null,
@@ -114,7 +116,7 @@ export default function EditProfile() {
           throw new Error(errorData.message);
         }
   
-        window.location.href = `/myProfile`;
+        navigate('/myProfile');
       } catch (error) {
         setMessage(error.message);
         setModalShow(true);

@@ -17,6 +17,7 @@ import useFetchState from "../../util/useFetchState";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { userEditFormInputs} from "./form/userEditFormInputs";
 import {userCreateFormInputs } from "./form/userCreateFormInputs";
+import { useNavigate } from 'react-router-dom';
 
 export default function UserEditAdmin() {
   let pathArray = window.location.pathname.split("/");
@@ -39,6 +40,7 @@ export default function UserEditAdmin() {
     const [isEdit, setIsEdit] = useState(false);
     const [authority, setAuthority] = useState([])
     const editUserFormRef = useRef();
+    const navigate = useNavigate();
   
     useEffect(() => {
       setUpUser();
@@ -148,7 +150,7 @@ export default function UserEditAdmin() {
           setMessage(response.message);
           setModalShow(true);
         }
-        else window.location.href = `/users`;
+        else navigate(`/users`);
       }
   
     const title = (

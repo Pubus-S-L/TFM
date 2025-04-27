@@ -10,6 +10,7 @@ import "../../styles/globals.css"
 import { SimpleProfileForm } from "./simpleForm.tsx";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "../../components/ui/sheet.tsx";
 import { UserIcon, PencilIcon } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 
 export default function UserProfile() {
@@ -27,6 +28,7 @@ export default function UserProfile() {
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 2;
   const totalPages = Math.ceil(favouritePapers.length / itemsPerPage);
+  const navigate = useNavigate();
 
   // Reiniciar la página si la lista de papers cambia
   useEffect(() => {
@@ -94,7 +96,7 @@ export default function UserProfile() {
       }
 
       setUserData(updatedProfile);
-      window.location.href = `/myProfile`
+      navigate('/myProfile');
     } catch (error) {
       setMessage(error.message);
       setModalShow(true);
@@ -193,7 +195,7 @@ export default function UserProfile() {
       // o crear una URL temporal para previsualización
       const newAvatarUrl = data.profilePicture || URL.createObjectURL(file)
       setAvatarSrc(newAvatarUrl)
-      window.location.href = `/myProfile`;
+      navigate('/myProfile');
 
 
       toast({

@@ -4,9 +4,11 @@ import tokenService from "../../services/token.service";
 import FormGenerator from "../../components/formGenerator/formGenerator";
 import { registerFormInputs } from "./form/registerFormInputs";
 import { useRef } from "react";
+import { useNavigate } from 'react-router-dom';
 
 export default function Register() {
-  const registerFormRef = useRef();      
+  const registerFormRef = useRef();   
+  const navigate = useNavigate();   
   
   async function handleSubmit({ values }) {
 
@@ -45,7 +47,7 @@ export default function Register() {
           else {
             tokenService.setUser(data);
             tokenService.updateLocalAccessToken(data.token);
-            window.location.href = "/papers";
+            navigate('/papers');
           }
         })
         .catch((message) => {

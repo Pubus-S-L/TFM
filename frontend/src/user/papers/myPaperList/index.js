@@ -12,6 +12,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import {PencilIcon, Trash2} from "lucide-react";
 import UserPaperEdit from "../myPaperEdit/index.js";
 import { Input } from "../../../components/ui/input.tsx";
+import { useNavigate } from 'react-router-dom';
 
 let exportTitles = []
 
@@ -33,6 +34,7 @@ let exportTitles = []
   const [importProgress, setImportProgress] = useState(0);
   // const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [selectedPaperId, setSelectedPaperId] = useState("");
+  const navigate = useNavigate();
 
   // const handleEditClick = (paperId) => {
   //   setSelectedPaperId(paperId);
@@ -127,7 +129,7 @@ let exportTitles = []
             setImportProgress(((i + 1) / jsonData.length) * 100);
         }
 
-        window.location.href = `/myPapers`;
+        navigate('/myPapers');
     } catch (error) {
         setMessage("Error importing papers.");
         setModalShow(true);
@@ -168,7 +170,7 @@ useEffect(() => {
         return response.json();
     })
     .then((data) => {
-        window.location.href = `/myPapers`;
+      navigate('/myPapers');
     });
 }
 
