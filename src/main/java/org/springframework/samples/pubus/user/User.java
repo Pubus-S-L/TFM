@@ -3,6 +3,7 @@ package org.springframework.samples.pubus.user;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -48,6 +49,12 @@ public class User extends BaseEntity {
 	String password;
 
 	String profilePicture;
+
+	@Lob
+    @Column(columnDefinition = "MEDIUMBLOB")
+    private byte[] profileImage;
+
+	private String profileImageType;
 
 	@NotNull
 	@ManyToOne(optional = false)

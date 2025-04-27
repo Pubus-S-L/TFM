@@ -164,43 +164,16 @@ public class UserService {
 
 	public User uploadProfilePicture(Integer userId, MultipartFile file) throws IOException {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-        // Crear carpeta si no existe
-        File uploadFolder = new File(uploadDir);
-        if (!uploadFolder.exists()) {
-            uploadFolder.mkdirs();
-        }
-
-		if (user.getProfilePicture() != null) {
-			// Si tiene foto, eliminarla del sistema de archivos
-			String oldFileName = user.getProfilePicture().replace("uploads/", "");
-			Path oldFilePath = Paths.get(uploadDir, oldFileName);
-			Files.deleteIfExists(oldFilePath);
-		}
-
-        // Guardar archivo en el servidor
-        String fileName = userId + "_" + file.getOriginalFilename() .replaceAll("[^\\p{ASCII}]", "") 
-        .replaceAll("\\s+", "_")
-        .replaceAll("[^a-zA-Z0-9._-]", "");;
-        Path filePath = Paths.get(uploadDir, fileName);
-        Files.write(filePath, file.getBytes());
-
-        // Guardar en la base de datos la ruta de la imagen
-        user.setProfilePicture("uploads/"+fileName);
+		user.setProfileImage(file.getBytes());
+		user.setProfileImageType(file.getContentType());
         return userRepository.save(user);
     }
 
     public void deleteProfilePicture(Integer userId) throws IOException {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-		if (user.getProfilePicture() != null) {
-			// Eliminar la imagen de perfil del sistema de archivos
-			String fileName = user.getProfilePicture().replace("uploads/", ""); 
-			Path filePath = Paths.get(uploadDir, fileName);
-			Files.deleteIfExists(filePath);
-	
-			// Eliminar la ruta de la imagen en la base de datos
-			user.setProfilePicture(null);
+		if (user.getProfileImage() != null) {
+			user.setProfileImage(null);
 			userRepository.save(user);
 		}
     }

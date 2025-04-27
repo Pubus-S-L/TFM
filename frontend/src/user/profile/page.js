@@ -20,7 +20,7 @@ export default function UserProfile() {
   const [modalShow, setModalShow] = useState(false);
   const [userId, setUserId] = useState(user.id);
   const [isUploading, setIsUploading] = useState(false)
-  const [avatarSrc, setAvatarSrc] = useState(user.profilePicture)
+  const [avatarSrc, setAvatarSrc] = useState()
   const fileInputRef = useRef(null)
   const [favouritePapers, setFavoritePapers] = useState([])
   const [recommendedPapers, setRecommendedPapers] = useState([])
@@ -41,6 +41,7 @@ export default function UserProfile() {
   useEffect(() => {
     if (user && user.id) {
       setUpUser();
+      setUpAvatar();
     } else {
       // Manejo de error si user.id no está disponible
       setMessage("Usuario no encontrado");
@@ -61,11 +62,29 @@ export default function UserProfile() {
 
       const userData = await response.json();
       setUserData(userData);
-      setAvatarSrc("http://localhost:8080/" + userData.profilePicture)
       setUserId(user.id);
 
     } catch (error) {
       setUserData({});
+      setMessage(error.message);
+      setModalShow(true);
+    }
+  }
+
+  async function setUpAvatar() {
+    try {
+      const response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/users/${userId}/profileImage`, {
+        headers: {},
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message);
+      }
+      const imageData = await response.json();
+      const imageUrl = URL.createObjectURL(imageData);
+      setAvatarSrc(imageUrl);
+
+    } catch (error) {
       setMessage(error.message);
       setModalShow(true);
     }
@@ -189,12 +208,7 @@ export default function UserProfile() {
         throw new Error("Error al subir la imagen")
       }
 
-      const data = await response.json()
-
-      // Actualizar la imagen con la URL devuelta por el servidor
-      // o crear una URL temporal para previsualización
-      const newAvatarUrl = data.profilePicture || URL.createObjectURL(file)
-      setAvatarSrc(newAvatarUrl)
+      await setUpAvatar()
       navigate('/myProfile');
 
 

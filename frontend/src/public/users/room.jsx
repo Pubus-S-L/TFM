@@ -110,10 +110,24 @@ function ChatList() {
       return user.name || user.username || user.email || `User ${user.id}`;
     };
 
-    const getUserProfileImage = (user) => {
-      if (!user || !user.profilePicture) return null;
-      return "http://localhost:8080/" + user.profilePicture;
-    };
+    const getUserProfileImage =
+      async (user) => {
+        try {
+          const response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/users/${user.id}/profileImage`);
+          if (response.ok) {
+            const imageBlob = await response.blob();
+            const imageUrl = URL.createObjectURL(imageBlob);
+            return imageUrl;
+          } else {
+            console.error('Error al obtener la imagen de perfil');
+            return null;
+          }
+        } catch (error) {
+          console.error('Error de red al obtener la imagen de perfil:', error);
+          // También podrías establecer una imagen por defecto aquí
+          return null;
+        }
+      };
 
     useEffect(() => {
       chats.forEach(chat => {
@@ -207,10 +221,10 @@ function ChatList() {
                 </div>
               </div>
             ) : filteredChats.length > 0 ? (
-              filteredChats.map((chat) => {
+              filteredChats.map(async (chat) => {
                 const otherUser = chat.users.find((u) => u.id !== currentUser.id)
                 const isActive = selectedChatId === chat.id
-                const profileImageUrl = getUserProfileImage(otherUser);
+                const profileImageUrl = await getUserProfileImage(otherUser);
                 const hasUnread = unreadMessages[chat.id];
   
                 return (

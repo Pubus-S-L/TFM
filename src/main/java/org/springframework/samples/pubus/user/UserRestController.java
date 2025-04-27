@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.pubus.auth.payload.response.MessageResponse;
 import org.springframework.samples.pubus.exceptions.AccessDeniedException;
@@ -136,6 +137,18 @@ class UserRestController {
         } catch (IOException e) {
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+	@GetMapping("/{id}/profileImage")
+    public ResponseEntity<byte[]> getProfilePicture(@PathVariable Integer id) {
+        User user = userService.findUser(id);
+        if (user.getProfileImage() == null) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(user.getProfileImageType()))
+            .body(user.getProfileImage());
     }
 
 

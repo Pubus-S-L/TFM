@@ -17,7 +17,7 @@ const onWebSocketClose = () => {
 const conectarWS = () => {
     onWebSocketClose();
     stompCliente = new StompJs.Client({
-        webSocketFactory: () => new WebSocket('ws://localhost:8080/websocket')
+        webSocketFactory: () => new WebSocket('ws://https://tfm-m1dn.onrender.com/websocket')
     });
     stompCliente.onConnect = onConnectSocket;
     stompCliente.onWebSocketClose = onWebSocketClose;
