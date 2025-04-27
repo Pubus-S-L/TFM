@@ -68,7 +68,7 @@ public class SecurityConfiguration {
         http
             .cors(cors -> cors.configurationSource(request -> {
                 CorsConfiguration config = new CorsConfiguration();
-                config.addAllowedOrigin("https://tfm-pubus.onrender.com"); // Origen permitido
+                config.addAllowedOrigin("https://pubus.onrender.com"); // Origen permitido
                 config.addAllowedMethod("*"); // Permitir todos los métodos HTTP
                 config.addAllowedHeader("*"); // Permitir todos los encabezados
                 config.setAllowCredentials(true); // Permitir credenciales
@@ -87,7 +87,7 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("https://tfm-pubus.onrender.com"); // Origen permitido (frontend)
+        configuration.addAllowedOrigin("https://pubus.onrender.com"); // Origen permitido (frontend)
         configuration.addAllowedMethod("*"); // Permitir todos los métodos HTTP
         configuration.addAllowedHeader("*"); // Permitir todos los encabezados
         configuration.setAllowCredentials(true); // Permitir credenciales

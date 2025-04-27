@@ -154,7 +154,7 @@ export default function UserPaperEdit({ id, onSave }) {
     }))
 
     // Luego enviar la solicitud al servidor para eliminar el archivo
-    fetch(`https://tfm-m1dn.onrender.com/api/v1/papers/${paperId}/delete/${id}`, {
+    fetch(`https://pubus.onrender.com/api/v1/papers/${paperId}/delete/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${jwt}`,
@@ -173,7 +173,7 @@ export default function UserPaperEdit({ id, onSave }) {
         setModalShow(true)
 
         // Si hay un error, restaurar el archivo en la UI
-        fetch(`https://tfm-m1dn.onrender.com/api/v1/papers/${paperId}`, {
+        fetch(`https://pubus.onrender.com/api/v1/papers/${paperId}`, {
           headers: {
             Authorization: `Bearer ${jwt}`,
           },
@@ -189,7 +189,7 @@ export default function UserPaperEdit({ id, onSave }) {
   }
   function setupPaper() {
     if (paperId !== "" && paper.id == null) {
-      const paper = fetch(`https://tfm-m1dn.onrender.com/api/v1/papers/${paperId}`, {
+      const paper = fetch(`https://pubus.onrender.com/api/v1/papers/${paperId}`, {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },
@@ -217,7 +217,7 @@ export default function UserPaperEdit({ id, onSave }) {
     }
 
     if (types.length === 0) {
-      fetch(`https://tfm-m1dn.onrender.com/api/v1/papers/types`, {
+      fetch(`https://pubus.onrender.com/api/v1/papers/types`, {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },

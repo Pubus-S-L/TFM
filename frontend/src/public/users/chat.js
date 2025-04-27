@@ -13,7 +13,7 @@ const Chat = () => {
     const params = new URLSearchParams({ text: userMessage });
     let data = [{}];
     try {
-        let response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/papers/users/${userId}/prompt?${params.toString()}`, {
+        let response = await fetch(`https://pubus.onrender.com/api/v1/papers/users/${userId}/prompt?${params.toString()}`, {
             method: "GET",
             headers: {
                 Accept: "application/json",

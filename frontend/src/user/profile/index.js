@@ -45,7 +45,7 @@ export default function EditProfile() {
   
     async function setUpUser() {
       try {
-        const response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/users/${userId}`, {
+        const response = await fetch(`https://pubus.onrender.com/api/v1/users/${userId}`, {
           headers: {
           },
         });
@@ -100,7 +100,7 @@ export default function EditProfile() {
 
         console.log(myuser)
   
-        const response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/users/${userId}`, {
+        const response = await fetch(`https://pubus.onrender.com/api/v1/users/${userId}`, {
           method: "PUT",
           headers: {
             Accept: "application/json",
