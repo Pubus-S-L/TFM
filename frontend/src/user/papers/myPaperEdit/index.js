@@ -329,17 +329,15 @@ export default function UserPaperEdit({ id, onSave }) {
     }
 
     const f = new FormData()
-    if (files != null) {
+     if (files && files.length > 0) { // Solo añadir 'files' si hay archivos
       for (let index = 0; index < files.length; index++) {
         f.append("files", files[index])
+        }
       }
-    } else {
-      const nofiles = []
-      f.append("files", nofiles)
-    }
-
+    
     f.append("paper", new Blob([JSON.stringify(mypaper)], { type: "application/json" }))
     f.append("userId", userId.toString())
+    
 
     try {
       console.log("FormData a enviar:", f); // Ver qué contiene el FormData
