@@ -328,77 +328,67 @@ export default function UserPaperEdit({ id, onSave }) {
       user: paper.user,
     }
 
-    const f = new FormData()
-     if (files && files.length > 0) { // Solo añadir 'files' si hay archivos
-      for (let index = 0; index < files.length; index++) {
-        f.append("files", files[index])
+    const f = new FormData();
+        if (files && files.length > 0) {
+            for (let index = 0; index < files.length; index++) {
+                f.append("files", files[index]);
+            }
         }
-      }
-    
-    f.append("paper", new Blob([JSON.stringify(mypaper)], { type: "application/json" }))
-    f.append("userId", userId.toString())
-    
 
-    try {
-      console.log("FormData a enviar:", f); // Ver qué contiene el FormData
-      
-      // Para ver el contenido del FormData (no es posible directamente)
-      console.log("Enviando petición POST/PUT a:", "/api/v1/papers" + (paperId !== "" ? "/" + paperId : ""));
-      console.log("Método:", mypaper.id ? "PUT" : "POST");
-      console.log("FormData a enviar:", f);
-      for (let pair of f.entries()) {
-        console.log(pair[0] + ': ' + pair[1]); 
-      }
-      
-      const response = await fetch("/api/v1/papers" + (paperId !== "" ? "/" + paperId : ""), {
-        method: mypaper.id ? "PUT" : "POST",
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-          Accept: "application/json",
-        },
-        body: JSON.stringify(mypaper),
-      });
-      
-      console.log("Respuesta del servidor:", response);
-      console.log("Status:", response.status);
-      console.log("Headers:", [...response.headers.entries()]);
-      
-      // Intentar leer el texto en bruto de la respuesta antes de parsearlo
-      const rawText = await response.text();
-      console.log("Respuesta en texto plano:", rawText);
-      
-      // Si hay contenido JSON, intentar parsearlo
-      if (rawText && rawText.trim()) {
+        // ¡Cambio importante aquí! Envía mypaper directamente como JSON string
+        f.append("paper", JSON.stringify(mypaper));
+        f.append("userId", userId.toString());
+
         try {
-          const jsonData = JSON.parse(rawText);
-          console.log("Datos JSON:", jsonData);
-          
-          // Continúa con tu lógica...
-          if (jsonData.message) {
+            console.log("FormData a enviar:", f);
+            for (let pair of f.entries()) {
+                console.log(pair[0] + ': ' + pair[1]);
+            }
+
+            const response = await fetch("/api/v1/papers" + (paperId !== "" ? "/" + paperId : ""), {
+                method: mypaper.id ? "PUT" : "POST",
+                headers: {
+                    Authorization: `Bearer ${jwt}`,
+                    // ¡Elimina Content-Type: application/json! El browser lo gestiona con FormData
+                    Accept: "application/json",
+                },
+                body: f,
+            });
+
+            console.log("Respuesta del servidor:", response);
+            console.log("Status:", response.status);
+            console.log("Headers:", [...response.headers.entries()]);
+
+            const rawText = await response.text();
+            console.log("Respuesta en texto plano:", rawText);
+
+            if (rawText && rawText.trim()) {
+                try {
+                    const jsonData = JSON.parse(rawText);
+                    console.log("Datos JSON:", jsonData);
+                    if (jsonData.message) {
+                        setModalShow(true);
+                    } else navigate('/myPapers');
+                } catch (jsonError) {
+                    console.error("Error al parsear JSON:", jsonError, "Texto recibido:", rawText);
+                    setModalShow(true);
+                }
+            } else {
+                console.log("Respuesta vacía del servidor");
+                if (response.ok) {
+                    navigate('/myPapers');
+                } else {
+                    setModalShow(true);
+                }
+            }
+
+            setIsSaving(false);
+        } catch (error) {
+            setIsSaving(false);
+            console.error("Error completo:", error);
             setModalShow(true);
-          } else navigate('/myPapers');
-          
-        } catch (jsonError) {
-          console.error("Error al parsear JSON:", jsonError, "Texto recibido:", rawText);
-          setModalShow(true);
         }
-      } else {
-        console.log("Respuesta vacía del servidor");
-        // Si la respuesta está vacía pero el status es exitoso, podrías decidir navegar
-        if (response.ok) {
-          navigate('/myPapers');
-        } else {
-          setModalShow(true);
-        }
-      }
-      
-      setIsSaving(false);
-    } catch (error) {
-      setIsSaving(false);
-      console.error("Error completo:", error);
-      setModalShow(true);
     }
-  }
 
   paperEditFormInputs.forEach((i) => (i.handleChange = handleChange))
 
