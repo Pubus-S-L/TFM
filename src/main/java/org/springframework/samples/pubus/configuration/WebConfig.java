@@ -10,6 +10,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -18,8 +19,11 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 public class WebConfig implements WebMvcConfigurer {
 	
-	 @Autowired
+	@Autowired
     GenericIdToEntityConverter idToEntityConverter;
+
+    @Autowired
+    ResponseLoggingInterceptor responseLoggingInterceptor;
     
     @Override
     public void addFormatters(FormatterRegistry registry) {
@@ -58,6 +62,11 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
         converters.add(mappingJackson2HttpMessageConverter());
+    }
+
+        @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(responseLoggingInterceptor);
     }
 }
     

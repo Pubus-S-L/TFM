@@ -99,8 +99,8 @@ public class PaperService {
 		if (otherPaper != null && !otherPaper.getId().equals(paper.getId())) {
 			throw new DuplicatedPaperTitleException();
 		} else{
-			// Map<String, byte[]> embeddings = paperFileService.addEmbedding(paper.getTitle(), new HashMap<>());
-			// paper.setEmbeddings(embeddings);
+			Map<String, byte[]> embeddings = paperFileService.addEmbedding(paper.getTitle(), new HashMap<>());
+			paper.setEmbeddings(embeddings);
 			paperRepository.save(paper);
 		}
 			
