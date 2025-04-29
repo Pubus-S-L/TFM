@@ -273,122 +273,122 @@ export default function UserPaperEdit({ id, onSave }) {
   // Función handleSubmit mejorada para validar todos los campos antes de enviar
   async function handleSubmit() {
     // Activar el spinner de carga
-    setIsSaving(true)
+    setIsSaving(true);
 
     // Marcar todos los campos como tocados para la validación
-    const allTouched = {}
+    const allTouched = {};
     paperEditFormInputs.forEach((input) => {
-      allTouched[input.name] = true
-    })
-    setTouchedFields(allTouched)
+        allTouched[input.name] = true;
+    });
+    setTouchedFields(allTouched);
 
-    const currentFormErrors = {}
-    let hasErrors = false
+    const currentFormErrors = {};
+    let hasErrors = false;
 
     // Validar todos los campos
     paperEditFormInputs.forEach((input) => {
-      const fieldName = input.name
-      const fieldValue = fieldName === "type" ? paper.type?.name : paper[fieldName]
-      const error = validateField(
-        fieldName,
-        fieldValue,
-        false, // En submit siempre validamos, independientemente de si es edición
-        true, // En submit consideramos todos los campos como tocados
-      )
+        const fieldName = input.name;
+        const fieldValue = fieldName === "type" ? paper.type?.name : paper[fieldName];
+        const error = validateField(
+            fieldName,
+            fieldValue,
+            false, // En submit siempre validamos, independientemente de si es edición
+            true, // En submit consideramos todos los campos como tocados
+        );
 
-      if (error) {
-        currentFormErrors[fieldName] = error
-        hasErrors = true
-      }
-    })
+        if (error) {
+            currentFormErrors[fieldName] = error;
+            hasErrors = true;
+        }
+    });
 
-    setFormErrors(currentFormErrors)
+    setFormErrors(currentFormErrors);
 
     // Si hay errores de validación, detener aquí y no llamar a la base de datos
     if (hasErrors) {
-      console.log("Form has validation errors, database call prevented:", currentFormErrors)
-      setIsSaving(false) // Desactivar el spinner si hay errores
-      return
+        console.log("Form has validation errors, database call prevented:", currentFormErrors);
+        setIsSaving(false); // Desactivar el spinner si hay errores
+        return;
     }
 
     // Continuar con la llamada a la base de datos solo si la validación pasa
     const mypaper = {
-      id: paper.id,
-      title: paper.title,
-      authors: paper.authors,
-      publicationYear: paper.publicationYear,
-      type: paper.type,
-      publisher: paper.publisher,
-      publicationData: paper.publicationData,
-      abstractContent: paper.abstractContent,
-      keywords: paper.keywords,
-      notes: paper.notes,
-      source: paper.source,
-      scopus: paper.scopus,
-      user: paper.user,
-    }
+        id: paper.id,
+        title: paper.title,
+        authors: paper.authors,
+        publicationYear: paper.publicationYear,
+        type: paper.type,
+        publisher: paper.publisher,
+        publicationData: paper.publicationData,
+        abstractContent: paper.abstractContent,
+        keywords: paper.keywords,
+        notes: paper.notes,
+        source: paper.source,
+        scopus: paper.scopus,
+        user: paper.user,
+    };
 
     const f = new FormData();
-        if (files && files.length > 0) {
-            for (let index = 0; index < files.length; index++) {
-                f.append("files", files[index]);
-            }
+
+    // Añadir archivos al FormData
+    if (files && files.length > 0) {
+        files.forEach(file => {
+            f.append("files", file);
+        });
+    }
+
+    // Añadir los datos del paper como un solo campo JSON
+    f.append("paper", JSON.stringify(mypaper));
+    f.append("userId", userId.toString());
+
+
+    try {
+        console.log("FormData a enviar:", f);
+        for (let pair of f.entries()) {
+            console.log(pair[0] + ': ' + pair[1]);
         }
 
-        // ¡Cambio importante aquí! Envía mypaper directamente como JSON string
-        f.append("paper", JSON.stringify(mypaper));
-        f.append("userId", userId.toString());
+        const response = await fetch("/api/v1/papers" + (paperId !== "" ? "/" + paperId : ""), {
+            method: mypaper.id ? "PUT" : "POST",
+            headers: {
+                'Authorization': `Bearer ${jwt}`,
+                // No especificamos Content-Type.  Fetch lo configura automáticamente con FormData
+            },
+            body: f,
+        });
 
-        try {
-            console.log("FormData a enviar:", f);
-            for (let pair of f.entries()) {
-                console.log(pair[0] + ': ' + pair[1]);
-            }
+        // Desactivar el spinner independientemente del resultado
+        setIsSaving(false);
 
-            const response = await fetch("/api/v1/papers" + (paperId !== "" ? "/" + paperId : ""), {
-                method: mypaper.id ? "PUT" : "POST",
-                headers: {
-                    Authorization: `Bearer ${jwt}`,
-                    // ¡Elimina Content-Type: application/json! El browser lo gestiona con FormData
-                    Accept: "application/json",
-                },
-                body: f,
-            });
-
-            console.log("Respuesta del servidor:", response);
-            console.log("Status:", response.status);
-            console.log("Headers:", [...response.headers.entries()]);
-
-            const rawText = await response.text();
-            console.log("Respuesta en texto plano:", rawText);
-
-            if (rawText && rawText.trim()) {
-                try {
-                    const jsonData = JSON.parse(rawText);
-                    console.log("Datos JSON:", jsonData);
-                    if (jsonData.message) {
-                        setModalShow(true);
-                    } else navigate('/myPapers');
-                } catch (jsonError) {
-                    console.error("Error al parsear JSON:", jsonError, "Texto recibido:", rawText);
+        if (response.ok) {
+            const responseText = await response.text();
+             console.log("Respuesta del servidor (texto):", responseText);
+            try {
+                const responseData = JSON.parse(responseText);
+                console.log("Respuesta del servidor (JSON):", responseData);
+                if (responseData.message) {
                     setModalShow(true);
-                }
-            } else {
-                console.log("Respuesta vacía del servidor");
-                if (response.ok) {
-                    navigate('/myPapers');
                 } else {
-                    setModalShow(true);
+                    navigate('/myPapers');
                 }
+            } catch (error) {
+                console.error("Error al parsear la respuesta JSON:", error);
+                setModalShow(true);
             }
-
-            setIsSaving(false);
-        } catch (error) {
-            setIsSaving(false);
-            console.error("Error completo:", error);
+        } else {
+            // Manejar errores de respuesta
+            const errorText = await response.text();
+            console.error(`Error del servidor (${response.status}):`, errorText);
             setModalShow(true);
         }
+    } catch (error) {
+        // Desactivar el spinner en caso de error de conexión
+        setIsSaving(false);
+        console.error("Error de conexión:", error);
+        setModalShow(true);
     }
+}
+
 
   paperEditFormInputs.forEach((i) => (i.handleChange = handleChange))
 
