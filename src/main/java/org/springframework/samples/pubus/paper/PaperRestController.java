@@ -211,7 +211,7 @@ public class PaperRestController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseEntity<?> create(@RequestPart @Valid Paper paper, @RequestParam(required=false) List<MultipartFile> files, @RequestPart("userId") String userId)
+	public ResponseEntity<Paper> create(@RequestPart @Valid Paper paper, @RequestParam(required=false) List<MultipartFile> files, @RequestPart("userId") String userId)
 			throws DataAccessException, DuplicatedPaperTitleException {
 		
 		System.out.println("Iniciando creación de Paper");
@@ -243,7 +243,7 @@ public class PaperRestController {
 		// 	System.out.println("Paper actualizado: " + res);
 		// 	return new ResponseEntity<>(res, HttpStatus.OK);
 		// }
-		return new ResponseEntity<>("Paper creado con ID: " + savedPaper.getId(), HttpStatus.CREATED);
+		return new ResponseEntity<>(savedPaper, HttpStatus.CREATED);
 }
 
 //UPDATE
