@@ -342,6 +342,13 @@ export default function UserPaperEdit({ id, onSave }) {
     f.append("userId", userId.toString())
 
     try {
+      console.log("FormData a enviar:", f); // Ver qué contiene el FormData
+      
+      // Para ver el contenido del FormData (no es posible directamente)
+      for (let pair of f.entries()) {
+        console.log(pair[0] + ': ' + pair[1]); 
+      }
+      
       const response = await fetch("/api/v1/papers" + (paperId !== "" ? "/" + paperId : ""), {
         method: mypaper.id ? "PUT" : "POST",
         headers: {
@@ -349,44 +356,45 @@ export default function UserPaperEdit({ id, onSave }) {
           Accept: "application/json",
         },
         body: f,
-      })
-
-      // Desactivar el spinner independientemente del resultado
-      setIsSaving(false)
-
-      if (response.ok) {
+      });
+      
+      console.log("Respuesta del servidor:", response);
+      console.log("Status:", response.status);
+      console.log("Headers:", [...response.headers.entries()]);
+      
+      // Intentar leer el texto en bruto de la respuesta antes de parsearlo
+      const rawText = await response.text();
+      console.log("Respuesta en texto plano:", rawText);
+      
+      // Si hay contenido JSON, intentar parsearlo
+      if (rawText && rawText.trim()) {
         try {
-          const contentType = response.headers.get("content-type");
-          if (contentType && contentType.includes("application/json")) {
-            const submit = await response.json();
-            if (submit.message) {
-              setModalShow(true);
-            } else navigate('/myPapers');
-          } else {
-            // Respuesta exitosa pero no es JSON
-            navigate('/myPapers');
-          }
+          const jsonData = JSON.parse(rawText);
+          console.log("Datos JSON:", jsonData);
+          
+          // Continúa con tu lógica...
+          if (jsonData.message) {
+            setModalShow(true);
+          } else navigate('/myPapers');
+          
         } catch (jsonError) {
-          console.error("Error al parsear JSON:", jsonError);
-          // Aun así, consideramos que la operación fue exitosa si el status es OK
+          console.error("Error al parsear JSON:", jsonError, "Texto recibido:", rawText);
+          setModalShow(true);
+        }
+      } else {
+        console.log("Respuesta vacía del servidor");
+        // Si la respuesta está vacía pero el status es exitoso, podrías decidir navegar
+        if (response.ok) {
           navigate('/myPapers');
+        } else {
+          setModalShow(true);
         }
-      } else if (response.status === 400) {
-        try {
-          const errorData = await response.json();
-          console.error("Errores de validación del backend:", errorData);
-        } catch (e) {
-          console.error("Error de formato en la respuesta de error");
-        }
-        setModalShow(true);
-      } else if (response.status === 500) {
-        console.error("Error del servidor:", response);
-        setModalShow(true);
       }
-    } catch (error) {
-      // Desactivar el spinner en caso de error
+      
       setIsSaving(false);
-      console.error("Error de conexión:", error);
+    } catch (error) {
+      setIsSaving(false);
+      console.error("Error completo:", error);
       setModalShow(true);
     }
   }

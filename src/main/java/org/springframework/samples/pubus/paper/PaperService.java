@@ -120,13 +120,22 @@ public class PaperService {
 
 	@Transactional
 	public Paper updatePaper(Paper paper, int id) {
+		System.out.println("Inicio de updatePaper con id: " + id);
 		Paper toUpdate = findPaperById(id);
-		if (paper.getTitle() != toUpdate.getTitle()) {
+		System.out.println("Paper encontrado para actualizar: " + toUpdate);
+		
+		if (paper.getTitle() != null && !paper.getTitle().equals(toUpdate.getTitle())) {
+			System.out.println("Actualizando embedding para título: " + paper.getTitle());
 			Map<String, byte[]> embeddings = paperFileService.addEmbedding(paper.getTitle(), new HashMap<>());
 			toUpdate.setEmbeddings(embeddings);
 		}
+		
 		BeanUtils.copyProperties(paper, toUpdate, "id");
-		return savePaper(toUpdate);
+		System.out.println("Paper después de copyProperties: " + toUpdate);
+		
+		Paper result = savePaper(toUpdate);
+		System.out.println("Paper después de guardar: " + result);
+		return result;
 	}
 
 	@Transactional
