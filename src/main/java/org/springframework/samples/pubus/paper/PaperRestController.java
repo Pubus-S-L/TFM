@@ -17,6 +17,7 @@ import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.pubus.auth.payload.response.MessageResponse;
 import org.springframework.samples.pubus.exceptions.ResourceNotOwnedException;
@@ -235,12 +236,14 @@ public class PaperRestController {
 			ResponseEntity<Paper> res = uploadFile(savedPaper.getId(), savedPaper, files);
 			System.out.println("Respuesta con archivos: " + res.getBody());
 			return res;
-		} else {
-			System.out.println("No hay archivos, actualizando paper...");
-			Paper res = paperService.updatePaper(savedPaper, savedPaper.getId());
-			System.out.println("Paper actualizado: " + res);
-			return new ResponseEntity<>(res, HttpStatus.OK);
-		}
+		} 
+		// else {
+		// 	System.out.println("No hay archivos, actualizando paper...");
+		// 	Paper res = paperService.updatePaper(savedPaper, savedPaper.getId());
+		// 	System.out.println("Paper actualizado: " + res);
+		// 	return new ResponseEntity<>(res, HttpStatus.OK);
+		// }
+		return new ResponseEntity<>(savedPaper,HttpStatus.OK);
 }
 
 //UPDATE
