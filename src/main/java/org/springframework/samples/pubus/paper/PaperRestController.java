@@ -209,14 +209,14 @@ public class PaperRestController {
 
 //CREATE	
 
-@PostMapping
+@PostMapping(consumes = {"multipart/form-data"})
 @ResponseStatus(HttpStatus.CREATED)
-public ResponseEntity<Paper> create(@RequestPart @Valid Paper paper, 
+public ResponseEntity<Paper> createWithFiles(@RequestPart("paper") @Valid Paper paper, 
                                   @RequestParam(required=false) List<MultipartFile> files, 
                                   @RequestPart("userId") String userId)
         throws DataAccessException, DuplicatedPaperTitleException {
     
-    System.out.println("Iniciando creación de Paper");
+    System.out.println("Iniciando creación de Paper con archivos (FormData)");
     System.out.println("Paper recibido: " + paper);
     System.out.println("UserId recibido: " + userId);
     System.out.println("Files recibidos: " + (files != null ? files.size() : "null"));
@@ -241,14 +241,48 @@ public ResponseEntity<Paper> create(@RequestPart @Valid Paper paper,
         
         return new ResponseEntity<>(savedPaper, HttpStatus.CREATED);
     } catch (Exception e) {
-        // Log detallado del error
-        System.err.println("Error al crear el paper: " + e.getMessage());
+        System.err.println("Error al crear el paper con archivos: " + e.getMessage());
         e.printStackTrace();
-        
-        // Devolver una respuesta con error
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(null); // O crear un objeto Paper con un mensaje de error
+            .body(null);
+    }
+}
+
+// Nuevo método que acepta JSON puro sin archivos
+@PostMapping(consumes = {"application/json"})
+@ResponseStatus(HttpStatus.CREATED)
+public ResponseEntity<Paper> createWithJson(@RequestBody PaperRequestDTO requestDTO)
+        throws DataAccessException, DuplicatedPaperTitleException {
+    
+    System.out.println("Iniciando creación de Paper con JSON");
+    System.out.println("RequestDTO recibido: " + requestDTO);
+    
+    try {
+        Paper paper = requestDTO.getPaper();
+        Integer userId = requestDTO.getUserId();
+        
+        System.out.println("Paper extraído: " + paper);
+        System.out.println("UserId extraído: " + userId);
+        
+        User user = userService.findUser(userId);
+        System.out.println("Usuario encontrado: " + user);
+        
+        Paper newPaper = new Paper();
+        BeanUtils.copyProperties(paper, newPaper, "id");
+        newPaper.setUser(user);
+        System.out.println("Paper antes de guardar: " + newPaper);
+        
+        Paper savedPaper = this.paperService.savePaper(newPaper);
+        System.out.println("Paper guardado: " + savedPaper);
+        
+        return new ResponseEntity<>(savedPaper, HttpStatus.CREATED);
+    } catch (Exception e) {
+        System.err.println("Error al crear el paper con JSON: " + e.getMessage());
+        e.printStackTrace();
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(null);
     }
 }
 
