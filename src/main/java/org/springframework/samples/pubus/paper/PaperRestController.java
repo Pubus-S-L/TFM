@@ -226,7 +226,12 @@ public class PaperRestController {
 		}
 		else{
 			Paper res = paperService.updatePaper(savedPaper, savedPaper.getId());
-			return new ResponseEntity<>(res, HttpStatus.OK);
+			// Asegúrate de que res no sea null
+			if (res != null) {
+				return new ResponseEntity<>(res, HttpStatus.OK);
+			} else {
+				return new ResponseEntity<>(savedPaper, HttpStatus.OK);
+			}
 		}
 	}
 

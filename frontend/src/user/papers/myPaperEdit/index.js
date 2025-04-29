@@ -355,23 +355,39 @@ export default function UserPaperEdit({ id, onSave }) {
       setIsSaving(false)
 
       if (response.ok) {
-        const submit = await response.json()
-        if (submit.message) {
-          setModalShow(true)
-        } else navigate('/myPapers');
+        try {
+          const contentType = response.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            const submit = await response.json();
+            if (submit.message) {
+              setModalShow(true);
+            } else navigate('/myPapers');
+          } else {
+            // Respuesta exitosa pero no es JSON
+            navigate('/myPapers');
+          }
+        } catch (jsonError) {
+          console.error("Error al parsear JSON:", jsonError);
+          // Aun así, consideramos que la operación fue exitosa si el status es OK
+          navigate('/myPapers');
+        }
       } else if (response.status === 400) {
-        const errorData = await response.json()
-        console.error("Errores de validación del backend:", errorData)
-        setModalShow(true)
+        try {
+          const errorData = await response.json();
+          console.error("Errores de validación del backend:", errorData);
+        } catch (e) {
+          console.error("Error de formato en la respuesta de error");
+        }
+        setModalShow(true);
       } else if (response.status === 500) {
-        console.error("Error del servidor:", response)
-        setModalShow(true)
+        console.error("Error del servidor:", response);
+        setModalShow(true);
       }
     } catch (error) {
       // Desactivar el spinner en caso de error
-      setIsSaving(false)
-      console.error("Error de conexión:", error)
-      setModalShow(true)
+      setIsSaving(false);
+      console.error("Error de conexión:", error);
+      setModalShow(true);
     }
   }
 
