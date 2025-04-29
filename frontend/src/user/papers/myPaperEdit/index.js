@@ -343,6 +343,9 @@ export default function UserPaperEdit({ id, onSave }) {
       console.log("FormData a enviar:", f); // Ver qué contiene el FormData
       
       // Para ver el contenido del FormData (no es posible directamente)
+      console.log("Enviando petición POST/PUT a:", "/api/v1/papers" + (paperId !== "" ? "/" + paperId : ""));
+      console.log("Método:", mypaper.id ? "PUT" : "POST");
+      console.log("FormData a enviar:", f);
       for (let pair of f.entries()) {
         console.log(pair[0] + ': ' + pair[1]); 
       }
@@ -353,7 +356,7 @@ export default function UserPaperEdit({ id, onSave }) {
           Authorization: `Bearer ${jwt}`,
           Accept: "application/json",
         },
-        body: f,
+        body: JSON.stringify(mypaper),
       });
       
       console.log("Respuesta del servidor:", response);
