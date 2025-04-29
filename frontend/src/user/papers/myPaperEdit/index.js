@@ -292,8 +292,8 @@ export default function UserPaperEdit({ id, onSave }) {
         const error = validateField(
             fieldName,
             fieldValue,
-            false, // En submit siempre validamos, independientemente de si es edición
-            true, // En submit consideramos todos los campos como tocados
+            false,
+            true,
         );
 
         if (error) {
@@ -304,14 +304,13 @@ export default function UserPaperEdit({ id, onSave }) {
 
     setFormErrors(currentFormErrors);
 
-    // Si hay errores de validación, detener aquí y no llamar a la base de datos
+    // Si hay errores de validación, detener aquí
     if (hasErrors) {
         console.log("Form has validation errors, database call prevented:", currentFormErrors);
-        setIsSaving(false); // Desactivar el spinner si hay errores
+        setIsSaving(false); // Desactivar el spinner
         return;
     }
 
-    // Continuar con la llamada a la base de datos solo si la validación pasa
     const mypaper = {
         id: paper.id,
         title: paper.title,
@@ -337,52 +336,76 @@ export default function UserPaperEdit({ id, onSave }) {
         });
     }
 
-    // Añadir los datos del paper como un solo campo JSON
+    // Añadir los datos del paper como un campo JSON
     f.append("paper", JSON.stringify(mypaper));
     f.append("userId", userId.toString());
 
-
     try {
         console.log("FormData a enviar:", f);
-        for (let pair of f.entries()) {
-            console.log(pair[0] + ': ' + pair[1]);
-        }
+        console.log("paper:", JSON.stringify(mypaper));
+        console.log("userId:", userId);
 
-        const response = await fetch("/api/v1/papers" + (paperId !== "" ? "/" + paperId : ""), {
+        // Usar la URL completa en lugar de relativa
+        const baseUrl = "https://tfm-m1dn.onrender.com";
+        const url = `${baseUrl}/api/v1/papers${paperId ? "/" + paperId : ""}`;
+        
+        console.log("URL de la solicitud:", url);
+        
+        const response = await fetch(url, {
             method: mypaper.id ? "PUT" : "POST",
             headers: {
                 'Authorization': `Bearer ${jwt}`,
-                // No especificamos Content-Type.  Fetch lo configura automáticamente con FormData
+                // No especificamos Content-Type para FormData
             },
             body: f,
         });
 
-        // Desactivar el spinner independientemente del resultado
+        console.log("Estado de la respuesta:", response.status);
+        
+        // Desactivar el spinner
         setIsSaving(false);
 
         if (response.ok) {
+            // Primero verifiquemos si la respuesta es vacía
             const responseText = await response.text();
-             console.log("Respuesta del servidor (texto):", responseText);
+            console.log("Respuesta del servidor (texto):", responseText);
+            
+            if (!responseText || responseText.trim() === "") {
+                console.log("Respuesta vacía del servidor, pero el estado es OK");
+                // Si la operación fue exitosa pero no hay respuesta JSON, redirigir
+                navigate('/myPapers');
+                return;
+            }
+            
             try {
                 const responseData = JSON.parse(responseText);
                 console.log("Respuesta del servidor (JSON):", responseData);
+                
                 if (responseData.message) {
+                    // Si hay un mensaje de error en la respuesta
+                    console.error("Error en la respuesta:", responseData.message);
                     setModalShow(true);
                 } else {
+                    // Operación exitosa, redirigir
                     navigate('/myPapers');
                 }
             } catch (error) {
                 console.error("Error al parsear la respuesta JSON:", error);
-                setModalShow(true);
+                // Si no podemos parsear pero el status es OK, asumimos éxito
+                if (response.status >= 200 && response.status < 300) {
+                    navigate('/myPapers');
+                } else {
+                    setModalShow(true);
+                }
             }
         } else {
-            // Manejar errores de respuesta
+            // Error en la respuesta
             const errorText = await response.text();
             console.error(`Error del servidor (${response.status}):`, errorText);
             setModalShow(true);
         }
     } catch (error) {
-        // Desactivar el spinner en caso de error de conexión
+        // Error de conexión
         setIsSaving(false);
         console.error("Error de conexión:", error);
         setModalShow(true);

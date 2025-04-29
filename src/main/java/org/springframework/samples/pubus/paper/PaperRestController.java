@@ -209,41 +209,47 @@ public class PaperRestController {
 
 //CREATE	
 
-	@PostMapping
-	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseEntity<Paper> create(@RequestPart @Valid Paper paper, @RequestParam(required=false) List<MultipartFile> files, @RequestPart("userId") String userId)
-			throws DataAccessException, DuplicatedPaperTitleException {
-		
-		System.out.println("Iniciando creación de Paper");
-		System.out.println("Paper recibido: " + paper);
-		System.out.println("UserId recibido: " + userId);
-		System.out.println("Files recibidos: " + (files != null ? files.size() : "null"));
-		
-		Integer id = Integer.parseInt(userId);
-		User user = userService.findUser(id);
-		System.out.println("Usuario encontrado: " + user);
-		
-		Paper newPaper = new Paper();
-		BeanUtils.copyProperties(paper, newPaper, "id");
-		newPaper.setUser(user);
-		System.out.println("Paper antes de guardar: " + newPaper);
-		
-		Paper savedPaper = this.paperService.savePaper(newPaper);
-		System.out.println("Paper guardado: " + savedPaper);
+@PostMapping
+@ResponseStatus(HttpStatus.CREATED)
+public ResponseEntity<Paper> create(@RequestPart @Valid Paper paper, 
+                                  @RequestParam(required=false) List<MultipartFile> files, 
+                                  @RequestPart("userId") String userId)
+        throws DataAccessException, DuplicatedPaperTitleException {
+    
+    System.out.println("Iniciando creación de Paper");
+    System.out.println("Paper recibido: " + paper);
+    System.out.println("UserId recibido: " + userId);
+    System.out.println("Files recibidos: " + (files != null ? files.size() : "null"));
+    
+    try {
+        Integer id = Integer.parseInt(userId);
+        User user = userService.findUser(id);
+        System.out.println("Usuario encontrado: " + user);
+        
+        Paper newPaper = new Paper();
+        BeanUtils.copyProperties(paper, newPaper, "id");
+        newPaper.setUser(user);
+        System.out.println("Paper antes de guardar: " + newPaper);
+        
+        Paper savedPaper = this.paperService.savePaper(newPaper);
+        System.out.println("Paper guardado: " + savedPaper);
 
-		if(files != null && !files.isEmpty()) {
-			System.out.println("Procesando archivos...");
-			ResponseEntity<Paper> res = uploadFile(savedPaper.getId(), savedPaper, files);
-			System.out.println("Respuesta con archivos: " + res.getBody());
-			return res;
-		} 
-		// else {
-		// 	System.out.println("No hay archivos, actualizando paper...");
-		// 	Paper res = paperService.updatePaper(savedPaper, savedPaper.getId());
-		// 	System.out.println("Paper actualizado: " + res);
-		// 	return new ResponseEntity<>(res, HttpStatus.OK);
-		// }
-		return new ResponseEntity<>(savedPaper, HttpStatus.CREATED);
+        if(files != null && !files.isEmpty()) {
+            System.out.println("Procesando archivos...");
+            return uploadFile(savedPaper.getId(), savedPaper, files);
+        }
+        
+        return new ResponseEntity<>(savedPaper, HttpStatus.CREATED);
+    } catch (Exception e) {
+        // Log detallado del error
+        System.err.println("Error al crear el paper: " + e.getMessage());
+        e.printStackTrace();
+        
+        // Devolver una respuesta con error
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(null); // O crear un objeto Paper con un mensaje de error
+    }
 }
 
 //UPDATE
