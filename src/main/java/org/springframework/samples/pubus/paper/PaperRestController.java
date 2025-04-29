@@ -243,7 +243,7 @@ public class PaperRestController {
 		// 	System.out.println("Paper actualizado: " + res);
 		// 	return new ResponseEntity<>(res, HttpStatus.OK);
 		// }
-		return new ResponseEntity<>(savedPaper,HttpStatus.OK);
+		return new ResponseEntity<>(savedPaper,HttpStatus.CREATED);
 }
 
 //UPDATE
