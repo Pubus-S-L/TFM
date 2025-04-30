@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, BrowserRouter } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import { ErrorBoundary } from "react-error-boundary";
 import AppNavbar from "./AppNavbar";
@@ -34,76 +34,70 @@ function ErrorFallback({ error, resetErrorBoundary }) {
 }
 
 function App() {
+  // Obtener token y decodificar de manera segura
   const jwt = tokenService.getLocalAccessToken();
-  let roles = []
+  let roles = [];
+  
   if (jwt) {
-    roles = getRolesFromJWT(jwt);
-  }
-
-  function getRolesFromJWT(jwt) {
-    return jwt_decode(jwt).authorities;
-  }
-
-  let adminRoutes = <></>;
-  let userRoutes = <></>;
-  let publicRoutes = <></>;
-
-  roles.forEach((role) => {
-    if (role === "ADMIN") {
-      adminRoutes = (
-        <>
-        <Route path="/users" exact={true} element={<PrivateRoute><UserListAdmin /></PrivateRoute>} />
-        <Route path="/users/:username" exact={true} element={<PrivateRoute><UserEditAdmin /></PrivateRoute>} />
-        </>)
+    try {
+      const decoded = jwt_decode(jwt);
+      roles = decoded.authorities || [];
+    } catch (error) {
+      console.error("Error decodificando JWT:", error);
     }
-
-  })
-  if (!jwt) {
-    publicRoutes = (
-      <>        
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/papers" exact={true} element={<Papers />} />
-        <Route path="/papers/filtered/:search" exact={true} element={<Papers />} />
-        <Route path="/papers/:id" exact={true} element={<PaperDetail />} />
-        <Route path="/papers/:id/download/:paperFileId" exact={true} element={<PaperDetail />} />
-        <Route path="/users/:id" exact={true} element={<UserDetail />} />
-        <Route path="/about" exact={true} element={<AboutUs />} />
-        <Route path="/linkedInLogin" exact={true} element={<LoginLinkedIn />} />
-      </>
-    )
-  } else {
-    userRoutes = (
-      <>
-        {/* <Route path="/papers" element={<PrivateRoute><Papers /></PrivateRoute>} /> */}        
-        <Route path="/logout" element={<Logout />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/myPapers" exact={true} element={<PrivateRoute><UserPaperList/></PrivateRoute>} />
-        <Route path="/myPapers/:id" exact={true} element={<PrivateRoute><UserPaperEdit /></PrivateRoute>} /> 
-        <Route path="/myProfile" exact={true} element={<PrivateRoute><Profile /></PrivateRoute>} /> 
-        <Route path="/papers" exact={true} element={<Papers />} />
-        <Route path="/papers/filtered/:search" exact={true} element={<Papers />} />
-        <Route path="/papers/:id" exact={true} element={<PaperDetail />} />
-        <Route path="/papers/:id/download/:paperFileId" exact={true} element={<PaperDetail />} />
-        <Route path="/admin/users/:id" exact={true} element={<UserEditAdmin />} />
-        <Route path="/users/:id" exact={true} element={<UserDetail />} />
-        <Route path="/about" exact={true} element={<AboutUs />} />
-        <Route path="/chats" exact={true} element={<ChatList />} />
-      </>
-    )
   }
+  
+  // Verificar si el usuario es administrador
+  const isAdmin = roles.includes("ADMIN");
+  const isAuthenticated = !!jwt;
 
   return (
     <div>
-      <ErrorBoundary FallbackComponent={ErrorFallback} >
-        <AppNavbar />
-        <Routes>
-          <Route path="/" exact={true} element={<Home />} />
-          <Route path="/docs" element={<SwaggerDocs />} />
-          {publicRoutes}
-          {userRoutes}
-          {adminRoutes}
-        </Routes>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <BrowserRouter>
+          <AppNavbar />
+          <Routes>
+            {/* Rutas comunes para todos los usuarios */}
+            <Route path="/" element={<Home />} />
+            <Route path="/docs" element={<SwaggerDocs />} />
+            <Route path="/papers" element={<Papers />} />
+            <Route path="/papers/filtered/:search" element={<Papers />} />
+            <Route path="/papers/:id" element={<PaperDetail />} />
+            <Route path="/papers/:id/download/:paperFileId" element={<PaperDetail />} />
+            <Route path="/users/:id" element={<UserDetail />} />
+            <Route path="/about" element={<AboutUs />} />
+            
+            {/* Rutas para usuarios no autenticados */}
+            {!isAuthenticated && (
+              <>
+                <Route path="/register" element={<Register />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/linkedInLogin" element={<LoginLinkedIn />} />
+              </>
+            )}
+            
+            {/* Rutas para usuarios autenticados */}
+            {isAuthenticated && (
+              <>
+                <Route path="/logout" element={<Logout />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/myPapers" element={<PrivateRoute><UserPaperList /></PrivateRoute>} />
+                <Route path="/myPapers/:id" element={<PrivateRoute><UserPaperEdit /></PrivateRoute>} />
+                <Route path="/myProfile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+                <Route path="/chats" element={<PrivateRoute><ChatList /></PrivateRoute>} />
+              </>
+            )}
+            
+            {/* Rutas para administradores */}
+            {isAdmin && (
+              <>
+                <Route path="/users" element={<PrivateRoute><UserListAdmin /></PrivateRoute>} />
+                <Route path="/users/:username" element={<PrivateRoute><UserEditAdmin /></PrivateRoute>} />
+                <Route path="/admin/users/:id" element={<PrivateRoute><UserEditAdmin /></PrivateRoute>} />
+              </>
+            )}
+          </Routes>
+        </BrowserRouter>
       </ErrorBoundary>
     </div>
   );
