@@ -45,6 +45,23 @@ function ChatList() {
       setHasUnreadChats(anyUnread);
     }, [unreadMessages]);
 
+    const getUserProfileImage = useCallback(async (user) => {
+      try {
+          const response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/users/${user.id}/profileImage`);
+          if (response.ok) {
+              const imageBlob = await response.blob();
+              const imageUrl = URL.createObjectURL(imageBlob);
+              return imageUrl;
+          } else {
+              console.error('Error al obtener la imagen de perfil');
+              return null;
+          }
+      } catch (error) {
+          console.error('Error de red al obtener la imagen de perfil:', error);
+          return null;
+      }
+  }, []);
+
     useEffect(() => {
       async function loadProfileImages() {
           const urls = {};
@@ -130,23 +147,6 @@ function ChatList() {
       if (!user) return "Unknown User";
       return user.name || user.username || user.email || `User ${user.id}`;
     };
-
-    const getUserProfileImage = useCallback(async (user) => {
-      try {
-          const response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/users/${user.id}/profileImage`);
-          if (response.ok) {
-              const imageBlob = await response.blob();
-              const imageUrl = URL.createObjectURL(imageBlob);
-              return imageUrl;
-          } else {
-              console.error('Error al obtener la imagen de perfil');
-              return null;
-          }
-      } catch (error) {
-          console.error('Error de red al obtener la imagen de perfil:', error);
-          return null;
-      }
-  }, []);
 
     useEffect(() => {
       chats.forEach(chat => {
