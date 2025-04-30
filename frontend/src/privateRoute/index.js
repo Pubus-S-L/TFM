@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import tokenService from './services/token.service';
+import tokenService from '../services/token.service';
 
 const PrivateRoute = ({ children }) => {
   const isAuthenticated = !!tokenService.getLocalAccessToken();
