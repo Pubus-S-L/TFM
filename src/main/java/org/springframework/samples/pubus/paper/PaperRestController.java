@@ -39,6 +39,9 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -282,25 +285,66 @@ public ResponseEntity<Paper> create(
 
 	@PutMapping("{paperId}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<Paper> update(@PathVariable("paperId") int paperId, @RequestPart("paper") @Valid Paper paper, @RequestParam(required=false) List<MultipartFile> files, @RequestPart("userId") String userId) {
+	public ResponseEntity<Paper> update(@PathVariable("paperId") int paperId, 
+		@RequestParam("title") String title,
+		@RequestParam("authors") String authors,
+		@RequestParam("publicationYear") String publicationYear,
+		@RequestParam("type") String typeJson, // Recibimos el JSON de Type como String
+		@RequestParam(value = "publisher", required = false) String publisher,
+		@RequestParam(value = "publicationData", required = false) String publicationData,
+		@RequestParam(value = "abstractContent", required = false) String abstractContent,
+		@RequestParam(value = "keywords", required = false) String keywords,
+		@RequestParam(value = "notes", required = false) String notes,
+		@RequestParam(value = "source", required = false) String source,
+		@RequestParam(value = "scopus", required = false) String scopus,
+		@RequestParam("userId") String userId,
+		@RequestParam(value = "files", required = false) List<MultipartFile> files) {
+
 		Paper aux = RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
 		Integer id = Integer.parseInt(userId);
 		User loggedUser = userService.findUser(id);
-			User paperUser = aux.getUser();
+		User paperUser = aux.getUser();
+		Paper newPaper = new Paper();
+		ObjectMapper objectMapper = new ObjectMapper();
+        PaperType type;
+
+		try {
+			type = objectMapper.readValue(typeJson, PaperType.class);
+			newPaper.setTitle(title);
+			newPaper.setAuthors(authors);
+			newPaper.setPublicationYear(Integer.parseInt(publicationYear));
+			newPaper.setType(type);
+			newPaper.setPublisher(publisher);
+			newPaper.setPublicationData(publicationData);
+			newPaper.setAbstractContent(abstractContent);
+			newPaper.setKeywords(keywords);
+			newPaper.setNotes(notes);
+			newPaper.setSource(source);
+			newPaper.setScopus(scopus);
+			newPaper.setUser(paperUser);
+
 			if (loggedUser.getId().equals(paperUser.getId())) {
 				if(files!=null){
-					ResponseEntity<Paper> res = uploadFile(paperId, paper, files);
+					ResponseEntity<Paper> res = uploadFile(paperId, newPaper, files);
 					return res;
 				}
 				else{
-					Paper res = paperService.updatePaper(paper, paperId);
+					Paper res = paperService.updatePaper(newPaper, paperId);
 					return new ResponseEntity<>(res, HttpStatus.OK);
 				}
-
-
 			} else
 				throw new ResourceNotOwnedException(aux);
-
+		 } catch (JsonMappingException e) {
+			return ResponseEntity
+			.status(HttpStatus.INTERNAL_SERVER_ERROR)
+			.body(null);
+		} catch (JsonProcessingException e) {
+			logger.debug("Error al crear el paper (atributos separados): " + e.getMessage());
+			e.printStackTrace();
+			return ResponseEntity
+					.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(null);
+		}
 	}
 
 //DELETE	
