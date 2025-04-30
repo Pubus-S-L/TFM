@@ -36,8 +36,10 @@ function ChatList() {
               fetchUnreadMessages(chat.id);
             });
         })
-        .catch(error => console.error("Error fetching chats:", error));
-        setLoading(false)
+        .catch(error => {
+          console.error("Error fetching chats:", error);
+          setLoading(false);
+        });
     }, [currentUser]);
 
     useEffect(() => {
@@ -239,9 +241,9 @@ function ChatList() {
                 </div>
               </div>
             ) : filteredChats.length > 0 ? (
-              filteredChats.map(async (chat) => {
-                const otherUser = chat.users.find((u) => u.id !== currentUser.id)
-                const isActive = selectedChatId === chat.id
+              filteredChats.map((chat) => {
+                const otherUser = chat.users.find((u) => u.id !== currentUser.id);
+                const isActive = selectedChatId === chat.id;
                 const profileImageUrl = profileImageUrls[otherUser?.id];
                 const hasUnread = unreadMessages[chat.id];
   
@@ -275,15 +277,15 @@ function ChatList() {
                         </p>
                       </div>
 
-                      {/* Mueve esto FUERA de las filas, pero dentro de chat-info-container */}
+                      {/* Unread indicator */}
                       {hasUnread && (
-                      <div className="unread-dot">
-                        {chat.unreadCount > 9 ? '9+' : chat.unreadCount}
-                      </div>
-                    )}
+                        <div className="unread-dot">
+                          {chat.unreadCount > 9 ? '9+' : chat.unreadCount}
+                        </div>
+                      )}
                     </div>
                   </div>
-                )
+                );
               })
             ) : (
               <div className="no-chats">{searchTerm ? "No conversations match your search" : "No conversations yet"}</div>
@@ -310,7 +312,7 @@ function ChatList() {
           )}
         </div>
       </div>
-    )
+    );
   }
   
   function getReceiverFromChat(chat, currentUser) {
