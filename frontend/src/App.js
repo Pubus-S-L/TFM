@@ -43,69 +43,39 @@ function App() {
   function getRolesFromJWT(jwt) {
     return jwt_decode(jwt).authorities;
   }
-
-  let adminRoutes = <></>;
-  let userRoutes = <></>;
-  let publicRoutes = <></>;
-
-  roles.forEach((role) => {
-    if (role === "ADMIN") {
-      adminRoutes = (
-        <BrowserRouter>
-        <Route path="/users" exact={true} element={<PrivateRoute><UserListAdmin /></PrivateRoute>} />
-        <Route path="/users/:username" exact={true} element={<PrivateRoute><UserEditAdmin /></PrivateRoute>} />
-        </BrowserRouter>
-        )
-    }
-
-  })
-  if (!jwt) {
-    publicRoutes = (
-      <BrowserRouter>       
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/papers" exact={true} element={<Papers />} />
-        <Route path="/papers/filtered/:search" exact={true} element={<Papers />} />
-        <Route path="/papers/:id" exact={true} element={<PaperDetail />} />
-        <Route path="/papers/:id/download/:paperFileId" exact={true} element={<PaperDetail />} />
-        <Route path="/users/:id" exact={true} element={<UserDetail />} />
-        <Route path="/about" exact={true} element={<AboutUs />} />
-        <Route path="/linkedInLogin" exact={true} element={<LoginLinkedIn />} />
-      </BrowserRouter>
-    )
-  } else {
-    userRoutes = (
-      <BrowserRouter>
-        {/* <Route path="/papers" element={<PrivateRoute><Papers /></PrivateRoute>} /> */}        
-        <Route path="/logout" element={<Logout />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/myPapers" exact={true} element={<PrivateRoute><UserPaperList/></PrivateRoute>} />
-        <Route path="/myPapers/:id" exact={true} element={<PrivateRoute><UserPaperEdit /></PrivateRoute>} /> 
-        <Route path="/myProfile" exact={true} element={<PrivateRoute><Profile /></PrivateRoute>} /> 
-        <Route path="/papers" exact={true} element={<Papers />} />
-        <Route path="/papers/filtered/:search" exact={true} element={<Papers />} />
-        <Route path="/papers/:id" exact={true} element={<PaperDetail />} />
-        <Route path="/papers/:id/download/:paperFileId" exact={true} element={<PaperDetail />} />
-        <Route path="/admin/users/:id" exact={true} element={<UserEditAdmin />} />
-        <Route path="/users/:id" exact={true} element={<UserDetail />} />
-        <Route path="/about" exact={true} element={<AboutUs />} />
-        <Route path="/chats" exact={true} element={<ChatList />} />
-      </BrowserRouter>
-    )
-  }
-
   return (
     <div>
-      <ErrorBoundary FallbackComponent={ErrorFallback} >
-        <AppNavbar />
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
         <BrowserRouter>
-        <Routes>
-          <Route path="/" exact={true} element={<Home />} />
-          <Route path="/docs" element={<SwaggerDocs />} />
-          {publicRoutes}
-          {userRoutes}
-          {adminRoutes}
-        </Routes>
+          <AppNavbar />
+          <Routes>
+            <Route path="/" exact={true} element={<Home />} />
+            <Route path="/docs" element={<SwaggerDocs />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/logout" element={<Logout />} />
+            <Route path="/papers" exact={true} element={<Papers />} />
+            <Route path="/papers/filtered/:search" exact={true} element={<Papers />} />
+            <Route path="/papers/:id" exact={true} element={<PaperDetail />} />
+            <Route path="/papers/:id/download/:paperFileId" exact={true} element={<PaperDetail />} />
+            <Route path="/users/:id" exact={true} element={<UserDetail />} />
+            <Route path="/about" exact={true} element={<AboutUs />} />
+            <Route path="/linkedInLogin" exact={true} element={<LoginLinkedIn />} />
+            <Route path="/chats" exact={true} element={<ChatList />} />
+
+            {/* Rutas privadas para usuarios autenticados */}
+            <Route path="/myPapers" exact={true} element={<PrivateRoute><UserPaperList /></PrivateRoute>} />
+            <Route path="/myPapers/:id" exact={true} element={<PrivateRoute><UserPaperEdit /></PrivateRoute>} />
+            <Route path="/myProfile" exact={true} element={<PrivateRoute><Profile /></PrivateRoute>} />
+
+            {/* Rutas privadas para administradores */}
+            {roles.includes("ADMIN") && (
+              <>
+                <Route path="/users" exact={true} element={<PrivateRoute><UserListAdmin /></PrivateRoute>} />
+                <Route path="/users/:username" exact={true} element={<PrivateRoute><UserEditAdmin /></PrivateRoute>} />
+              </>
+            )}
+          </Routes>
         </BrowserRouter>
       </ErrorBoundary>
     </div>
