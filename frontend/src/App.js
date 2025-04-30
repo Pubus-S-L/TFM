@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, Routes, Navigate, BrowserRouter } from "react-router-dom";
+import { Route, Routes, BrowserRouter } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import { ErrorBoundary } from "react-error-boundary";
 import AppNavbar from "./AppNavbar";
@@ -32,34 +32,37 @@ function ErrorFallback({ error, resetErrorBoundary }) {
     </div>
   )
 }
-const AdminRoute = ({ children }) => {
-  const jwt = tokenService.getLocalAccessToken();
-  if (!jwt) return <Navigate to="/login" />;
-  
-  try {
-    const decodedToken = jwt_decode(jwt);
-    const isAdmin = decodedToken.authorities && 
-                decodedToken.authorities.includes('ADMIN');
-    return isAdmin ? children : <Navigate to="/" />;
-  } catch (error) {
-    console.error("Error al decodificar token:", error);
-    return <Navigate to="/" />;
-  }
-};
 
 function App() {
+  // Obtener token de manera segura
+  const jwt = tokenService.getLocalAccessToken();
+  
+  // Preparar roles con manejo de errores
+  let roles = [];
+  
+  if (jwt) {
+    try {
+      const decoded = jwt_decode(jwt);
+      roles = decoded.authorities || [];
+    } catch (error) {
+      console.error("Error decodificando JWT:", error);
+    }
+  }
+
+  // Verificar si el usuario es admin
+  const isAdmin = roles.includes("ADMIN");
+
   return (
     <div>
       <ErrorBoundary FallbackComponent={ErrorFallback}>
         <BrowserRouter>
           <AppNavbar />
           <Routes>
-            {/* Rutas públicas */}
+            {/* Rutas públicas comunes */}
             <Route path="/" element={<Home />} />
             <Route path="/docs" element={<SwaggerDocs />} />
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/logout" element={<Logout />} />
             <Route path="/papers" element={<Papers />} />
             <Route path="/papers/filtered/:search" element={<Papers />} />
             <Route path="/papers/:id" element={<PaperDetail />} />
@@ -67,24 +70,27 @@ function App() {
             <Route path="/users/:id" element={<UserDetail />} />
             <Route path="/about" element={<AboutUs />} />
             <Route path="/linkedInLogin" element={<LoginLinkedIn />} />
-            <Route path="/chats" element={<ChatList />} />
-
-            {/* Rutas privadas para usuarios autenticados */}
+            
+            {/* Rutas solo para usuarios autenticados */}
+            <Route path="/logout" element={<PrivateRoute><Logout /></PrivateRoute>} />
             <Route path="/myPapers" element={<PrivateRoute><UserPaperList /></PrivateRoute>} />
             <Route path="/myPapers/:id" element={<PrivateRoute><UserPaperEdit /></PrivateRoute>} />
             <Route path="/myProfile" element={<PrivateRoute><Profile /></PrivateRoute>} />
-
-            {/* Rutas privadas para administradores */}
-            <Route path="/users" element={<AdminRoute><UserListAdmin /></AdminRoute>} />
-            <Route path="/users/:username" element={<AdminRoute><UserEditAdmin /></AdminRoute>} />
-            <Route path="/admin/users/:id" element={<AdminRoute><UserEditAdmin /></AdminRoute>} />
+            <Route path="/chats" element={<PrivateRoute><ChatList /></PrivateRoute>} />
             
-            {/* Manejo de rutas no encontradas */}
-            <Route path="*" element={<Navigate to="/" />} />
+            {/* Rutas solo para administradores */}
+            {isAdmin && (
+              <>
+                <Route path="/users" element={<PrivateRoute><UserListAdmin /></PrivateRoute>} />
+                <Route path="/users/:username" element={<PrivateRoute><UserEditAdmin /></PrivateRoute>} />
+                <Route path="/admin/users/:id" element={<PrivateRoute><UserEditAdmin /></PrivateRoute>} />
+              </>
+            )}
           </Routes>
         </BrowserRouter>
       </ErrorBoundary>
     </div>
   );
 }
+
 export default App;
