@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Chat from './messages.jsx';
 import tokenService from "../../services/token.service";
 import { Search, Send, MessageSquare } from "lucide-react"
@@ -131,24 +131,22 @@ function ChatList() {
       return user.name || user.username || user.email || `User ${user.id}`;
     };
 
-    const getUserProfileImage =
-      async (user) => {
-        try {
+    const getUserProfileImage = useCallback(async (user) => {
+      try {
           const response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/users/${user.id}/profileImage`);
           if (response.ok) {
-            const imageBlob = await response.blob();
-            const imageUrl = URL.createObjectURL(imageBlob);
-            return imageUrl;
+              const imageBlob = await response.blob();
+              const imageUrl = URL.createObjectURL(imageBlob);
+              return imageUrl;
           } else {
-            console.error('Error al obtener la imagen de perfil');
-            return null;
+              console.error('Error al obtener la imagen de perfil');
+              return null;
           }
-        } catch (error) {
+      } catch (error) {
           console.error('Error de red al obtener la imagen de perfil:', error);
-          // También podrías establecer una imagen por defecto aquí
           return null;
-        }
-      };
+      }
+  }, []);
 
     useEffect(() => {
       chats.forEach(chat => {
