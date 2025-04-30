@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import { ErrorBoundary } from "react-error-boundary";
 import AppNavbar from "./AppNavbar";
@@ -33,48 +33,76 @@ function ErrorFallback({ error, resetErrorBoundary }) {
   )
 }
 
-function App() {
+// Componente para manejar rutas de admin
+const AdminRoute = ({ children }) => {
   const jwt = tokenService.getLocalAccessToken();
-  let roles = []
+  let isAdmin = false;
+  
   if (jwt) {
-    roles = getRolesFromJWT(jwt);
+    try {
+      const decodedToken = jwt_decode(jwt);
+      isAdmin = decodedToken.authorities && 
+                decodedToken.authorities.includes('ADMIN');
+    } catch (error) {
+      console.error("Error al decodificar token:", error);
+    }
   }
 
-  function getRolesFromJWT(jwt) {
-    return jwt_decode(jwt).authorities;
+  return isAdmin ? children : <Navigate to="/" />;
+};
+
+function App() {
+  const jwt = tokenService.getLocalAccessToken();
+  let roles = [];
+  
+  if (jwt) {
+    try {
+      roles = jwt_decode(jwt).authorities || [];
+    } catch (error) {
+      console.error("Error decodificando token:", error);
+    }
   }
+
   return (
     <div>
       <ErrorBoundary FallbackComponent={ErrorFallback}>
         <BrowserRouter>
           <AppNavbar />
           <Routes>
-            <Route path="/" exact={true} element={<Home />} />
+            {/* Rutas públicas */}
+            <Route path="/" element={<Home />} />
             <Route path="/docs" element={<SwaggerDocs />} />
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
             <Route path="/logout" element={<Logout />} />
-            <Route path="/papers" exact={true} element={<Papers />} />
-            <Route path="/papers/filtered/:search" exact={true} element={<Papers />} />
-            <Route path="/papers/:id" exact={true} element={<PaperDetail />} />
-            <Route path="/papers/:id/download/:paperFileId" exact={true} element={<PaperDetail />} />
-            <Route path="/users/:id" exact={true} element={<UserDetail />} />
-            <Route path="/about" exact={true} element={<AboutUs />} />
-            <Route path="/linkedInLogin" exact={true} element={<LoginLinkedIn />} />
-            <Route path="/chats" exact={true} element={<ChatList />} />
+            <Route path="/papers" element={<Papers />} />
+            <Route path="/papers/filtered/:search" element={<Papers />} />
+            <Route path="/papers/:id" element={<PaperDetail />} />
+            <Route path="/papers/:id/download/:paperFileId" element={<PaperDetail />} />
+            <Route path="/users/:id" element={<UserDetail />} />
+            <Route path="/about" element={<AboutUs />} />
+            <Route path="/linkedInLogin" element={<LoginLinkedIn />} />
+            <Route path="/chats" element={<ChatList />} />
 
             {/* Rutas privadas para usuarios autenticados */}
-            <Route path="/myPapers" exact={true} element={<PrivateRoute><UserPaperList /></PrivateRoute>} />
-            <Route path="/myPapers/:id" exact={true} element={<PrivateRoute><UserPaperEdit /></PrivateRoute>} />
-            <Route path="/myProfile" exact={true} element={<PrivateRoute><Profile /></PrivateRoute>} />
+            <Route path="/myPapers" element={<PrivateRoute><UserPaperList /></PrivateRoute>} />
+            <Route path="/myPapers/:id" element={<PrivateRoute><UserPaperEdit /></PrivateRoute>} />
+            <Route path="/myProfile" element={<PrivateRoute><Profile /></PrivateRoute>} />
 
             {/* Rutas privadas para administradores */}
-            {roles.includes("ADMIN") && (
-              <>
-                <Route path="/users" exact={true} element={<PrivateRoute><UserListAdmin /></PrivateRoute>} />
-                <Route path="/users/:username" exact={true} element={<PrivateRoute><UserEditAdmin /></PrivateRoute>} />
-              </>
-            )}
+            <Route path="/users" element={
+              <PrivateRoute>
+                {roles.includes("ADMIN") ? <UserListAdmin /> : <Navigate to="/" />}
+              </PrivateRoute>
+            } />
+            <Route path="/users/:username" element={
+              <PrivateRoute>
+                {roles.includes("ADMIN") ? <UserEditAdmin /> : <Navigate to="/" />}
+              </PrivateRoute>
+            } />
+            
+            {/* Ruta para manejar URLs no encontradas */}
+            <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </BrowserRouter>
       </ErrorBoundary>
