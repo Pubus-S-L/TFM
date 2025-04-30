@@ -211,7 +211,7 @@ public class PaperRestController {
 
 @PostMapping
 @ResponseStatus(HttpStatus.CREATED)
-public ResponseEntity<Paper> create(@RequestPart @Valid Paper paper, 
+public ResponseEntity<Paper> create(@RequestPart("paper") @Valid Paper paper, 
                                   @RequestParam(required=false) List<MultipartFile> files, 
                                   @RequestPart("userId") String userId)
         throws DataAccessException, DuplicatedPaperTitleException {
