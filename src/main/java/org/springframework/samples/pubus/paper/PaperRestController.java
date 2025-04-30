@@ -325,7 +325,8 @@ public ResponseEntity<Paper> create(
 
 			if (loggedUser.getId().equals(paperUser.getId())) {
 				if(files!=null){
-					ResponseEntity<Paper> res = uploadFile(paperId, newPaper, files);
+					Paper paper = paperService.updatePaper(newPaper, paperId);
+					ResponseEntity<Paper> res = uploadFile(paperId, paper, files);
 					return res;
 				}
 				else{
