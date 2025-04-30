@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import { ErrorBoundary } from "react-error-boundary";
 import AppNavbar from "./AppNavbar";
@@ -51,16 +51,17 @@ function App() {
   roles.forEach((role) => {
     if (role === "ADMIN") {
       adminRoutes = (
-        <>
+        <BrowserRouter>
         <Route path="/users" exact={true} element={<PrivateRoute><UserListAdmin /></PrivateRoute>} />
         <Route path="/users/:username" exact={true} element={<PrivateRoute><UserEditAdmin /></PrivateRoute>} />
-        </>)
+        </BrowserRouter>
+        )
     }
 
   })
   if (!jwt) {
     publicRoutes = (
-      <>        
+      <BrowserRouter>       
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/papers" exact={true} element={<Papers />} />
@@ -70,11 +71,11 @@ function App() {
         <Route path="/users/:id" exact={true} element={<UserDetail />} />
         <Route path="/about" exact={true} element={<AboutUs />} />
         <Route path="/linkedInLogin" exact={true} element={<LoginLinkedIn />} />
-      </>
+      </BrowserRouter>
     )
   } else {
     userRoutes = (
-      <>
+      <BrowserRouter>
         {/* <Route path="/papers" element={<PrivateRoute><Papers /></PrivateRoute>} /> */}        
         <Route path="/logout" element={<Logout />} />
         <Route path="/login" element={<Login />} />
@@ -89,7 +90,7 @@ function App() {
         <Route path="/users/:id" exact={true} element={<UserDetail />} />
         <Route path="/about" exact={true} element={<AboutUs />} />
         <Route path="/chats" exact={true} element={<ChatList />} />
-      </>
+      </BrowserRouter>
     )
   }
 
@@ -97,6 +98,7 @@ function App() {
     <div>
       <ErrorBoundary FallbackComponent={ErrorFallback} >
         <AppNavbar />
+        <BrowserRouter>
         <Routes>
           <Route path="/" exact={true} element={<Home />} />
           <Route path="/docs" element={<SwaggerDocs />} />
@@ -104,6 +106,7 @@ function App() {
           {userRoutes}
           {adminRoutes}
         </Routes>
+        </BrowserRouter>
       </ErrorBoundary>
     </div>
   );

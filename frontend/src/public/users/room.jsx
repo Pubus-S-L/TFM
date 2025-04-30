@@ -19,6 +19,7 @@ function ChatList() {
     const [imageUrl, setImageUrl] = useState("");
     const [unreadMessages, setUnreadMessages] = useState({});
     const[hasUnreadChats, setHasUnreadChats] = useState(false);
+    const [profileImageUrls, setProfileImageUrls] = useState({});
   
     useEffect(() => {
       setLoading(true)
@@ -43,6 +44,26 @@ function ChatList() {
       const anyUnread = Object.values(unreadMessages).some(count => count > 0);
       setHasUnreadChats(anyUnread);
     }, [unreadMessages]);
+
+    useEffect(() => {
+      async function loadProfileImages() {
+          const urls = {};
+          for (const chat of filteredChats) {
+              const otherUser = chat.users.find(u => u.id !== currentUser.id);
+              if (otherUser) {
+                  const imageUrl = await getUserProfileImage(otherUser);
+                  if (imageUrl) {
+                      urls[otherUser.id] = imageUrl;
+                  }
+              }
+          }
+          setProfileImageUrls(urls);
+      }
+  
+      if (filteredChats.length > 0) {
+          loadProfileImages();
+      }
+  }, [filteredChats, getUserProfileImage, currentUser]);
 
     // Función para obtener mensajes no leídos
     const fetchUnreadMessages = (chatId) => {
@@ -224,7 +245,7 @@ function ChatList() {
               filteredChats.map(async (chat) => {
                 const otherUser = chat.users.find((u) => u.id !== currentUser.id)
                 const isActive = selectedChatId === chat.id
-                const profileImageUrl = await getUserProfileImage(otherUser);
+                const profileImageUrl = profileImageUrls[otherUser?.id];
                 const hasUnread = unreadMessages[chat.id];
   
                 return (
