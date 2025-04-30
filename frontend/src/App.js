@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { Route, Routes, Navigate, BrowserRouter } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import { ErrorBoundary } from "react-error-boundary";
 import AppNavbar from "./AppNavbar";
@@ -10,6 +10,7 @@ import Logout from "./auth/logout";
 import Papers from "./public/papers/papersList";
 import PaperDetail from "./public/papers/papersDetails";
 import tokenService from "./services/token.service";
+import PrivateRoute from "./privateRoute";
 import UserPaperEdit from "./user/papers/myPaperEdit";
 import {UserPaperList} from "./user/papers/myPaperList";
 import UserDetail from "./public/users";
@@ -22,12 +23,15 @@ import UserEditAdmin from "./admin/users/UserEditAdmin";
 import ChatList from "./public/users/room";
 import "./styles/globals.css";
 
-// Componente de ruta privada simplificado
-const PrivateRoute = ({ children }) => {
-  return tokenService.getLocalAccessToken() ? children : <Navigate to="/login" />;
-};
-
-// Componente de ruta de administrador
+function ErrorFallback({ error, resetErrorBoundary }) {
+  return (
+    <div role="alert">
+      <p>Something went wrong:</p>
+      <pre>{error.message}</pre>
+      <button onClick={resetErrorBoundary}>Try again</button>
+    </div>
+  )
+}
 const AdminRoute = ({ children }) => {
   const jwt = tokenService.getLocalAccessToken();
   if (!jwt) return <Navigate to="/login" />;
@@ -42,16 +46,6 @@ const AdminRoute = ({ children }) => {
     return <Navigate to="/" />;
   }
 };
-
-function ErrorFallback({ error, resetErrorBoundary }) {
-  return (
-    <div role="alert">
-      <p>Something went wrong:</p>
-      <pre>{error.message}</pre>
-      <button onClick={resetErrorBoundary}>Try again</button>
-    </div>
-  )
-}
 
 function App() {
   return (
@@ -93,5 +87,4 @@ function App() {
     </div>
   );
 }
-
 export default App;
