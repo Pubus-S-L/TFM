@@ -39,9 +39,9 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.fasterxml.jackson.databind.JsonNode;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import io.micrometer.core.ipc.http.HttpSender.Response;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -61,6 +61,7 @@ public class PaperRestController {
 	private static final String ADMIN_AUTH = "ADMIN";
 	private final RestTemplate restTemplate;
 	private final ObjectMapper objectMapper;
+	private static final Logger logger = LoggerFactory.getLogger(PaperRestController.class);
 
 	@Autowired
 	public PaperRestController(PaperService paperService, UserService userService, PaperFileService paperFileService, RestTemplate restTemplate,ObjectMapper objectMapper) {
@@ -227,18 +228,18 @@ public ResponseEntity<Paper> create(
         @RequestParam(value = "files", required = false) List<MultipartFile> files)
         throws DataAccessException, DuplicatedPaperTitleException {
 
-    System.out.println("Iniciando creación de Paper (atributos separados)");
-    System.out.println("Title recibido: " + title);
-    System.out.println("Authors recibido: " + authors);
-    System.out.println("Publication Year recibido: " + publicationYear);
-    System.out.println("Type JSON recibido: " + typeJson);
-    System.out.println("UserId recibido: " + userId);
-    System.out.println("Files recibidos: " + (files != null ? files.size() : "null"));
+    logger.debug("Iniciando creación de Paper (atributos separados)");
+    logger.debug("Title recibido: " + title);
+    logger.debug("Authors recibido: " + authors);
+    logger.debug("Publication Year recibido: " + publicationYear);
+    logger.debug("Type JSON recibido: " + typeJson);
+    logger.debug("UserId recibido: " + userId);
+	logger.debug("Files recibidos: " + (files != null ? files.size() : "null"));
 
     try {
         Integer id = Integer.parseInt(userId);
         User user = userService.findUser(id);
-        System.out.println("Usuario encontrado: " + user);
+        logger.debug("Usuario encontrado: " + user);
 
         // Deserializar el JSON de Type a un objeto Type
         ObjectMapper objectMapper = new ObjectMapper();
@@ -257,19 +258,19 @@ public ResponseEntity<Paper> create(
         newPaper.setSource(source);
         newPaper.setScopus(scopus);
         newPaper.setUser(user);
-        System.out.println("Paper antes de guardar: " + newPaper);
+        logger.debug("Paper antes de guardar: " + newPaper);
 
         Paper savedPaper = this.paperService.savePaper(newPaper);
-        System.out.println("Paper guardado: " + savedPaper);
+        logger.debug("Paper guardado: " + savedPaper);
 
         if (files != null && !files.isEmpty()) {
-            System.out.println("Procesando archivos...");
+            logger.debug("Procesando archivos...");
             return uploadFile(savedPaper.getId(), savedPaper, files);
         }
 
         return new ResponseEntity<>(savedPaper, HttpStatus.CREATED);
     } catch (Exception e) {
-        System.err.println("Error al crear el paper (atributos separados): " + e.getMessage());
+        logger.debug("Error al crear el paper (atributos separados): " + e.getMessage());
         e.printStackTrace();
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
