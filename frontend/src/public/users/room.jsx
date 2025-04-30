@@ -62,6 +62,13 @@ function ChatList() {
       }
   }, []);
 
+  const filteredChats = chats.filter(chat => {
+    const otherUser = chat.users.find(u => u.id !== currentUser.id);
+    return otherUser && 
+      (otherUser.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+       otherUser.username?.toLowerCase().includes(searchTerm.toLowerCase()));
+  });
+
     useEffect(() => {
       async function loadProfileImages() {
           const urls = {};
@@ -116,14 +123,6 @@ function ChatList() {
         .catch(error => console.error("Error marking messages as read:", error));
       }
     };
-
-    // Filter chats based on search term
-    const filteredChats = chats.filter(chat => {
-      const otherUser = chat.users.find(u => u.id !== currentUser.id);
-      return otherUser && 
-        (otherUser.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-         otherUser.username?.toLowerCase().includes(searchTerm.toLowerCase()));
-    });
 
     const getLastMessage = (chat) => {
       const lastMsg = lastMessages[chat.id];
