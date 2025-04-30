@@ -211,44 +211,69 @@ public class PaperRestController {
 
 @PostMapping
 @ResponseStatus(HttpStatus.CREATED)
-public ResponseEntity<Paper> create(@RequestPart("paper") @Valid Paper paper, 
-                                  @RequestParam(required=false) List<MultipartFile> files, 
-                                  @RequestPart("userId") String userId)
+public ResponseEntity<Paper> create(
+        @RequestParam("title") String title,
+        @RequestParam("authors") String authors,
+        @RequestParam("publicationYear") String publicationYear,
+        @RequestParam("type") String typeJson, // Recibimos el JSON de Type como String
+        @RequestParam(value = "publisher", required = false) String publisher,
+        @RequestParam(value = "publicationData", required = false) String publicationData,
+        @RequestParam(value = "abstractContent", required = false) String abstractContent,
+        @RequestParam(value = "keywords", required = false) String keywords,
+        @RequestParam(value = "notes", required = false) String notes,
+        @RequestParam(value = "source", required = false) String source,
+        @RequestParam(value = "scopus", required = false) String scopus,
+        @RequestParam("userId") String userId,
+        @RequestParam(value = "files", required = false) List<MultipartFile> files)
         throws DataAccessException, DuplicatedPaperTitleException {
-    
-    System.out.println("Iniciando creación de Paper");
-    System.out.println("Paper recibido: " + paper);
+
+    System.out.println("Iniciando creación de Paper (atributos separados)");
+    System.out.println("Title recibido: " + title);
+    System.out.println("Authors recibido: " + authors);
+    System.out.println("Publication Year recibido: " + publicationYear);
+    System.out.println("Type JSON recibido: " + typeJson);
     System.out.println("UserId recibido: " + userId);
     System.out.println("Files recibidos: " + (files != null ? files.size() : "null"));
-    
+
     try {
         Integer id = Integer.parseInt(userId);
         User user = userService.findUser(id);
         System.out.println("Usuario encontrado: " + user);
-        
+
+        // Deserializar el JSON de Type a un objeto Type
+        ObjectMapper objectMapper = new ObjectMapper();
+        PaperType type = objectMapper.readValue(typeJson, PaperType.class);
+
         Paper newPaper = new Paper();
-        BeanUtils.copyProperties(paper, newPaper, "id");
+        newPaper.setTitle(title);
+        newPaper.setAuthors(authors);
+        newPaper.setPublicationYear(Integer.parseInt(publicationYear));
+        newPaper.setType(type);
+        newPaper.setPublisher(publisher);
+        newPaper.setPublicationData(publicationData);
+        newPaper.setAbstractContent(abstractContent);
+        newPaper.setKeywords(keywords);
+        newPaper.setNotes(notes);
+        newPaper.setSource(source);
+        newPaper.setScopus(scopus);
         newPaper.setUser(user);
         System.out.println("Paper antes de guardar: " + newPaper);
-        
+
         Paper savedPaper = this.paperService.savePaper(newPaper);
         System.out.println("Paper guardado: " + savedPaper);
 
-        if(files != null && !files.isEmpty()) {
+        if (files != null && !files.isEmpty()) {
             System.out.println("Procesando archivos...");
             return uploadFile(savedPaper.getId(), savedPaper, files);
         }
-        
+
         return new ResponseEntity<>(savedPaper, HttpStatus.CREATED);
     } catch (Exception e) {
-        // Log detallado del error
-        System.err.println("Error al crear el paper: " + e.getMessage());
+        System.err.println("Error al crear el paper (atributos separados): " + e.getMessage());
         e.printStackTrace();
-        
-        // Devolver una respuesta con error
         return ResponseEntity
-            .status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(null); // O crear un objeto Paper con un mensaje de error
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(null);
     }
 }
 

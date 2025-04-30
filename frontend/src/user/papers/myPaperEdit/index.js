@@ -328,6 +328,19 @@ export default function UserPaperEdit({ id, onSave }) {
     };
 
     const f = new FormData();
+    f.append("title", mypaper.title);
+    f.append("authors", mypaper.authors);
+    f.append("publicationYear", mypaper.publicationYear);
+    f.append("type", JSON.stringify(mypaper.type)); // Si 'type' es un objeto
+    f.append("publisher", mypaper.publisher);
+    f.append("publicationData", mypaper.publicationData);
+    f.append("abstractContent", mypaper.abstractContent);
+    f.append("keywords", mypaper.keywords);
+    f.append("notes", mypaper.notes);
+    f.append("source", mypaper.source);
+    f.append("scopus", mypaper.scopus);
+    f.append("userId", userId.toString());
+
 
     // Añadir archivos al FormData
     if (files && files.length > 0) {
@@ -337,7 +350,6 @@ export default function UserPaperEdit({ id, onSave }) {
     }
 
     // Añadir los datos del paper como un campo JSON
-    f.append("paper", JSON.stringify(mypaper));
     f.append("userId", userId.toString());
 
     try {
@@ -355,7 +367,6 @@ export default function UserPaperEdit({ id, onSave }) {
             method: mypaper.id ? "PUT" : "POST",
             headers: {
                 'Authorization': `Bearer ${jwt}`,
-                // No especificamos Content-Type para FormData
             },
             body: f,
         });
