@@ -349,9 +349,6 @@ export default function UserPaperEdit({ id, onSave }) {
         });
     }
 
-    // Añadir los datos del paper como un campo JSON
-    f.append("userId", userId.toString());
-
     try {
         console.log("FormData a enviar:", f);
         console.log("paper:", JSON.stringify(mypaper));
