@@ -327,44 +327,80 @@ export default function UserPaperEdit({ id, onSave }) {
         user: paper.user,
     };
 
-    const f = new FormData();
-
-    // Añadir archivos al FormData
-    if (files && files.length > 0) {
-        files.forEach(file => {
-            f.append("files", file);
-        });
-    }
-
-    // Añadir los datos del paper como un campo JSON
-    f.append("paper", JSON.stringify(mypaper));
-    f.append("userId", userId.toString());
-
     try {
-        console.log("FormData a enviar:", f);
-        console.log("paper:", JSON.stringify(mypaper));
-        console.log("userId:", userId);
-
-        // Usar la URL completa en lugar de relativa
         const baseUrl = "https://tfm-m1dn.onrender.com";
-        const url = `${baseUrl}/api/v1/papers${paperId ? "/" + paperId : ""}`;
+        let url = `${baseUrl}/api/v1/papers`;
+        
+        if (paperId) {
+            url = `${baseUrl}/api/v1/papers/${paperId}`;
+        }
         
         console.log("URL de la solicitud:", url);
         
-        const response = await fetch(url, {
-            method: mypaper.id ? "PUT" : "POST",
-            headers: {
-                'Authorization': `Bearer ${jwt}`,
-                // No especificamos Content-Type para FormData
-            },
-            body: f,
-        });
-
+        // Enfoque 1: Usar FormData (opción tradicional)
+        if (files && files.length > 0) {
+            // Si tenemos archivos, usamos FormData
+            const f = new FormData();
+            
+            // Añadir archivos al FormData
+            files.forEach(file => {
+                f.append("files", file);
+            });
+            
+            // Añadir los datos del paper como un campo JSON
+            f.append("paper", new Blob([JSON.stringify(mypaper)], {
+                type: 'application/json'
+            }));
+            f.append("userId", userId.toString());
+            
+            console.log("FormData a enviar:", f);
+            
+            const response = await fetch(url, {
+                method: mypaper.id ? "PUT" : "POST",
+                headers: {
+                    'Authorization': `Bearer ${jwt}`,
+                    // No especificamos Content-Type para FormData, el navegador lo configurará automáticamente
+                },
+                body: f,
+            });
+            
+            handleResponse(response);
+        } 
+        // Enfoque 2: Usar JSON puro si no hay archivos
+        else {
+            // Si no hay archivos, es más simple usar JSON
+            const requestData = {
+                paper: mypaper,
+                userId: userId
+            };
+            
+            console.log("JSON a enviar:", requestData);
+            
+            const response = await fetch(url, {
+                method: mypaper.id ? "PUT" : "POST",
+                headers: {
+                    'Authorization': `Bearer ${jwt}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            });
+            
+            handleResponse(response);
+        }
+    } catch (error) {
+        // Error de conexión
+        setIsSaving(false);
+        console.error("Error de conexión:", error);
+        setModalShow(true);
+    }
+    
+    // Función auxiliar para manejar la respuesta
+    async function handleResponse(response) {
         console.log("Estado de la respuesta:", response.status);
         
         // Desactivar el spinner
         setIsSaving(false);
-
+        
         if (response.ok) {
             // Primero verifiquemos si la respuesta es vacía
             const responseText = await response.text();
@@ -404,11 +440,6 @@ export default function UserPaperEdit({ id, onSave }) {
             console.error(`Error del servidor (${response.status}):`, errorText);
             setModalShow(true);
         }
-    } catch (error) {
-        // Error de conexión
-        setIsSaving(false);
-        console.error("Error de conexión:", error);
-        setModalShow(true);
     }
 }
 
