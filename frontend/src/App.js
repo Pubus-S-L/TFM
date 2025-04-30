@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, Routes, BrowserRouter } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import { ErrorBoundary } from "react-error-boundary";
 import AppNavbar from "./AppNavbar";
@@ -10,7 +10,6 @@ import Logout from "./auth/logout";
 import Papers from "./public/papers/papersList";
 import PaperDetail from "./public/papers/papersDetails";
 import tokenService from "./services/token.service";
-import PrivateRoute from "./privateRoute";
 import UserPaperEdit from "./user/papers/myPaperEdit";
 import {UserPaperList} from "./user/papers/myPaperList";
 import UserDetail from "./public/users";
@@ -23,6 +22,27 @@ import UserEditAdmin from "./admin/users/UserEditAdmin";
 import ChatList from "./public/users/room";
 import "./styles/globals.css";
 
+// Componente de ruta privada simplificado
+const PrivateRoute = ({ children }) => {
+  return tokenService.getLocalAccessToken() ? children : <Navigate to="/login" />;
+};
+
+// Componente de ruta de administrador
+const AdminRoute = ({ children }) => {
+  const jwt = tokenService.getLocalAccessToken();
+  if (!jwt) return <Navigate to="/login" />;
+  
+  try {
+    const decodedToken = jwt_decode(jwt);
+    const isAdmin = decodedToken.authorities && 
+                decodedToken.authorities.includes('ADMIN');
+    return isAdmin ? children : <Navigate to="/" />;
+  } catch (error) {
+    console.error("Error al decodificar token:", error);
+    return <Navigate to="/" />;
+  }
+};
+
 function ErrorFallback({ error, resetErrorBoundary }) {
   return (
     <div role="alert">
@@ -34,68 +54,39 @@ function ErrorFallback({ error, resetErrorBoundary }) {
 }
 
 function App() {
-  // Obtener token y decodificar de manera segura
-  const jwt = tokenService.getLocalAccessToken();
-  let roles = [];
-  
-  if (jwt) {
-    try {
-      const decoded = jwt_decode(jwt);
-      roles = decoded.authorities || [];
-    } catch (error) {
-      console.error("Error decodificando JWT:", error);
-    }
-  }
-  
-  // Verificar si el usuario es administrador
-  const isAdmin = roles.includes("ADMIN");
-  const isAuthenticated = !!jwt;
-
   return (
     <div>
       <ErrorBoundary FallbackComponent={ErrorFallback}>
         <BrowserRouter>
           <AppNavbar />
           <Routes>
-            {/* Rutas comunes para todos los usuarios */}
+            {/* Rutas públicas */}
             <Route path="/" element={<Home />} />
             <Route path="/docs" element={<SwaggerDocs />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/logout" element={<Logout />} />
             <Route path="/papers" element={<Papers />} />
             <Route path="/papers/filtered/:search" element={<Papers />} />
             <Route path="/papers/:id" element={<PaperDetail />} />
             <Route path="/papers/:id/download/:paperFileId" element={<PaperDetail />} />
             <Route path="/users/:id" element={<UserDetail />} />
             <Route path="/about" element={<AboutUs />} />
+            <Route path="/linkedInLogin" element={<LoginLinkedIn />} />
+            <Route path="/chats" element={<ChatList />} />
+
+            {/* Rutas privadas para usuarios autenticados */}
+            <Route path="/myPapers" element={<PrivateRoute><UserPaperList /></PrivateRoute>} />
+            <Route path="/myPapers/:id" element={<PrivateRoute><UserPaperEdit /></PrivateRoute>} />
+            <Route path="/myProfile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+
+            {/* Rutas privadas para administradores */}
+            <Route path="/users" element={<AdminRoute><UserListAdmin /></AdminRoute>} />
+            <Route path="/users/:username" element={<AdminRoute><UserEditAdmin /></AdminRoute>} />
+            <Route path="/admin/users/:id" element={<AdminRoute><UserEditAdmin /></AdminRoute>} />
             
-            {/* Rutas para usuarios no autenticados */}
-            {!isAuthenticated && (
-              <>
-                <Route path="/register" element={<Register />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/linkedInLogin" element={<LoginLinkedIn />} />
-              </>
-            )}
-            
-            {/* Rutas para usuarios autenticados */}
-            {isAuthenticated && (
-              <>
-                <Route path="/logout" element={<Logout />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/myPapers" element={<PrivateRoute><UserPaperList /></PrivateRoute>} />
-                <Route path="/myPapers/:id" element={<PrivateRoute><UserPaperEdit /></PrivateRoute>} />
-                <Route path="/myProfile" element={<PrivateRoute><Profile /></PrivateRoute>} />
-                <Route path="/chats" element={<PrivateRoute><ChatList /></PrivateRoute>} />
-              </>
-            )}
-            
-            {/* Rutas para administradores */}
-            {isAdmin && (
-              <>
-                <Route path="/users" element={<PrivateRoute><UserListAdmin /></PrivateRoute>} />
-                <Route path="/users/:username" element={<PrivateRoute><UserEditAdmin /></PrivateRoute>} />
-                <Route path="/admin/users/:id" element={<PrivateRoute><UserEditAdmin /></PrivateRoute>} />
-              </>
-            )}
+            {/* Manejo de rutas no encontradas */}
+            <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </BrowserRouter>
       </ErrorBoundary>
