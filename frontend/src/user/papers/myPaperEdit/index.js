@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Upload, FileText, Trash2, X } from "lucide-react";
 import tokenService from "../../../services/token.service"; 
-import { paperEditFormInputs } from "../form/paperEditFormInputs"; 
+import { paperEditFormInputs } from "./form/paperEditFormInputs"; 
 
 export default function UserPaperEdit({ id, onSave }) {
   // Estilo para los mensajes de error
