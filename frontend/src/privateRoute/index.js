@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import tokenService from './services/token.service';
+import tokenService from '../services/token.service';
 
 const PrivateRoute = ({ children }) => {
     const [isLoading, setIsLoading] = useState(true);
