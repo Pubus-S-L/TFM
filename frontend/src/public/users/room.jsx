@@ -21,6 +21,19 @@ function ChatList() {
     const[hasUnreadChats, setHasUnreadChats] = useState(false);
     const [profileImageUrls, setProfileImageUrls] = useState({});
   
+    // Función para obtener mensajes no leídos
+    const fetchUnreadMessages = useCallback((chatId) => {
+      fetch(`https://tfm-m1dn.onrender.com/api/v1/message/${chatId}/unread/${currentUser.id}`)
+        .then(response => response.json())
+        .then(data => {
+          setUnreadMessages(prev => ({
+            ...prev,
+            [chatId]: data.length > 0
+          }));
+        })
+        .catch(error => console.error("Error fetching unread messages:", error));
+    }, [currentUser.id]);
+
     useEffect(() => {
       setLoading(true)
       // Cargar lista de chats del usuario
@@ -40,7 +53,7 @@ function ChatList() {
           console.error("Error fetching chats:", error);
           setLoading(false);
         });
-    }, [currentUser]);
+    }, [currentUser.id, fetchUnreadMessages]); // Añadido fetchUnreadMessages a las dependencias
 
     useEffect(() => {
       const anyUnread = Object.values(unreadMessages).some(count => count > 0);
@@ -89,20 +102,7 @@ function ChatList() {
       if (filteredChats.length > 0) {
           loadProfileImages();
       }
-  }, [filteredChats, getUserProfileImage, currentUser]);
-
-    // Función para obtener mensajes no leídos
-    const fetchUnreadMessages = (chatId) => {
-      fetch(`https://tfm-m1dn.onrender.com/api/v1/message/${chatId}/unread/${currentUser.id}`)
-        .then(response => response.json())
-        .then(data => {
-          setUnreadMessages(prev => ({
-            ...prev,
-            [chatId]: data.length > 0
-          }));
-        })
-        .catch(error => console.error("Error fetching unread messages:", error));
-    };
+  }, [filteredChats, getUserProfileImage, currentUser.id]); // Cambiado currentUser por currentUser.id
 
     // Marcar mensajes como leídos cuando se selecciona un chat
     const handleSelectChat = (chatId) => {
@@ -150,20 +150,39 @@ function ChatList() {
     };
 
     useEffect(() => {
-      chats.forEach(chat => {
-        fetch(`https://tfm-m1dn.onrender.com/api/v1/message/${chat.id}/messages`)
-          .then(response => response.json())
-          .then(data => {
+      // Evitamos ejecutar esto si no hay chats
+      if (chats.length === 0) return;
+      
+      const fetchLastMessages = async () => {
+        const newLastMessages = {...lastMessages};
+        let updated = false;
+        
+        for (const chat of chats) {
+          try {
+            const response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/message/${chat.id}/messages`);
+            const data = await response.json();
+            
             if (data.length > 0) {
-              setLastMessages(prev => ({
-                ...prev,
-                [chat.id]: data[data.length - 1]
-              }));
+              const lastMessage = data[data.length - 1];
+              // Solo actualizamos si el mensaje es diferente al que ya tenemos
+              if (!newLastMessages[chat.id] || newLastMessages[chat.id].id !== lastMessage.id) {
+                newLastMessages[chat.id] = lastMessage;
+                updated = true;
+              }
             }
-          })
-          .catch(err => console.error("Error cargando mensajes:", err));
-      });
-    }, [chats]);
+          } catch (err) {
+            console.error("Error cargando mensajes:", err);
+          }
+        }
+        
+        // Solo actualizamos el estado si hay cambios
+        if (updated) {
+          setLastMessages(newLastMessages);
+        }
+      };
+      
+      fetchLastMessages();
+    }, [chats]); // Eliminada la dependencia de lastMessages para evitar bucles
 
     const handleSendMessage = () => {
       if (!newMessage.trim() || !selectedChatId) return
