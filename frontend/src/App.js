@@ -1,5 +1,5 @@
-import React from "react";
-import { Route, Routes } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Route, Routes, Navigate } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import { ErrorBoundary } from "react-error-boundary";
 import AppNavbar from "./AppNavbar";
@@ -34,75 +34,121 @@ function ErrorFallback({ error, resetErrorBoundary }) {
 }
 
 function App() {
-  const jwt = tokenService.getLocalAccessToken();
-  let roles = []
-  if (jwt) {
-    roles = getRolesFromJWT(jwt);
-  }
+  // Usar useState para manejar el token y roles de forma reactiva
+  const [jwt, setJwt] = useState(tokenService.getLocalAccessToken());
+  const [roles, setRoles] = useState([]);
+  
+  // Efecto para actualizar los roles cuando cambia el token
+  useEffect(() => {
+    if (jwt) {
+      try {
+        setRoles(getRolesFromJWT(jwt));
+      } catch (error) {
+        console.error("Error decoding JWT:", error);
+        // Limpiar token inválido
+        tokenService.removeUser();
+        setJwt(null);
+        setRoles([]);
+      }
+    } else {
+      setRoles([]);
+    }
+  }, [jwt]);
+  
+  // Efecto para escuchar cambios en localStorage
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const currentToken = tokenService.getLocalAccessToken();
+      if (currentToken !== jwt) {
+        setJwt(currentToken);
+      }
+    };
+    
+    // Verificar el token cada 5 segundos para detectar cambios
+    const interval = setInterval(handleStorageChange, 5000);
+    
+    // Limpiar intervalo al desmontar
+    return () => clearInterval(interval);
+  }, [jwt]);
 
-  function getRolesFromJWT(jwt) {
-    return jwt_decode(jwt).authorities;
+  function getRolesFromJWT(token) {
+    if (!token) return [];
+    try {
+      return jwt_decode(token).authorities || [];
+    } catch (e) {
+      console.error("Error decoding token:", e);
+      return [];
+    }
   }
 
   let adminRoutes = <></>;
   let userRoutes = <></>;
   let publicRoutes = <></>;
 
-  roles.forEach((role) => {
-    if (role === "ADMIN") {
-      adminRoutes = (
-        <>
-        <Route path="/users" exact={true} element={<PrivateRoute><UserListAdmin /></PrivateRoute>} />
-        <Route path="/users/:username" exact={true} element={<PrivateRoute><UserEditAdmin /></PrivateRoute>} />
-        </>)
-    }
+  // Construir rutas de administrador si el usuario tiene el rol
+  const isAdmin = roles.some(role => role === "ADMIN");
+  if (isAdmin) {
+    adminRoutes = (
+      <>
+      <Route path="/users" element={<PrivateRoute><UserListAdmin /></PrivateRoute>} />
+      <Route path="/users/:username" element={<PrivateRoute><UserEditAdmin /></PrivateRoute>} />
+      </>
+    );
+  }
 
-  })
+  // Rutas públicas si no hay token
   if (!jwt) {
     publicRoutes = (
       <>        
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/papers" exact={true} element={<Papers />} />
-        <Route path="/papers/filtered/:search" exact={true} element={<Papers />} />
-        <Route path="/papers/:id" exact={true} element={<PaperDetail />} />
-        <Route path="/papers/:id/download/:paperFileId" exact={true} element={<PaperDetail />} />
-        <Route path="/users/:id" exact={true} element={<UserDetail />} />
-        <Route path="/about" exact={true} element={<AboutUs />} />
-        <Route path="/linkedInLogin" exact={true} element={<LoginLinkedIn />} />
+        <Route path="/papers" element={<Papers />} />
+        <Route path="/papers/filtered/:search" element={<Papers />} />
+        <Route path="/papers/:id" element={<PaperDetail />} />
+        <Route path="/papers/:id/download/:paperFileId" element={<PaperDetail />} />
+        <Route path="/users/:id" element={<UserDetail />} />
+        <Route path="/about" element={<AboutUs />} />
+        <Route path="/linkedInLogin" element={<LoginLinkedIn />} />
+        {/* Redireccionar rutas protegidas al login */}
+        <Route path="/myPapers" element={<Navigate to="/login" />} />
+        <Route path="/myPapers/:id" element={<Navigate to="/login" />} />
+        <Route path="/myProfile" element={<Navigate to="/login" />} />
+        <Route path="/chats" element={<Navigate to="/login" />} />
       </>
-    )
+    );
   } else {
+    // Rutas para usuarios autenticados
     userRoutes = (
-      <>
-        {/* <Route path="/papers" element={<PrivateRoute><Papers /></PrivateRoute>} /> */}        
+      <>       
         <Route path="/logout" element={<Logout />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/myPapers" exact={true} element={<PrivateRoute><UserPaperList/></PrivateRoute>} />
-        <Route path="/myPapers/:id" exact={true} element={<PrivateRoute><UserPaperEdit /></PrivateRoute>} /> 
-        <Route path="/myProfile" exact={true} element={<PrivateRoute><Profile /></PrivateRoute>} /> 
-        <Route path="/papers" exact={true} element={<Papers />} />
-        <Route path="/papers/filtered/:search" exact={true} element={<Papers />} />
-        <Route path="/papers/:id" exact={true} element={<PaperDetail />} />
-        <Route path="/papers/:id/download/:paperFileId" exact={true} element={<PaperDetail />} />
-        <Route path="/admin/users/:id" exact={true} element={<UserEditAdmin />} />
-        <Route path="/users/:id" exact={true} element={<UserDetail />} />
-        <Route path="/about" exact={true} element={<AboutUs />} />
-        <Route path="/chats" exact={true} element={<ChatList />} />
+        <Route path="/myPapers" element={<PrivateRoute><UserPaperList/></PrivateRoute>} />
+        <Route path="/myPapers/:id" element={<PrivateRoute><UserPaperEdit /></PrivateRoute>} /> 
+        <Route path="/myProfile" element={<PrivateRoute><Profile /></PrivateRoute>} /> 
+        <Route path="/papers" element={<Papers />} />
+        <Route path="/papers/filtered/:search" element={<Papers />} />
+        <Route path="/papers/:id" element={<PaperDetail />} />
+        <Route path="/papers/:id/download/:paperFileId" element={<PaperDetail />} />
+        <Route path="/admin/users/:id" element={<UserEditAdmin />} />
+        <Route path="/users/:id" element={<UserDetail />} />
+        <Route path="/about" element={<AboutUs />} />
+        <Route path="/chats" element={<PrivateRoute><ChatList /></PrivateRoute>} />
       </>
-    )
+    );
   }
 
   return (
     <div>
-      <ErrorBoundary FallbackComponent={ErrorFallback} >
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
         <AppNavbar />
         <Routes>
-          <Route path="/" exact={true} element={<Home />} />
+          <Route path="/" element={<Home />} />
           <Route path="/docs" element={<SwaggerDocs />} />
           {publicRoutes}
           {userRoutes}
           {adminRoutes}
+          {/* Ruta catch-all para manejar URLs no encontradas */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </ErrorBoundary>
     </div>
