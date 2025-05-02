@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Upload, FileText, Trash2, X } from "lucide-react"; // Asumiendo que estás usando lucide-react para iconos
-import tokenService from "../../services/token.service"; // Ajusta la ruta según tu estructura
-import { paperEditFormInputs } from "../../constants/paperFormInputs"; // Ajusta la ruta según tu estructura
+import { Upload, FileText, Trash2, X } from "lucide-react";
+import tokenService from "../../../services/token.service"; 
+import { paperEditFormInputs } from "..//constants/paperFormInputs"; 
 
 export default function UserPaperEdit({ id, onSave }) {
   // Estilo para los mensajes de error
