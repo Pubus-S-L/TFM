@@ -381,7 +381,7 @@ export default function UserPaperEdit({ id, onSave }) {
             if (!responseText || responseText.trim() === "") {
                 console.log("Respuesta vacía del servidor, pero el estado es OK");
                 // Si la operación fue exitosa pero no hay respuesta JSON, redirigir
-                navigate('/myPapers');
+                navigate(0);
                 return;
             }
             
@@ -395,13 +395,13 @@ export default function UserPaperEdit({ id, onSave }) {
                     setModalShow(true);
                 } else {
                     // Operación exitosa, redirigir
-                    navigate('/myPapers');
+                    navigate(0);
                 }
             } catch (error) {
                 console.error("Error al parsear la respuesta JSON:", error);
                 // Si no podemos parsear pero el status es OK, asumimos éxito
                 if (response.status >= 200 && response.status < 300) {
-                    navigate('/myPapers');
+                    navigate(0);
                 } else {
                     setModalShow(true);
                 }
@@ -434,7 +434,7 @@ export default function UserPaperEdit({ id, onSave }) {
             if (!responseText || responseText.trim() === "") {
                 console.log("Respuesta vacía del servidor, pero el estado es OK");
                 // Si la operación fue exitosa pero no hay respuesta JSON, redirigir
-                navigate('/myPapers');
+                navigate(0);
                 return;
             }
             
@@ -448,13 +448,13 @@ export default function UserPaperEdit({ id, onSave }) {
                     setModalShow(true);
                 } else {
                     // Operación exitosa, redirigir
-                    navigate('/myPapers');
+                    navigate(0);
                 }
             } catch (error) {
                 console.error("Error al parsear la respuesta JSON:", error);
                 // Si no podemos parsear pero el status es OK, asumimos éxito
                 if (response.status >= 200 && response.status < 300) {
-                    navigate('/myPapers');
+                    navigate(0);
                 } else {
                     setModalShow(true);
                 }
