@@ -108,7 +108,7 @@ export default function UserProfile() {
       }
 
       setUserData(updatedProfile);
-      navigate('/myProfile');
+      navigate(0);
     } catch (error) {
       setMessage(error.message);
       setModalShow(true);
@@ -204,7 +204,7 @@ export default function UserProfile() {
       }
 
       await setUpAvatar()
-      navigate('/myProfile');
+      navigate(0);
 
 
       toast({

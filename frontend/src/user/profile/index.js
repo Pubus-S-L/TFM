@@ -116,7 +116,7 @@ export default function EditProfile() {
           throw new Error(errorData.message);
         }
   
-        navigate('/myProfile');
+        navigate(0);
       } catch (error) {
         setMessage(error.message);
         setModalShow(true);

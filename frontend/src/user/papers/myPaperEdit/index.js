@@ -369,14 +369,7 @@ export default function UserPaperEdit({ id, onSave }) {
             console.log("Operación exitosa. Redirigiendo...");
             // Desactivar el spinner
             setIsSaving(false);
-            
-            // Usar setTimeout para asegurar que la redirección ocurra después de que React
-            // haya completado sus actualizaciones internas de estado
-            setTimeout(() => {
-                // Forzar recargar la página después de la redirección para asegurar
-                // que los cambios sean visibles
-                window.location.href = '/myPapers';
-            }, 100);
+            navigate(0);
         } else {
             // Error en la respuesta
             const errorText = await response.text();

@@ -129,7 +129,7 @@ let exportTitles = []
             setImportProgress(((i + 1) / jsonData.length) * 100);
         }
 
-        navigate('/myPapers');
+        navigate(0);
     } catch (error) {
         setMessage("Error importing papers.");
         setModalShow(true);
@@ -170,7 +170,7 @@ useEffect(() => {
         return response.json();
     })
     .then((data) => {
-      navigate('/myPapers');
+      navigate(0);
     });
 }
 
