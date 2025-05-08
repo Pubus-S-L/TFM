@@ -36,7 +36,7 @@ export default function Login() {
       .then(function (data) {
         tokenService.setUser(data);
         tokenService.updateLocalAccessToken(data.token);
-        navigate('/papers');
+        navigate(0);
       })
       .catch((error) => {         
         setMessage(error);
@@ -58,7 +58,7 @@ export default function Login() {
       .then(function (data) {
         tokenService.setUser(data);
         tokenService.updateLocalAccessToken(data.token);
-        navigate('/papers');
+        navigate(0);
       })
       .catch((error) => {         
         setMessage(error);

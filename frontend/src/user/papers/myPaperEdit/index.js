@@ -1,8 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { Upload, FileText, Trash2, X } from "lucide-react";
-import tokenService from "../../../services/token.service"; 
-import { paperEditFormInputs } from "./form/paperEditFormInputs"; 
+"use client"
+import { useEffect, useState, useRef } from "react"
+import { paperEditFormInputs } from "./form/paperEditFormInputs"
+import "bootstrap/dist/css/bootstrap.min.css"
+import tokenService from "../../../services/token.service"
+import { FileText, Upload, Trash2, Loader, X } from "lucide-react"
+import "../../../static/css/user/myPaperEdit.css"
+import { useNavigate } from 'react-router-dom';
 
 export default function UserPaperEdit({ id, onSave }) {
   // Estilo para los mensajes de error
@@ -329,14 +332,15 @@ export default function UserPaperEdit({ id, onSave }) {
     f.append("authors", mypaper.authors);
     f.append("publicationYear", mypaper.publicationYear);
     f.append("type", JSON.stringify(mypaper.type)); // Si 'type' es un objeto
-    f.append("publisher", mypaper.publisher || "");
-    f.append("publicationData", mypaper.publicationData || "");
-    f.append("abstractContent", mypaper.abstractContent || "");
-    f.append("keywords", mypaper.keywords || "");
-    f.append("notes", mypaper.notes || "");
-    f.append("source", mypaper.source || "");
-    f.append("scopus", mypaper.scopus || "");
+    f.append("publisher", mypaper.publisher);
+    f.append("publicationData", mypaper.publicationData);
+    f.append("abstractContent", mypaper.abstractContent);
+    f.append("keywords", mypaper.keywords);
+    f.append("notes", mypaper.notes);
+    f.append("source", mypaper.source);
+    f.append("scopus", mypaper.scopus);
     f.append("userId", userId.toString());
+
 
     // Añadir archivos al FormData
     if (files && files.length > 0) {
@@ -347,7 +351,9 @@ export default function UserPaperEdit({ id, onSave }) {
 
     try {
         console.log("FormData a enviar:", f);
-        
+        console.log("paper:", JSON.stringify(mypaper));
+        console.log("userId:", userId);
+
         // Usar la URL completa en lugar de relativa
         const baseUrl = "https://tfm-m1dn.onrender.com";
         const url = `${baseUrl}/api/v1/papers${paperId ? "/" + paperId : ""}`;
@@ -364,26 +370,104 @@ export default function UserPaperEdit({ id, onSave }) {
 
         console.log("Estado de la respuesta:", response.status);
         
-        // Verificar si la operación fue exitosa
+        // Desactivar el spinner
+        setIsSaving(false);
+
         if (response.ok) {
-            console.log("Operación exitosa. Redirigiendo...");
-            // Desactivar el spinner
-            setIsSaving(false);
-            navigate(0);
+            // Primero verifiquemos si la respuesta es vacía
+            const responseText = await response.text();
+            console.log("Respuesta del servidor (texto):", responseText);
+            
+            if (!responseText || responseText.trim() === "") {
+                console.log("Respuesta vacía del servidor, pero el estado es OK");
+                // Si la operación fue exitosa pero no hay respuesta JSON, redirigir
+                navigate(0);
+                return;
+            }
+            
+            try {
+                const responseData = JSON.parse(responseText);
+                console.log("Respuesta del servidor (JSON):", responseData);
+                
+                if (responseData.message) {
+                    // Si hay un mensaje de error en la respuesta
+                    console.error("Error en la respuesta:", responseData.message);
+                    setModalShow(true);
+                } else {
+                    // Operación exitosa, redirigir
+                    navigate(0);
+                }
+            } catch (error) {
+                console.error("Error al parsear la respuesta JSON:", error);
+                // Si no podemos parsear pero el status es OK, asumimos éxito
+                if (response.status >= 200 && response.status < 300) {
+                    navigate(0);
+                } else {
+                    setModalShow(true);
+                }
+            }
         } else {
             // Error en la respuesta
             const errorText = await response.text();
             console.error(`Error del servidor (${response.status}):`, errorText);
             setModalShow(true);
-            setIsSaving(false);
         }
     } catch (error) {
         // Error de conexión
+        setIsSaving(false);
         console.error("Error de conexión:", error);
         setModalShow(true);
+    }
+    
+    // Función auxiliar para manejar la respuesta
+    async function handleResponse(response) {
+        console.log("Estado de la respuesta:", response.status);
+        
+        // Desactivar el spinner
         setIsSaving(false);
+        
+        if (response.ok) {
+            // Primero verifiquemos si la respuesta es vacía
+            const responseText = await response.text();
+            console.log("Respuesta del servidor (texto):", responseText);
+            
+            if (!responseText || responseText.trim() === "") {
+                console.log("Respuesta vacía del servidor, pero el estado es OK");
+                // Si la operación fue exitosa pero no hay respuesta JSON, redirigir
+                navigate(0);
+                return;
+            }
+            
+            try {
+                const responseData = JSON.parse(responseText);
+                console.log("Respuesta del servidor (JSON):", responseData);
+                
+                if (responseData.message) {
+                    // Si hay un mensaje de error en la respuesta
+                    console.error("Error en la respuesta:", responseData.message);
+                    setModalShow(true);
+                } else {
+                    // Operación exitosa, redirigir
+                    navigate(0);
+                }
+            } catch (error) {
+                console.error("Error al parsear la respuesta JSON:", error);
+                // Si no podemos parsear pero el status es OK, asumimos éxito
+                if (response.status >= 200 && response.status < 300) {
+                    navigate(0);
+                } else {
+                    setModalShow(true);
+                }
+            }
+        } else {
+            // Error en la respuesta
+            const errorText = await response.text();
+            console.error(`Error del servidor (${response.status}):`, errorText);
+            setModalShow(true);
+        }
     }
 }
+
 
   paperEditFormInputs.forEach((i) => (i.handleChange = handleChange))
 
@@ -473,9 +557,7 @@ export default function UserPaperEdit({ id, onSave }) {
     <div className="paper-edit-container">
       {/* Loading Spinner */}
       {isSaving && (
-        <div className="spinner-overlay">
-          <span className="loader"></span>
-        </div>
+        <span class="loader"></span>
       )}
 
       <h2 className="page-title">{paper.id ? "Edit Paper" : "Add Paper"}</h2>

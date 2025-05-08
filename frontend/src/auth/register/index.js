@@ -47,7 +47,7 @@ export default function Register() {
           else {
             tokenService.setUser(data);
             tokenService.updateLocalAccessToken(data.token);
-            navigate('/papers');
+            navigate(0);
           }
         })
         .catch((message) => {
