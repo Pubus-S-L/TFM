@@ -25,7 +25,7 @@ FROM nginx:stable-alpine
 COPY --from=build /app/build /usr/share/nginx/html
 
 # Copiamos un nginx.conf personalizado (opcional, si quieres configurar mejor nginx)
-# COPY nginx.conf /etc/nginx/nginx.conf
+COPY nginx.conf /nginx.conf
 
 # Exponemos el puerto 80
 EXPOSE 80
