@@ -53,7 +53,7 @@ public class PaperFileServiceImpl implements PaperFileService {
     public PaperFile save(PaperFile paperFile) {
         return paperFileRepository.save(paperFile);
     }
-    private static final int MAX_TOKENS = 6500;
+    private static final int MAX_TOKENS = 8000;
 
 
     @Override
