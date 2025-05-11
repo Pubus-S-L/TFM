@@ -53,7 +53,7 @@ public class PaperFileServiceImpl implements PaperFileService {
     public PaperFile save(PaperFile paperFile) {
         return paperFileRepository.save(paperFile);
     }
-    private static final int MAX_TOKENS = 7000;
+    private static final int MAX_TOKENS = 6500;
 
 
     @Override
@@ -197,16 +197,19 @@ public class PaperFileServiceImpl implements PaperFileService {
         for (String sentence : sentences) {
             int sentenceTokens = estimateTokenCount(sentence);
         
-            if (currentTokenCount + sentenceTokens > MAX_TOKENS) {
-                chunks.add(currentChunk.toString());
-                currentChunk = new StringBuilder();
-                currentTokenCount = 0;
+            if (currentTokenCount + sentenceTokens <= MAX_TOKENS) {
+                currentChunk.append(sentence).append(" ");
+                currentTokenCount += sentenceTokens;
+            } else {
+                // Guardamos el chunk actual antes de añadir esta frase
+                if (currentChunk.length() > 0) {
+                    chunks.add(currentChunk.toString());
+                }
+                // Comenzamos nuevo chunk con la frase actual
+                currentChunk = new StringBuilder(sentence).append(" ");
+                currentTokenCount = sentenceTokens;
             }
-        
-            currentChunk.append(sentence).append(" ");
-            currentTokenCount += sentenceTokens;
-        }
-        
+        }     
         if (currentChunk.length() > 0) {
             chunks.add(currentChunk.toString());
         }
