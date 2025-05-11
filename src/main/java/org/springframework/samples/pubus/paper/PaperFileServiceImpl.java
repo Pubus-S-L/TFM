@@ -56,7 +56,9 @@ public class PaperFileServiceImpl implements PaperFileService {
         return paperFileRepository.save(paperFile);
     }
     private static final int MAX_TOKENS = 7000;
-    private static final Encoding ENCODING = Encodings.newDefaultEncodingRegistry().getEncoding("cl100k_base");
+    private static final Encoding ENCODING = Encodings.newDefaultEncodingRegistry()
+    .getEncoding("cl100k_base")
+    .orElseThrow(() -> new IllegalArgumentException("Encoding 'cl100k_base' not found"));
 
 
     @Override
