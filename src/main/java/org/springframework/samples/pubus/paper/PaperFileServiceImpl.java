@@ -34,6 +34,8 @@ import jakarta.persistence.Tuple;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
+import com.knuddels.jtokkit.Encodings;
+import com.knuddels.jtokkit.api.Encoding;
 
 
 @Service
@@ -53,7 +55,8 @@ public class PaperFileServiceImpl implements PaperFileService {
     public PaperFile save(PaperFile paperFile) {
         return paperFileRepository.save(paperFile);
     }
-    private static final int MAX_TOKENS = 8000;
+    private static final int MAX_TOKENS = 7000;
+    private static final Encoding ENCODING = Encodings.newDefaultEncodingRegistry().getEncoding("cl100k_base");
 
 
     @Override
@@ -218,7 +221,7 @@ public class PaperFileServiceImpl implements PaperFileService {
     }
 
     private int estimateTokenCount(String text) {
-        return text.length() / 4;
+        return ENCODING.encode(text).size();
     }
 
     public Pair<Integer,String> getContext(byte[] data, Integer userId) throws JsonProcessingException {
