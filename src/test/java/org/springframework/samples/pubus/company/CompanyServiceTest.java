@@ -2,6 +2,7 @@ package org.springframework.samples.pubus.company;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.dao.DataAccessException;
 import org.springframework.samples.pubus.exceptions.ResourceNotFoundException;
 
 public class CompanyServiceTest {
@@ -75,19 +77,35 @@ public class CompanyServiceTest {
         verify(companyRepository, times(1)).save(company);
     }
 
-    @Test
-    public void testUpdateCompany_CompanyFound() {
+ @Test
+    public void testUpdateCompany_CompanyFound() throws DataAccessException {
         Integer id = 1;
-        Company company = new Company();
-        Company updatedCompany = new Company();
-        updatedCompany.setName("Updated Name");
+        Company companyToUpdate = new Company();
+        companyToUpdate.setName("Updated Name");
+        companyToUpdate.setDescription("Updated Description");
+        companyToUpdate.setPhone(999999999);
+        companyToUpdate.setEmail("updated@example.com");
+        companyToUpdate.setSupportPhone(888888888);
+        companyToUpdate.setSupportEmail("support@updated.com");
 
-        when(companyRepository.findById(id)).thenReturn(Optional.of(company));
-        when(companyRepository.save(company)).thenReturn(updatedCompany);
+        Company existingCompany = new Company();
+        existingCompany.setId(id);
+        existingCompany.setName("Original Name");
 
-        assertEquals("Updated Name", updatedCompany.getName());
+        when(companyRepository.findById(id)).thenReturn(Optional.of(existingCompany));
+        when(companyRepository.save(any(Company.class))).thenReturn(companyToUpdate);
+
+        Company result = companyService.updateCompany(companyToUpdate, id);
+
+        assertEquals("Updated Name", result.getName());
+        assertEquals("Updated Description", result.getDescription());
+        assertEquals(999999999, result.getPhone());
+        assertEquals("updated@example.com", result.getEmail());
+        assertEquals(888888888, result.getSupportPhone());
+        assertEquals("support@updated.com", result.getSupportEmail());
+
         verify(companyRepository, times(1)).findById(id);
-        verify(companyRepository, times(1)).save(company);
+        verify(companyRepository, times(1)).save(existingCompany); // Se guarda la entidad existente modificada
     }
 
     @Test

@@ -213,9 +213,9 @@ public class PaperRestController {
 
 //CREATE	
 
-@PostMapping
-@ResponseStatus(HttpStatus.CREATED)
-public ResponseEntity<Paper> create(
+	@PostMapping
+	@ResponseStatus(HttpStatus.CREATED)
+	public ResponseEntity<Paper> create(
         @RequestParam("title") String title,
         @RequestParam("authors") String authors,
         @RequestParam("publicationYear") String publicationYear,

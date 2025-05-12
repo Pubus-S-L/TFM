@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.InjectMocks;
@@ -21,6 +22,8 @@ import org.springframework.samples.pubus.exceptions.ResourceNotFoundException;
 import org.springframework.samples.pubus.paper.exceptions.DuplicatedPaperTitleException;
 import org.springframework.samples.pubus.user.User;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -32,6 +35,9 @@ public class PaperServiceTest {
     
     @Mock
     private PaperRepository paperRepository;
+
+    @Mock
+    private PaperFileService paperFileService;
 
     @InjectMocks
     private PaperService paperService;
@@ -300,26 +306,29 @@ public class PaperServiceTest {
         User user = new User();
         user.setId(1);
 
-        Paper existingPaper = new Paper();
-        existingPaper.setId(1);
-        existingPaper.setTitle("Old Title");
-        existingPaper.setUser(user);
+        Paper paperToSave = new Paper();
+        paperToSave.setTitle("Test Paper");
+        paperToSave.setUser(user);
 
-        Paper updatedPaper = new Paper();
-        updatedPaper.setId(1);
-        updatedPaper.setTitle("Updated Title");
-        updatedPaper.setUser(user);
+        Paper savedPaper = new Paper();
+        savedPaper.setId(1); // Simulamos que la base de datos asigna un ID
+        savedPaper.setTitle("Test Paper");
+        savedPaper.setUser(user);
 
-        when(paperRepository.findById(1)).thenReturn(Optional.of(existingPaper));
         when(paperRepository.findAllPapersByUserId(1)).thenReturn(Arrays.asList());
+        when(paperRepository.findByTitle("Test Paper")).thenReturn(null);
+        when(paperRepository.save(paperToSave)).thenReturn(savedPaper);
+        when(paperFileService.addEmbedding(anyString(), anyMap())).thenReturn(new HashMap<>());
 
         // Act
-        Paper result = paperService.updatePaper(updatedPaper, 1);
+        Paper result = paperService.savePaper(paperToSave);
 
         // Assert
-        verify(paperRepository, times(1)).save(existingPaper);
-        assertEquals("Updated Title", result.getTitle());
+        verify(paperRepository, times(1)).save(paperToSave);
+        assertEquals(paperToSave.getTitle(), result.getTitle());
+        assertEquals(paperToSave.getUser(), result.getUser()); 
     }
+
 
     @Test
     void testUpdatePaper_NotFound() {

@@ -179,32 +179,27 @@ public class UserRestControllerTest {
         assertEquals(user, response.getBody());
     }
 
-    // @Test
-    // public void testCreate_Success() {
-    //     User user = new User();
-    //     user.setUsername("new_user");
-    //     user.setPassword("password");
-    //     user.setFirstName("Nombre Test");
-    //     user.setLastName("Apellido Test");
-    //     user.setUsername("test");
-    //     user.setStudies("ingeniería");
-    //     user.setJob("estudiante");
-    //     user.setEmail("test@gmail.com");
+    @Test
+    public void testCreate_Success() {
+        User user = new User();
+        user.setUsername("new_user");
+        user.setPassword("password");
+        user.setFirstName("Nombre Test");
+        user.setLastName("Apellido Test");
+        user.setUsername("test");
+        user.setEmail("test@gmail.com");
 
-    //     when(userService.saveUser(user)).thenReturn(user);
-    //     userRestController = new UserRestController(userService, authoritiesService, encoderMock);
-    //     ResponseEntity<User> response = userRestController.create(user);
+        when(userService.saveUser(user)).thenReturn(user);
+        userRestController = new UserRestController(userService, authoritiesService, encoderMock, paperService);
+        ResponseEntity<User> response = userRestController.create(user);
 
-    //     assertEquals(HttpStatus.CREATED, response.getStatusCode());
-    //     assertEquals(user, response.getBody());
-    //     assertEquals(user.getFirstName(), response.getBody().getFirstName());
-    //     assertEquals(user.getLastName(), response.getBody().getLastName());
-    //     assertEquals(user.getUsername(), response.getBody().getUsername());
-    //     assertEquals(user.getStudies(), response.getBody().getStudies());
-    //     assertEquals(user.getJob(), response.getBody().getJob());
-    //     assertEquals(user.getEmail(), response.getBody().getEmail());
-
-    // }
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(user, response.getBody());
+        assertEquals(user.getFirstName(), response.getBody().getFirstName());
+        assertEquals(user.getLastName(), response.getBody().getLastName());
+        assertEquals(user.getUsername(), response.getBody().getUsername());
+        assertEquals(user.getEmail(), response.getBody().getEmail());
+    }
 
     @Test
     public void testUpdate_Success() {
