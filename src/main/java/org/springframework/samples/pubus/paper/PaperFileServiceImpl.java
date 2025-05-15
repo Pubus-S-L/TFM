@@ -41,7 +41,7 @@ import com.knuddels.jtokkit.api.Encoding;
 @Service
 public class PaperFileServiceImpl implements PaperFileService {
 
-    @Value("${openai.api.key}") // Tu clave API de OpenAI
+    @Value("${openai.api.key}")
     private String openaiApiKey;
 
     @Autowired
@@ -50,6 +50,10 @@ public class PaperFileServiceImpl implements PaperFileService {
     @Autowired
     @Lazy
     private PaperService paperService;
+
+    public PaperFileServiceImpl(PaperFileRepository paperFileRepository) {
+        this.paperFileRepository = paperFileRepository;
+    }
 
     @Transactional
     public PaperFile save(PaperFile paperFile) {
@@ -107,47 +111,8 @@ public class PaperFileServiceImpl implements PaperFileService {
         return embeddingMap;
     }
 
-    @Override
-    public Optional<PaperFile> download(Integer id) throws NotFoundException {
-        Optional<PaperFile> file = paperFileRepository.findById(id);
-        if(file.isPresent()){
-            return file;
-        }
-        throw new NotFoundException();
-    }
-
-    @Override
-    public List<ResponseFile> getAllFilesByPaperId(Integer paperId) {   
-        List<ResponseFile> files = paperFileRepository.findByPaperId(paperId).stream().map(dbFile -> {
-            String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/api/v1/papers/{paperId}/files/")
-                .path(dbFile.getId().toString())
-                .toUriString();
-            return ResponseFile.builder()
-                .name(dbFile.getName())
-                .url(fileDownloadUri)
-                .type(dbFile.getType())
-                .size(dbFile.getData().length).build();
-
-        }).collect(Collectors.toList());
-
-        return files;
-    }
-
-    @Override
-    public void deletePaperFile(Integer id) {
-        paperFileRepository.deleteById(id);
-       
-    }
-
-    @Override
-    public PaperFile getPaperFileById(Integer id) {
-        return paperFileRepository.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("File not found with ID: " + id));
-    }
-
     // Método para extraer texto del PDF
-    private String extractTextFromPdf(MultipartFile file) throws IOException {
+    public String extractTextFromPdf(MultipartFile file) throws IOException {
         try (PDDocument document = PDDocument.load(file.getInputStream())) {
             PDFTextStripper stripper = new PDFTextStripper();
             return stripper.getText(document);
@@ -252,6 +217,35 @@ public class PaperFileServiceImpl implements PaperFileService {
         return result;
         }
 
+    public float[] deserializeToFloatArray(byte[] data) throws JsonProcessingException {
+        String jsonStringFromDb = new String(data, StandardCharsets.UTF_8);
+        JsonNode restoredJsonNode;
+        ObjectMapper objectMapper = new ObjectMapper();
+            try {
+                restoredJsonNode = objectMapper.readTree(jsonStringFromDb);
+
+            float[] embedding = new float[restoredJsonNode.size()];
+            for (int i = 0; i < restoredJsonNode.size(); i++) {
+                JsonNode valueNode = restoredJsonNode.get(i);
+                embedding[i] = valueNode.floatValue(); // Convertir a float
+            }
+            return embedding;
+        } catch (JsonProcessingException e) {
+            throw new JsonProcessingException("Error al procesar JSON") {};
+        }
+    }
+
+    public double cosineSimilarity(float[] vec1, float[] vec2) {
+        if (vec1.length != vec2.length) throw new IllegalArgumentException("Vector sizes must match");
+        double dot = 0.0, norm1 = 0.0, norm2 = 0.0;
+        for (int i = 0; i < vec1.length; i++) {
+            dot += vec1[i] * vec2[i];
+            norm1 += vec1[i] * vec1[i];
+            norm2 += vec2[i] * vec2[i];
+        }
+        return dot / (Math.sqrt(norm1) * Math.sqrt(norm2));
+    }
+
     @Override
     public String[] getContextRecommended(List<byte[]> data) throws JsonProcessingException {
         List<Paper> papers = paperService.findAll().stream().toList();
@@ -281,38 +275,48 @@ public class PaperFileServiceImpl implements PaperFileService {
         return closestKey;
     }
 
-    private List<PaperFile> getAllFilesByUserId(Integer userId) {
+
+    public List<PaperFile> getAllFilesByUserId(Integer userId) {
         return paperFileRepository.findByUserId(userId);
            
     }
 
-    private float[] deserializeToFloatArray(byte[] data) throws JsonProcessingException {
-        String jsonStringFromDb = new String(data, StandardCharsets.UTF_8);
-        JsonNode restoredJsonNode;
-        ObjectMapper objectMapper = new ObjectMapper();
-            try {
-                restoredJsonNode = objectMapper.readTree(jsonStringFromDb);
-
-            float[] embedding = new float[restoredJsonNode.size()];
-            for (int i = 0; i < restoredJsonNode.size(); i++) {
-                JsonNode valueNode = restoredJsonNode.get(i);
-                embedding[i] = valueNode.floatValue(); // Convertir a float
-            }
-            return embedding;
-        } catch (JsonProcessingException e) {
-            throw new JsonProcessingException("Error al procesar JSON") {};
+    @Override
+    public Optional<PaperFile> download(Integer id) throws NotFoundException {
+        Optional<PaperFile> file = paperFileRepository.findById(id);
+        if(file.isPresent()){
+            return file;
         }
+        throw new NotFoundException();
     }
 
-    private double cosineSimilarity(float[] vec1, float[] vec2) {
-        if (vec1.length != vec2.length) throw new IllegalArgumentException("Vector sizes must match");
-        double dot = 0.0, norm1 = 0.0, norm2 = 0.0;
-        for (int i = 0; i < vec1.length; i++) {
-            dot += vec1[i] * vec2[i];
-            norm1 += vec1[i] * vec1[i];
-            norm2 += vec2[i] * vec2[i];
-        }
-        return dot / (Math.sqrt(norm1) * Math.sqrt(norm2));
+    @Override
+    public List<ResponseFile> getAllFilesByPaperId(Integer paperId) {   
+        List<ResponseFile> files = paperFileRepository.findByPaperId(paperId).stream().map(dbFile -> {
+            String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/api/v1/papers/{paperId}/files/")
+                .path(dbFile.getId().toString())
+                .toUriString();
+            return ResponseFile.builder()
+                .name(dbFile.getName())
+                .url(fileDownloadUri)
+                .type(dbFile.getType())
+                .size(dbFile.getData().length).build();
+
+        }).collect(Collectors.toList());
+
+        return files;
     }
 
+    @Override
+    public void deletePaperFile(Integer id) {
+        paperFileRepository.deleteById(id);
+       
+    }
+
+    @Override
+    public PaperFile getPaperFileById(Integer id) {
+        return paperFileRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("File not found with ID: " + id));
+    }
 }

@@ -1,0 +1,122 @@
+[
+    {
+        "query": "¿Qué contiene el documento rag systems?",
+        "expectedDocuments": [
+            "rag_systems.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué contiene el documento embedding vectors?",
+        "expectedDocuments": [
+            "embedding_vectors.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué contiene el documento neural networks?",
+        "expectedDocuments": [
+            "neural_networks.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué contiene el documento springboot basics?",
+        "expectedDocuments": [
+            "springboot_basics.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué contiene el documento language models?",
+        "expectedDocuments": [
+            "language_models.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué contiene el documento tokenization?",
+        "expectedDocuments": [
+            "tokenization.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué contiene el documento fine tuning?",
+        "expectedDocuments": [
+            "fine_tuning.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué contiene el documento model evaluation?",
+        "expectedDocuments": [
+            "model_evaluation.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué contiene el documento context retrieval?",
+        "expectedDocuments": [
+            "context_retrieval.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué contiene el documento semantic search?",
+        "expectedDocuments": [
+            "semantic_search.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué contiene el documento information retrieval?",
+        "expectedDocuments": [
+            "information_retrieval.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué contiene el documento openai api?",
+        "expectedDocuments": [
+            "openai_api.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué contiene el documento retrieval augmented generation?",
+        "expectedDocuments": [
+            "retrieval_augmented_generation.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué contiene el documento vector databases?",
+        "expectedDocuments": [
+            "vector_databases.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué contiene el documento bert vs gpt?",
+        "expectedDocuments": [
+            "bert_vs_gpt.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué contiene el documento java embeddings?",
+        "expectedDocuments": [
+            "java_embeddings.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué contiene el documento llm pipeline?",
+        "expectedDocuments": [
+            "llm_pipeline.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué contiene el documento chatbot design?",
+        "expectedDocuments": [
+            "chatbot_design.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué contiene el documento ai intro?",
+        "expectedDocuments": [
+            "ai_intro.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué contiene el documento deep learning?",
+        "expectedDocuments": [
+            "deep_learning.pdf"
+        ]
+    }
+]

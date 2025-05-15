@@ -21,4 +21,8 @@ public interface PaperFileService {
     Pair<Integer,String> getContext(byte[] data, Integer userId) throws JsonProcessingException;
     Map<String, byte[]> addEmbedding(String text, Map<String, byte[]> embeddingMap);
     String[] getContextRecommended(List<byte[]> data) throws JsonProcessingException;
+    List<PaperFile> getAllFilesByUserId(Integer userId);
+    double cosineSimilarity(float[] vec1, float[] vec2);
+    float[] deserializeToFloatArray(byte[] data) throws IOException;
+    String extractTextFromPdf(MultipartFile file) throws IOException;
 }

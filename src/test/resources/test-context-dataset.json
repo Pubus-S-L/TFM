@@ -1,0 +1,52 @@
+[
+  {
+    "pdfText": "Este estudio demuestra que el modelo propuesto mejora la precisión en un 20% respecto al estado del arte.",
+    "query": "¿Qué mejoras propone el estudio?",
+    "expectedFragment": "mejora la precisión en un 20%"
+  },
+  {
+    "pdfText": "Se encontró que el algoritmo reduce el tiempo de cómputo en un 50% en comparación con soluciones previas.",
+    "query": "¿Qué eficiencia tiene el algoritmo?",
+    "expectedFragment": "reduce el tiempo de cómputo en un 50%"
+  },
+  {
+    "pdfText": "El nuevo enfoque permite el procesamiento paralelo sin pérdida de datos.",
+    "query": "¿Cuál es la ventaja del nuevo enfoque?",
+    "expectedFragment": "procesamiento paralelo sin pérdida de datos"
+  },
+  {
+    "pdfText": "Este trabajo introduce un método novedoso de agrupamiento jerárquico.",
+    "query": "¿Qué introduce el trabajo?",
+    "expectedFragment": "método novedoso de agrupamiento"
+  },
+  {
+    "pdfText": "El modelo logra una reducción del error cuadrático medio en los conjuntos de prueba.",
+    "query": "¿Qué logra el modelo?",
+    "expectedFragment": "reducción del error cuadrático medio"
+  },
+  {
+    "pdfText": "El sistema está optimizado para dispositivos móviles con bajo consumo energético.",
+    "query": "¿Dónde está optimizado el sistema?",
+    "expectedFragment": "dispositivos móviles con bajo consumo"
+  },
+  {
+    "pdfText": "La precisión aumenta cuando se entrena con datos balanceados.",
+    "query": "¿Qué pasa al usar datos balanceados?",
+    "expectedFragment": "precisión aumenta"
+  },
+  {
+    "pdfText": "Los experimentos validan la eficacia del nuevo algoritmo en múltiples dominios.",
+    "query": "¿Qué validan los experimentos?",
+    "expectedFragment": "eficacia del nuevo algoritmo"
+  },
+  {
+    "pdfText": "El clasificador alcanza una precisión del 92% en imágenes médicas.",
+    "query": "¿Qué resultado obtiene el clasificador?",
+    "expectedFragment": "precisión del 92%"
+  },
+  {
+    "pdfText": "La arquitectura propuesta reduce significativamente el uso de memoria.",
+    "query": "¿Qué reduce la arquitectura?",
+    "expectedFragment": "reduce el uso de memoria"
+  }
+]

@@ -1,0 +1,73 @@
+
+[
+  {
+    "testName": "Test Embeddings Vectoriales",
+    "query": "¿Qué son los embeddings vectoriales?",
+    "expectedDocuments": ["embeddings_explicacion.pdf", "nlp_fundamentos.pdf"],
+    "minSimilarityThreshold": 0.7,
+    "description": "Verifica que los documentos relacionados con embeddings vectoriales sean recuperados correctamente."
+  },
+  {
+    "testName": "Test Sistema RAG",
+    "query": "Explica cómo funciona un sistema RAG",
+    "expectedDocuments": ["rag_arquitectura.pdf", "sistemas_recuperacion_informacion.pdf"],
+    "minSimilarityThreshold": 0.65,
+    "description": "Evalúa si el sistema RAG recupera los documentos esperados sobre su funcionamiento."
+  },
+  {
+    "testName": "Test Ventajas Embeddings",
+    "query": "¿Cuáles son las ventajas de usar embeddings en búsquedas semánticas?",
+    "expectedDocuments": ["embeddings_explicacion.pdf", "busqueda_semantica.pdf"],
+    "minSimilarityThreshold": 0.75,
+    "description": "Comprueba que las ventajas de los embeddings en búsquedas semánticas sean correctamente identificadas."
+  },
+  {
+    "testName": "Test Diferencias Embeddings y Tokens",
+    "query": "Diferencias entre embeddings y tokens",
+    "expectedDocuments": ["embeddings_explicacion.pdf", "nlp_fundamentos.pdf"],
+    "minSimilarityThreshold": 0.6,
+    "description": "Valida que las diferencias entre embeddings y tokens sean recuperadas correctamente."
+  },
+  {
+    "testName": "Test OpenAI API Embeddings",
+    "query": "OpenAI API para embeddings",
+    "expectedDocuments": ["api_integracion.pdf", "openai_guia.pdf"],
+    "minSimilarityThreshold": 0.8,
+    "description": "Verifica que los documentos relacionados con la API de OpenAI para embeddings sean recuperados."
+  },
+  {
+    "testName": "Test Aplicaciones RAG",
+    "query": "Ejemplos de aplicaciones RAG en producción",
+    "expectedDocuments": ["rag_casos_uso.pdf", "rag_arquitectura.pdf"],
+    "minSimilarityThreshold": 0.7,
+    "description": "Evalúa si el sistema recupera ejemplos de aplicaciones RAG en producción."
+  },
+  {
+    "testName": "Test Cosine Similarity",
+    "query": "Cosine similarity para comparar vectores",
+    "expectedDocuments": ["algoritmos_similitud.pdf", "embeddings_explicacion.pdf"],
+    "minSimilarityThreshold": 0.75,
+    "description": "Comprueba que los documentos sobre cosine similarity sean recuperados correctamente."
+  },
+  {
+    "testName": "Test Chunking Documentos",
+    "query": "Cómo dividir documentos largos para embeddings",
+    "expectedDocuments": ["procesamiento_documentos.pdf", "chunking_estrategias.pdf"],
+    "minSimilarityThreshold": 0.7,
+    "description": "Valida que los documentos sobre estrategias de chunking sean recuperados."
+  },
+  {
+    "testName": "Test Modelo OpenAI Embeddings",
+    "query": "¿Qué modelo de OpenAI es mejor para embeddings?",
+    "expectedDocuments": ["openai_guia.pdf", "modelos_embeddings.pdf"],
+    "minSimilarityThreshold": 0.65,
+    "description": "Evalúa si el sistema identifica correctamente los modelos de OpenAI para embeddings."
+  },
+  {
+    "testName": "Test Spring Boot OpenAI",
+    "query": "Spring Boot y OpenAI integración",
+    "expectedDocuments": ["api_integracion.pdf", "spring_openai.pdf"],
+    "minSimilarityThreshold": 0.75,
+    "description": "Verifica que los documentos sobre integración de Spring Boot y OpenAI sean recuperados."
+  }
+]

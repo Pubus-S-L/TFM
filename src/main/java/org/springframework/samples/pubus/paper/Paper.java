@@ -27,6 +27,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.samples.pubus.model.BaseEntity;
 import org.springframework.samples.pubus.user.User;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 

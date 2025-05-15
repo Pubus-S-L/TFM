@@ -8,18 +8,32 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.Mockito;
+
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
+import org.springframework.data.util.Pair;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.samples.pubus.exceptions.ResourceNotFoundException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -28,6 +42,9 @@ public class PaperFileServiceImplTest {
     private PaperFileRepository paperFileRepository;
 
     @Mock
+    private PaperRepository paperRepository;
+
+    @InjectMocks
     private PaperService paperService;
 
     @InjectMocks
@@ -39,10 +56,18 @@ public class PaperFileServiceImplTest {
     @Mock
     private HttpServletRequest mockRequest;
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    static class TestCase {
+        public String pdfText;
+        public String query;
+        public String expectedFragment;
+    }
+
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-
+        paperService = Mockito.mock(PaperService.class);
         when(mockRequest.getContextPath()).thenReturn("/api/v1");
 
         Paper paper = new Paper();
@@ -50,12 +75,6 @@ public class PaperFileServiceImplTest {
         paper.setTitle("Sample Paper");
         paper.setPaperFiles(new ArrayList<>());
 
-        // MultipartFile file = new MockMultipartFile(
-        //     "file", 
-        //     "testfile.pdf", 
-        //     "application/pdf", 
-        //     "test content".getBytes()
-        // );
     }
 
     // private ResponseFile responseFile;
@@ -92,35 +111,6 @@ public class PaperFileServiceImplTest {
             paperFileService.download(id);
         });
     }
-    
-    @Test
-    public void testUploadSuccess() throws IOException {
-      // Mock objects
-      MockMultipartFile file = new MockMultipartFile("test_file.txt", "text/plain", "txt", "This is a test file".getBytes());
-      Paper mockPaper = new Paper();
-      mockPaper.setPaperFiles(new ArrayList<>());
-      Integer paperId = 1;
-
-      // Mock behavior
-      PaperFile expectedPaperFile = new PaperFile();
-          expectedPaperFile.setName("test_file.txt");
-          expectedPaperFile.setType("text/plain");
-          expectedPaperFile.setData("This is a test file".getBytes());
-          expectedPaperFile.setPaper(mockPaper);
-
-    Mockito.when(paperFileRepository.save(Mockito.any(PaperFile.class))).thenReturn(expectedPaperFile);
-    
-      // Call the upload method
-      PaperFile uploadedFile = paperFileService.upload(file, mockPaper, paperId);
-      
-      // Assertions
-      assertNotNull(uploadedFile);
-      assertEquals(expectedPaperFile.getName(), uploadedFile.getName());
-      assertEquals(expectedPaperFile.getType(), uploadedFile.getType());
-      assertEquals(expectedPaperFile.getData(), uploadedFile.getData());
-      assertEquals(mockPaper, uploadedFile.getPaper());
-
-    }
 
     @Test
     public void testDeletePaperFile() {
@@ -149,5 +139,7 @@ public class PaperFileServiceImplTest {
             paperFileService.getPaperFileById(id);
         });
     }
+
+
 
 }

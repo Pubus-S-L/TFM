@@ -1,6 +1,8 @@
 package org.springframework.samples.pubus.user;
 
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
@@ -14,6 +16,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.annotation.Transient;
 import org.springframework.samples.pubus.model.BaseEntity;
 
 import lombok.Getter;
@@ -61,6 +64,9 @@ public class User extends BaseEntity {
 	@JoinColumn(name = "authority")
 	Authorities authority;
 
+	@ElementCollection
+	@CollectionTable(name = "user_favorites", joinColumns = @JoinColumn(name = "user_id"))
+	@Column(name = "favorite_id")
 	List<Integer> favorites = new ArrayList<>();
 
 
