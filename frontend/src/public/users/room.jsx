@@ -5,7 +5,7 @@ import { Search, Send, MessageSquare } from "lucide-react"
 import { Button } from "../../components/ui/button.tsx"
 import { Input } from "../../components/ui/input.tsx"
 import '../../static/css/user/chatList.css'; 
-
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "../../components/ui/sheet.tsx";
 
 function ChatList() {
     const currentUser = tokenService.getUser();
@@ -314,23 +314,32 @@ function ChatList() {
         </div>
   
         {/* Main Chat Area */}
-        <div className="chat-main">
-          {selectedChatId ? (
-            <Chat 
-              currentUser={currentUser} 
-              chatId={selectedChatId} 
-              receiver={getReceiverFromChat(chats.find(c => c.id === selectedChatId), currentUser)}
-            />
-          ) : (
-            <div className="no-chat-selected">
-              <div className="placeholder-icon">
-                <MessageSquare size={48} />
-              </div>
-              <h3>Select a conversation</h3>
-              <p>Choose a conversation from the list to start chatting</p>
-            </div>
-          )}
-        </div>
+        <Sheet open={!!selectedChatId} onOpenChange={(open) => {
+            if (!open) setSelectedChatId(null)
+          }}>
+            <SheetContent className="w-full sm:max-w-xl overflow-y-auto bg-white">
+              <SheetHeader>
+                <SheetTitle>
+                  Chat with{" "}
+                  {selectedChatId && getReceiverFromChat(chats.find(c => c.id === selectedChatId), currentUser)?.firstName}
+                </SheetTitle>
+              </SheetHeader>
+
+              {selectedChatId ? (
+                <Chat
+                  currentUser={currentUser}
+                  chatId={selectedChatId}
+                  receiver={getReceiverFromChat(chats.find(c => c.id === selectedChatId), currentUser)}
+                />
+              ) : (
+                <div className="p-4 text-center">
+                  <MessageSquare size={48} className="mx-auto mb-2 text-gray-400" />
+                  <h3 className="text-lg font-semibold">Select a conversation</h3>
+                  <p className="text-sm text-gray-500">Choose a conversation from the list to start chatting</p>
+                </div>
+              )}
+            </SheetContent>
+          </Sheet>
       </div>
     );
   }

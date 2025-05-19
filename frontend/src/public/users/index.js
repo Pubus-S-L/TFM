@@ -295,25 +295,27 @@ export default function UserDetail() {
                 ))}
 
                 {/* Controles de paginación */}
-                <div className="flex justify-center gap-4 mt-4">
-                    <button
-                        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
-                        disabled={currentPage === 0}
-                        className="px-4 py-2 bg-gray-200 text-black rounded disabled:opacity-50"
-                    >
-                        Anterior
-                    </button>
+              <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-4 mt-4 text-sm">
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
+                  disabled={currentPage === 0}
+                  className="px-3 py-1.5 bg-gray-200 text-black rounded disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                >
+                  Previous
+                </button>
 
-                    <span className="text-black">Página {currentPage + 1} de {totalPages}</span>
+                <span className="text-black whitespace-nowrap">
+                  Page {currentPage + 1} of {totalPages}
+                </span>
 
-                    <button
-                        onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages - 1))}
-                        disabled={currentPage >= totalPages - 1}
-                        className="px-4 py-2 bg-gray-200 text-black rounded disabled:opacity-50"
-                    >
-                        Siguiente
-                    </button>
-                </div>
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages - 1))}
+                  disabled={currentPage >= totalPages - 1}
+                  className="px-3 py-1.5 bg-gray-200 text-black rounded disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                >
+                  Next
+                </button>
+              </div>
                 </TabsContent>
             </Tabs> 
         </div>

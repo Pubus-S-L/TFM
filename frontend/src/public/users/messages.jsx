@@ -3,7 +3,6 @@ import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 import { Send, RefreshCw, Wifi, WifiOff } from 'lucide-react';
 import '../../static/css/user/chatMessage.css';
-import '../../static/css/user/chatMessage.css';
 
 function ChatMessage({ currentUser, chatId, receiver }) {
     const [messages, setMessages] = useState([]);
@@ -347,13 +346,18 @@ function ChatMessage({ currentUser, chatId, receiver }) {
             placeholder="Escribe un mensaje..."
             className="message-input"
           />
-          <button
-            type="submit"
-            className="send-button"
-            disabled={!stompClientRef.current?.connected}
-          >
-            Enviar
-          </button>
+      <button
+        type="submit"
+        disabled={!stompClientRef.current?.connected || !messageInput.trim()}
+        className="ml-1 flex items-center justify-center bg-green-600 hover:bg-green-700 disabled:bg-gray-400 rounded-[20px] disabled:cursor-not-allowed text-white px-4 py-2 transition-colors"
+        aria-label="Send"
+      >
+        {/* Texto que solo aparece en pantallas >= sm */}
+        <span className="hidden sm:inline">Send</span>
+
+        {/* Icono que solo aparece en pantallas < sm */}
+        <Send className="sm:hidden w-5 h-5" />
+      </button>
         </form>
       </div>
     );

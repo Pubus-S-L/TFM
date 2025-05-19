@@ -69,6 +69,17 @@
   }
 }
 
+@media (max-width: 640px) {
+  .card-content {
+    justify-content: flex-start !important;
+  }
+
+  .card-header {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+}
+
 /* Paper Row Styles */
 .paper-row {
   display: flex;

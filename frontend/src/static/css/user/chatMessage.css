@@ -94,36 +94,63 @@
     margin: 20px 0;
   }
   
-  .message-form {
-    display: flex;
-    padding: 15px;
-    border-top: 1px solid #ddd;
-    background-color: white;
+.message-form {
+  display: flex;
+  padding: 10px 15px;
+  border-top: 1px solid #ddd;
+  background-color: white;
+  gap: 8px;
+  flex-wrap: nowrap; /* evitar que se envuelva */
+}
+
+.message-input {
+  flex: 1;
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  outline: none;
+  margin: 0;
+  min-width: 0;
+  font-size: 1rem;
+}
+
+.send-button {
+  padding: 8px 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ocultar texto y mostrar icono en pantallas pequeñas */
+@media (max-width: 640px) {
+  .send-button span.text {
+    display: none;
   }
-  
-  .message-input {
-    flex: 1;
-    padding: 10px 15px;
-    border: 1px solid #ddd;
-    border-radius: 20px;
-    outline: none;
-    margin-right: 10px;
+  .send-button svg {
+    display: block;
+    width: 20px;
+    height: 20px;
   }
-  
-  .send-button {
-    padding: 8px 20px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
+}
+
+/* En pantallas grandes mostrar texto y ocultar icono */
+.send-button svg {
+  display: none;
+}
+
   .send-button:hover {
     background-color: #3e8e41;
   }
-  
+
   .send-button:disabled {
     background-color: #cccccc;
     cursor: not-allowed;

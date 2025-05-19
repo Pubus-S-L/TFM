@@ -369,15 +369,21 @@ export default function UserProfile() {
 
         {/* Research Papers Section */}
         <div className="bg-gray rounded-lg p-6 border border-gray-900">
-          <h2 className="text-xl font-semibold text-black mb-6">Research Papers</h2>
+          <h2 className="text-xl font-semibold text-black mb-6">Saved Papers</h2>
 
-          <Tabs defaultValue="favorite">
-            <TabsList className="w-full bg-gray-200 mb-4 border border-gray-900">
-              <TabsTrigger value="favorite" className="flex-1 data-[state=active]:bg-white">
-                Favorite Papers
+          <Tabs defaultValue="favorite" className="w-full">
+            <TabsList className="w-full flex flex-wrap bg-gray-200 mb-4 border border-gray-900 rounded-md overflow-hidden">
+              <TabsTrigger
+                value="favorite"
+                className="w-1/2 sm:w-auto flex-1 px-2 py-1 text-sm text-center data-[state=active]:bg-white"
+              >
+                Favorites
               </TabsTrigger>
-              <TabsTrigger value="recommended" className="flex-1 data-[state=active]:bg-white">
-                Recommended Papers
+              <TabsTrigger
+                value="recommended"
+                className="w-1/2 sm:w-auto flex-1 px-2 py-1 text-sm text-center data-[state=active]:bg-white"
+              >
+                Recommended
               </TabsTrigger>
             </TabsList>
 
@@ -399,23 +405,25 @@ export default function UserProfile() {
             ))}
 
             {/* Controles de paginación */}
-            <div className="flex justify-center gap-4 mt-4">
+            <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-4 mt-4 text-sm">
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
                 disabled={currentPage === 0}
-                className="px-4 py-2 bg-gray-200 text-black rounded disabled:opacity-50"
+                className="px-3 py-1.5 bg-gray-200 text-black rounded disabled:opacity-50 disabled:cursor-not-allowed text-sm"
               >
-                Anterior
+                Previous
               </button>
 
-              <span className="text-black">Página {currentPage + 1} de {totalPages==0? totalPages + 1: totalPages}</span>
+              <span className="text-black whitespace-nowrap">
+                Page {currentPage + 1} of {totalPages === 0 ? 1 : totalPages}
+              </span>
 
               <button
                 onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages - 1))}
                 disabled={currentPage >= totalPages - 1}
-                className="px-4 py-2 bg-gray-200 text-black rounded disabled:opacity-50"
+                className="px-3 py-1.5 bg-gray-200 text-black rounded disabled:opacity-50 disabled:cursor-not-allowed text-sm"
               >
-                Siguiente
+                Next
               </button>
             </div>
           </TabsContent>

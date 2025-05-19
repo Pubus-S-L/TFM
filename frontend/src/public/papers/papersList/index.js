@@ -3,6 +3,7 @@ import "../../../static/css/auth/authButton.css";
 import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { Heart } from "lucide-react";
 import like from "../../../static/images/like.png";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../components/ui/card.tsx"
 import { Input } from "../../../components/ui/input.tsx";
@@ -114,11 +115,11 @@ export default function Papers() {
           }}
         />
        
-       <Card className="flex items-center mt-3 p-2 shadow-lg border border-gray-200 bg-white">
+       <Card className="flex flex-wrap items-center mt-3 p-2 shadow-lg border border-gray-200 bg-white">
         <CardHeader className="pr-1">
           <CardTitle className="text-sm font-bold whitespace-nowrap">Filter by:</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-row items-center justify-center gap-1.5 p-0">
+        <CardContent className="flex flex-wrap items-center justify-center gap-1.5 p-0">
           {types.map((type, index) => (
             <label key={index} className="flex justify-center gap-1 text-xs">
               <input
@@ -159,10 +160,12 @@ export default function Papers() {
                       className="paper-name"
                       style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}
                     >
-                      {paper.likes != null && paper.likes > 0 ? paper.likes : null}
-                      {paper.likes != null && paper.likes > 0 ? (
-                        <img src={like} alt="Like" style={{ height: 15, width: 15 }} />
-                      ) : null}
+                      {paper.likes != null && paper.likes > 0 && (
+                        <span className="inline-flex items-center gap-1 text-sm font-medium text-gray-700 self-start">
+                          <Heart size={16} className="text-red-500" />
+                          {paper.likes}
+                        </span>
+                      )}
                     </strong>
                   </CardDescription>
                 </CardContent>

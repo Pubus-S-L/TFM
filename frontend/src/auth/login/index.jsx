@@ -15,7 +15,7 @@ export default function Login() {
   const navigate = useNavigate();
   const { linkedInLogin } = useLinkedIn({
     clientId: "77bspiilcaqccb",
-    redirectUri: `http://localhost:3000/linkedInLogin`,    
+    redirectUri: `${API_BASE_URL}/linkedInLogin`,    
     onSuccess: loginLinkedIn, // Aquí pasas la función loginLinkedIn como callback de onSuccess
     onError: (error) => {
       console.log(error);
@@ -25,7 +25,7 @@ export default function Login() {
   async function loginLinkedIn(code) {
     const reqBody = { code }; // Aquí estás creando el cuerpo de la solicitud con el código de autorización
     setMessage(null);
-    await fetch("${API_BASE_URL}/api/v1/auth/loginLinkedIn", {
+    await fetch(`${API_BASE_URL}/api/v1/auth/loginLinkedIn`, {
       headers: { "Content-Type": "application/json" },
       method: "POST",
       body: JSON.stringify(reqBody),
@@ -47,7 +47,7 @@ export default function Login() {
 
     const reqBody = values;
     setMessage(null);
-    await fetch("${API_BASE_URL}/api/v1/auth/signin", {
+    await fetch(`${API_BASE_URL}/api/v1/auth/signin`, {
       headers: { "Content-Type": "application/json" },
       method: "POST",
       body: JSON.stringify(reqBody),
