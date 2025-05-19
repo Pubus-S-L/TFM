@@ -198,7 +198,7 @@ function ChatMessage({ currentUser, chatId, receiver }) {
         });
   
         client.onConnect = (frame) => {
-          console.log(`STOMP connected con éxito para chat ${chatId}:`, frame);
+          console.log(`STOMP conectado con éxito para chat ${chatId}:`, frame);
           
           if (!isMountedRef.current) {
             client.deactivate();
@@ -293,7 +293,7 @@ function ChatMessage({ currentUser, chatId, receiver }) {
         setMessages([]);
         setIsLoading(true);
         
-        // Desconectar WebSocket actual y limpiar
+        // Connectingctar WebSocket actual y limpiar
         cleanupConnection();
         
         // Cargar mensajes y luego conectar WebSocket
@@ -352,8 +352,8 @@ function ChatMessage({ currentUser, chatId, receiver }) {
       if (!trimmedMessage) return;
       
       if (!stompClientRef.current?.connected) {
-        console.warn("No connected al servidor de chat");
-        setConnectionStatus('Reconnecting...');
+        console.warn("No conectado al servidor de chat");
+        setConnectionStatus('Reconectando...');
         connectWebSocket();
         return;
       }
@@ -478,7 +478,7 @@ function ChatMessage({ currentUser, chatId, receiver }) {
             type="text"
             value={messageInput}
             onChange={(e) => setMessageInput(e.target.value)}
-            placeholder="Write a message..."
+            placeholder="Escribe un mensaje..."
             className="message-input"
           />
           <button
@@ -487,7 +487,7 @@ function ChatMessage({ currentUser, chatId, receiver }) {
             className="ml-1 flex items-center justify-center bg-green-600 hover:bg-green-700 disabled:bg-gray-400 rounded-[20px] disabled:cursor-not-allowed text-white px-4 py-2 transition-colors"
             aria-label="Send"
           >
-            <span className="hidden sm:inline">Send</span>
+            <span className="hidden sm:inline">Enviar</span>
             <Send className="sm:hidden w-5 h-5" />
           </button>
         </form>
