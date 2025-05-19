@@ -399,7 +399,7 @@ function ChatMessage({ currentUser, chatId, receiver }) {
         ]);
         
         stompClientRef.current.publish({
-          destination: `/app/chat.sendMessage/${chatId}`,
+          destination: `${API_BASE_URL}/chat.sendMessage/${chatId}`,
           body: JSON.stringify(chatMessage)
         });
         
