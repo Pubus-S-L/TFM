@@ -7,7 +7,7 @@ import '../../static/css/user/chatMessage.css';
 function ChatMessage({ currentUser, chatId, receiver }) {
     const [messages, setMessages] = useState([]);
     const [messageInput, setMessageInput] = useState('');
-    const [connectionStatus, setConnectionStatus] = useState('Disconnected');
+    const [connectionStatus, setConnectionStatus] = useState('Desconectado');
     const [isLoading, setIsLoading] = useState(true);
     const stompClientRef = useRef(null);
     const messagesEndRef = useRef(null);
@@ -184,7 +184,7 @@ function ChatMessage({ currentUser, chatId, receiver }) {
         // Limpieza de conexiones previas
         cleanupConnection();
         
-        setConnectionStatus('Connecting...');
+        setConnectionStatus('Conectando...');
   
         const socket = new SockJS(`${API_BASE_URL}/ws`);
         const client = new Client({
@@ -206,7 +206,7 @@ function ChatMessage({ currentUser, chatId, receiver }) {
             return;
           }
           
-          setConnectionStatus('Connected');
+          setConnectionStatus('Conectado');
           reconnectAttemptsRef.current = 0;
   
           // Suscripción al topic de chat
@@ -232,7 +232,7 @@ function ChatMessage({ currentUser, chatId, receiver }) {
         client.onWebSocketClose = () => {
           console.log("WebSocket cerrado");
           if (isMountedRef.current) {
-            setConnectionStatus('Disconnected');
+            setConnectionStatus('Desconectado');
             scheduleReconnect();
           }
           connectionInProgressRef.current = false;
@@ -293,7 +293,7 @@ function ChatMessage({ currentUser, chatId, receiver }) {
         setMessages([]);
         setIsLoading(true);
         
-        // Connectingctar WebSocket actual y limpiar
+        // Desconectar WebSocket actual y limpiar
         cleanupConnection();
         
         // Cargar mensajes y luego conectar WebSocket
@@ -431,8 +431,8 @@ function ChatMessage({ currentUser, chatId, receiver }) {
       <div className="chat-message-container">
         <div className="chat-header">
           <h3 style={{ color: 'black' }}>{getReceiverDisplayName()}</h3>
-          <div className={`connection-status ${connectionStatus === 'Connected' ? 'connected' : 'disconnected'}`}>
-            {connectionStatus === 'Connected' ? (
+          <div className={`connection-status ${connectionStatus === 'Conectado' ? 'connected' : 'disconnected'}`}>
+            {connectionStatus === 'Conectado' ? (
               <Wifi size={16} className="inline-block mr-1" />
             ) : (
               <WifiOff size={16} className="inline-block mr-1" />
