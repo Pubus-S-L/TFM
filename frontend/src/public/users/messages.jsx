@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 import { Send, RefreshCw, Wifi, WifiOff } from 'lucide-react';
@@ -17,139 +17,82 @@ function ChatMessage({ currentUser, chatId, receiver }) {
     const subscriptionRef = useRef(null);
     const processingMessageIdsRef = useRef(new Map());
     const API_BASE_URL = process.env.REACT_APP_API_URL;
-    const currentUserRef = useRef(null);
-    const currentChatIdRef = useRef(null);
     const connectionInProgressRef = useRef(false);
+    const isMountedRef = useRef(true);
     
-    // Actualizar las referencias cuando cambian los props
-    useEffect(() => {
-      currentUserRef.current = currentUser;
-      console.log("Current User actualizado:", currentUser);
-    }, [currentUser]);
-
-    useEffect(() => {
-      currentChatIdRef.current = chatId;
-      console.log("Chat ID actualizado:", chatId);
-    }, [chatId]);
-  
-    // Función para hacer scroll al último mensaje
-    const scrollToBottom = () => {
+    // Scroll al último mensaje
+    const scrollToBottom = useCallback(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
+    }, []);
   
-    // Función mejorada para conectar WebSocket
-    const connectWebSocket = async () => {
-      // Evitar múltiples intentos de conexión simultáneos
-      if (connectionInProgressRef.current) {
-        console.log("Conexión ya en progreso, ignorando solicitud");
+    // Cargar mensajes del servidor
+    const loadMessages = useCallback(async () => {
+      if (!chatId) {
+        console.error("No se pueden cargar mensajes: chatId es inválido");
         return;
       }
       
-      connectionInProgressRef.current = true;
+      setIsLoading(true);
       
       try {
-        // Asegurarse de cerrar correctamente conexiones anteriores
-        if (stompClientRef.current) {
-          try {
-            if (subscriptionRef.current) {
-              subscriptionRef.current.unsubscribe();
-              subscriptionRef.current = null;
-            }
-            
-            if (stompClientRef.current.connected) {
-              await new Promise((resolve) => {
-                stompClientRef.current.deactivate();
-                setTimeout(resolve, 300); // Dar tiempo para desconexión limpia
-              });
-            }
-          } catch (error) {
-            console.warn("Error al cerrar conexión anterior:", error);
-          }
+        const response = await fetch(`${API_BASE_URL}/api/v1/message/${chatId}/messages`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-  
-        if (!currentChatIdRef.current) {
-          console.error("No se puede conectar: chatId es inválido");
-          setConnectionStatus('Error: Chat inválido');
-          connectionInProgressRef.current = false;
+        
+        const data = await response.json();
+        
+        // Verificar que todavía estamos en el mismo chat
+        if (chatId !== chatId) {
+          console.log("El chatId cambió durante la carga de mensajes, ignorando resultados");
           return;
         }
-  
-        setConnectionStatus('Connecting...');
-  
-        const socket = new SockJS(`${API_BASE_URL}/ws`);
-        const client = new Client({
-          webSocketFactory: () => socket,
-          debug: function (str) {
-            // Reducir logs en producción
-            if (process.env.NODE_ENV !== 'production') {
-              console.log("STOMP Debug:", str);
-            }
-          },
-          reconnectDelay: 5000,
-          heartbeatIncoming: 4000,
-          heartbeatOutgoing: 4000,
-        });
-  
-        client.onConnect = (frame) => {
-          console.log(`STOMP Connected con éxito para chat ${currentChatIdRef.current}:`, frame);
-          
-          // Verificar que todavía estamos en el mismo chat que solicitó la conexión
-          if (currentChatIdRef.current !== chatId) {
-            console.log(`El chatId cambió durante la conexión (${currentChatIdRef.current} -> ${chatId}), desconectando`);
-            client.deactivate();
-            connectionInProgressRef.current = false;
-            return;
-          }
-          
-          setConnectionStatus('Connected');
-          reconnectAttemptsRef.current = 0;
-  
-          // Suscripción al topic de chat
-          try {
-            subscriptionRef.current = client.subscribe(`/topic/chat/${currentChatIdRef.current}`, onMessageReceived);
-            console.log(`Suscrito a /topic/chat/${currentChatIdRef.current}`, subscriptionRef.current);
-          } catch (e) {
-            console.error("Error al suscribirse:", e);
-          }
-          
-          connectionInProgressRef.current = false;
-        };
-  
-        client.onStompError = (frame) => {
-          console.error('Error STOMP:', frame);
-          setConnectionStatus('Error de conexión');
-          scheduleReconnect();
-          connectionInProgressRef.current = false;
-        };
-  
-        client.onWebSocketClose = () => {
-          console.log("WebSocket cerrado");
-          setConnectionStatus('Disconnected');
-          scheduleReconnect();
-          connectionInProgressRef.current = false;
-        };
-  
-        client.onWebSocketError = (event) => {
-          console.error("Error en WebSocket:", event);
-          setConnectionStatus('Error de conexión');
-          scheduleReconnect();
-          connectionInProgressRef.current = false;
-        };
-  
-        stompClientRef.current = client;
-        client.activate();
-  
-      } catch (error) {
-        console.error("Error al crear conexión WebSocket:", error);
-        setConnectionStatus('Error de conexión');
-        scheduleReconnect();
-        connectionInProgressRef.current = false;
+        
+        if (!isMountedRef.current) return;
+        
+        console.log(`Mensajes cargados para chat ${chatId}:`, data.length);
+        setMessages(data);
+        setTimeout(scrollToBottom, 100);
+      } catch (err) {
+        console.error(`Error cargando mensajes para chat ${chatId}:`, err);
+      } finally {
+        if (isMountedRef.current) {
+          setIsLoading(false);
+        }
       }
-    };
+    }, [chatId, API_BASE_URL, scrollToBottom]);
   
-    const scheduleReconnect = () => {
-      // Solo programar reconexión si estamos en un chat válido
-      if (!currentChatIdRef.current) return;
+    // Limpiar conexiones WebSocket existentes
+    const cleanupConnection = useCallback(() => {
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
+      
+      try {
+        if (subscriptionRef.current) {
+          subscriptionRef.current.unsubscribe();
+          subscriptionRef.current = null;
+        }
+        
+        if (stompClientRef.current) {
+          if (stompClientRef.current.connected) {
+            stompClientRef.current.deactivate();
+          }
+          stompClientRef.current = null;
+        }
+      } catch (e) {
+        console.warn("Error al limpiar conexiones:", e);
+      }
+      
+      connectionInProgressRef.current = false;
+      reconnectAttemptsRef.current = 0;
+    }, []);
+    
+    // Función para programar reconexión con backoff exponencial
+    const scheduleReconnect = useCallback(() => {
+      if (!chatId || !isMountedRef.current) return;
       
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
@@ -160,152 +103,62 @@ function ChatMessage({ currentUser, chatId, receiver }) {
       if (reconnectAttemptsRef.current <= MAX_RECONNECT_ATTEMPTS) {
         const backoffTime = Math.min(Math.pow(2, reconnectAttemptsRef.current) * 1000, 10000);
         console.log(`Intentando reconexión en ${backoffTime / 1000} segundos... (Intento ${reconnectAttemptsRef.current}/${MAX_RECONNECT_ATTEMPTS})`);
+        
         reconnectTimeoutRef.current = setTimeout(() => {
-          connectWebSocket();
+          if (isMountedRef.current) {
+            connectWebSocket();
+          }
         }, backoffTime);
       } else {
         console.error("Número máximo de intentos de reconexión alcanzado");
-        setConnectionStatus('Conexión fallida - Recarga la página');
+        if (isMountedRef.current) {
+          setConnectionStatus('Conexión fallida - Recarga la página');
+        }
       }
-    };
-  
-    // Función mejorada para cargar mensajes del servidor
-    const loadMessages = async () => {
-      if (!currentChatIdRef.current) {
-        console.error("No se pueden cargar mensajes: chatId es inválido");
-        return;
-      }
-      
-      setIsLoading(true);
-      
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/v1/message/${currentChatIdRef.current}/messages`);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        // Verificar que todavía estamos en el mismo chat que solicitó los mensajes
-        if (currentChatIdRef.current !== chatId) {
-          console.log(`El chatId cambió durante la carga de mensajes (${currentChatIdRef.current} -> ${chatId}), ignorando resultados`);
-          return;
-        }
-        
-        console.log(`Mensajes cargados para chat ${currentChatIdRef.current}:`, data.length);
-        
-        if (data.length > 0) {
-          console.log("Ejemplo de mensaje del servidor:", data[0]);
-        }
-        
-        setMessages(data);
-        setTimeout(scrollToBottom, 100);
-      } catch (err) {
-        console.error(`Error cargando mensajes para chat ${currentChatIdRef.current}:`, err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-  
-    // Efecto principal para configurar el chat al cambiar chatId
-    useEffect(() => {
-      console.log(`Configurando chat para chatId: ${chatId}`);
-      
-      if (!chatId) {
-        console.error("No se puede configurar chat: chatId es inválido");
-        return;
-      }
-      
-      // Limpiar inmediatamente los mensajes al cambiar de chat para evitar mostrar mensajes del chat anterior
-      setMessages([]);
-      setIsLoading(true);
-      
-      // Actualizar la referencia del chatId actual
-      currentChatIdRef.current = chatId;
-      
-      // Desconectamos la conexión WebSocket actual si existe
-      const cleanupPrevious = async () => {
-        if (reconnectTimeoutRef.current) {
-          clearTimeout(reconnectTimeoutRef.current);
-          reconnectTimeoutRef.current = null;
-        }
-        
-        if (subscriptionRef.current) {
-          try {
-            subscriptionRef.current.unsubscribe();
-          } catch (e) {
-            console.warn("Error al desubscribirse durante cambio de chat:", e);
-          }
-          subscriptionRef.current = null;
-        }
-        
-        if (stompClientRef.current && stompClientRef.current.connected) {
-          try {
-            await new Promise((resolve) => {
-              stompClientRef.current.deactivate();
-              setTimeout(resolve, 300); // Pequeña pausa para asegurar desconexión limpia
-            });
-          } catch (e) {
-            console.warn("Error al desconectar durante cambio de chat:", e);
-          }
-        }
-        
-        // Resetear estado de conexión
-        reconnectAttemptsRef.current = 0;
-        connectionInProgressRef.current = false;
-        
-        // Limpiar el mapa de mensajes en procesamiento
-        processingMessageIdsRef.current.clear();
-      };
-      
-      // Ejecutar limpieza y luego iniciar nueva conexión
-      cleanupPrevious().then(() => {
-        // Cargar mensajes primero, luego conectar WebSocket
-        loadMessages().then(() => connectWebSocket());
-      });
-      
-      return () => {
-        console.log(`Limpiando conexión WebSocket para chat ${chatId}`);
-        cleanupPrevious();
-      };
     }, [chatId]);
-  
-    // Mantener scroll al fondo cuando llegan nuevos mensajes
-    useEffect(() => {
-      if (messages.length > 0) {
-        scrollToBottom();
-      }
-    }, [messages]);
-  
-    // Mejorado el manejo de mensajes recibidos
-    const onMessageReceived = (payload) => {
+    
+    // Procesar mensajes recibidos
+    const onMessageReceived = useCallback((payload) => {
       try {
         const receivedMessage = JSON.parse(payload.body);
         console.log("Mensaje recibido:", receivedMessage);
         
         // Verificar que el mensaje sea para el chat actual
         if (!receivedMessage.chatId || 
-            receivedMessage.chatId.toString() !== currentChatIdRef.current?.toString()) {
-          console.log(`Ignorando mensaje para otro chat: ${receivedMessage.chatId} (actual: ${currentChatIdRef.current})`);
+            receivedMessage.chatId.toString() !== chatId?.toString()) {
+          console.log(`Ignorando mensaje para otro chat: ${receivedMessage.chatId} (actual: ${chatId})`);
           return;
         }
         
-        // Si este mensaje lo envié yo y ya está siendo procesado, ignorarlo
+        if (!isMountedRef.current) return;
+        
+        // Verificar si este mensaje lo envié yo y ya está siendo procesado
         const messageKey = receivedMessage.id || (receivedMessage.content + receivedMessage.timestamp);
-        if (isCurrentUserMessage(receivedMessage) && processingMessageIdsRef.current.has(messageKey)) {
-          console.log("Confirmado mensaje enviado:", receivedMessage);
+        const isMyMessage = isCurrentUserMessage(receivedMessage);
+        
+        if (isMyMessage && processingMessageIdsRef.current.has(messageKey)) {
+          console.log("Confirmado mensaje enviado, actualizando:", receivedMessage);
           processingMessageIdsRef.current.delete(messageKey);
+          
+          setMessages(prevMessages => prevMessages.map(msg => {
+            if (msg._pending && msg.content === receivedMessage.content) {
+              return {
+                ...receivedMessage,
+                _pending: false,
+                _sendError: false
+              };
+            }
+            return msg;
+          }));
           return;
         }
         
-        // Verificar si el mensaje ya existe en la lista
+        // Para todos los demás mensajes, verificar duplicados
         setMessages(prevMessages => {
-          // Verificar por ID (preferido) o por combinación de contenido y timestamp
           const messageExists = prevMessages.some(m => 
             (m.id && m.id === receivedMessage.id) || 
             (m.content === receivedMessage.content && 
-             m.timestamp === receivedMessage.timestamp)
+             isCurrentUserMessage(m) === isMyMessage)
           );
           
           if (!messageExists) {
@@ -316,142 +169,157 @@ function ChatMessage({ currentUser, chatId, receiver }) {
       } catch (error) {
         console.error("Error procesando mensaje recibido:", error);
       }
-    };
-  
-    const sendMessage = (event) => {
-      event.preventDefault();
-  
-      const trimmedMessage = messageInput.trim();
-      if (!trimmedMessage) {
+    }, [chatId]);
+    
+    // Función para crear una conexión WebSocket
+    const connectWebSocket = useCallback(() => {
+      // Evitar múltiples intentos de conexión simultáneos
+      if (connectionInProgressRef.current || !chatId || !isMountedRef.current) {
         return;
       }
       
-      if (!stompClientRef.current?.connected) {
-        console.warn("No conectado al servidor de chat");
-        setConnectionStatus('Reconectando...');
-        connectWebSocket();
-        return;
-      }
+      connectionInProgressRef.current = true;
       
-      if (!currentChatIdRef.current) {
-        console.error("No se puede enviar mensaje: chatId es inválido");
-        return;
-      }
-
       try {
-        setMessageInput(''); // Limpiar input inmediatamente
+        // Limpieza de conexiones previas
+        cleanupConnection();
         
-        // Obtener el ID del usuario actual
-        const currentUserId = typeof currentUserRef.current === 'object' ? 
-            (currentUserRef.current.id || currentUserRef.current.userId) : 
-            currentUserRef.current;
-            
-        console.log("Mensaje será enviado como usuario:", currentUserId);
-        
-        const receiverId = typeof receiver === 'object' ? 
-            (receiver.id || receiver.userId) : 
-            receiver;
-            
-        console.log("Mensaje será enviado a usuario:", receiverId);
-        
-        const chatMessage = {
-          sender: currentUserId,
-          receiver: receiverId,
-          content: trimmedMessage,
-          timestamp: new Date().toISOString(),
-          chatId: currentChatIdRef.current
-        };
-
-        console.log(`Enviando mensaje en chat ${currentChatIdRef.current}:`, chatMessage);
-        
-        // Generar una clave única para este mensaje
-        const messageKey = trimmedMessage + chatMessage.timestamp;
-        processingMessageIdsRef.current.set(messageKey, Date.now());
-        
-        // Optimistic UI update - Mostrar mensaje inmediatamente
-        setMessages(prevMessages => [
-          ...prevMessages, 
-          {
-            ...chatMessage,
-            _pending: true // Marcarlo como pendiente para UI
-          }
-        ]);
-        
-        stompClientRef.current.publish({
-          destination: `/app/chat.sendMessage/${currentChatIdRef.current}`,
-          body: JSON.stringify(chatMessage)
-        });
-        
-        // Establecer un timeout para eliminar la marca después de 5 segundos 
-        setTimeout(() => {
-          if (processingMessageIdsRef.current.has(messageKey)) {
-            console.warn("El servidor no confirmó la recepción del mensaje después de 5s");
-            processingMessageIdsRef.current.delete(messageKey);
-            
-            // Opcional: Actualizar la UI para indicar que el mensaje podría no haberse enviado
-            setMessages(prevMessages => prevMessages.map(msg => {
-              if (msg.content === trimmedMessage && msg.timestamp === chatMessage.timestamp) {
-                return { ...msg, _sendError: true };
-              }
-              return msg;
-            }));
-          }
-        }, 5000);
-        
-      } catch (error) {
-        console.error("Error enviando mensaje:", error);
-        setMessageInput(trimmedMessage); // Restaurar el mensaje si falló
-        alert("Error al enviar el mensaje. Por favor, inténtalo de nuevo.");
-      }
-    };
+        setConnectionStatus('Connecting...');
   
-    // Función mejorada para determinar si un mensaje es del usuario actual
-    const isCurrentUserMessage = (msg) => {
-      if (!msg || !msg.sender) {
+        const socket = new SockJS(`${API_BASE_URL}/ws`);
+        const client = new Client({
+          webSocketFactory: () => socket,
+          debug: process.env.NODE_ENV !== 'production' ? 
+            (str) => console.log("STOMP Debug:", str) : 
+            () => {},
+          reconnectDelay: 5000,
+          heartbeatIncoming: 4000,
+          heartbeatOutgoing: 4000,
+        });
+  
+        client.onConnect = (frame) => {
+          console.log(`STOMP connected con éxito para chat ${chatId}:`, frame);
+          
+          if (!isMountedRef.current) {
+            client.deactivate();
+            connectionInProgressRef.current = false;
+            return;
+          }
+          
+          setConnectionStatus('Connected');
+          reconnectAttemptsRef.current = 0;
+  
+          // Suscripción al topic de chat
+          try {
+            subscriptionRef.current = client.subscribe(`/topic/chat/${chatId}`, onMessageReceived);
+            console.log(`Suscrito a /topic/chat/${chatId}`);
+          } catch (e) {
+            console.error("Error al suscribirse:", e);
+          }
+          
+          connectionInProgressRef.current = false;
+        };
+  
+        client.onStompError = (frame) => {
+          console.error('Error STOMP:', frame);
+          if (isMountedRef.current) {
+            setConnectionStatus('Error de conexión');
+            scheduleReconnect();
+          }
+          connectionInProgressRef.current = false;
+        };
+  
+        client.onWebSocketClose = () => {
+          console.log("WebSocket cerrado");
+          if (isMountedRef.current) {
+            setConnectionStatus('Disconnected');
+            scheduleReconnect();
+          }
+          connectionInProgressRef.current = false;
+        };
+  
+        client.onWebSocketError = (event) => {
+          console.error("Error en WebSocket:", event);
+          if (isMountedRef.current) {
+            setConnectionStatus('Error de conexión');
+            scheduleReconnect();
+          }
+          connectionInProgressRef.current = false;
+        };
+  
+        stompClientRef.current = client;
+        client.activate();
+  
+      } catch (error) {
+        console.error("Error al crear conexión WebSocket:", error);
+        if (isMountedRef.current) {
+          setConnectionStatus('Error de conexión');
+          scheduleReconnect();
+        }
+        connectionInProgressRef.current = false;
+      }
+    }, [API_BASE_URL, chatId, cleanupConnection, onMessageReceived, scheduleReconnect]);
+    
+    // Determinar si un mensaje es del usuario actual
+    const isCurrentUserMessage = useCallback((msg) => {
+      if (!msg || !msg.sender || !currentUser) {
         return false;
       }
       
-      // Obtener ID del usuario actual - usar ref para tener el valor más actualizado
-      let currentUserId = null;
-      if (currentUserRef.current) {
-        currentUserId = typeof currentUserRef.current === 'object' ? 
-          (currentUserRef.current.id || currentUserRef.current.userId) : 
-          currentUserRef.current;
-      }
+      // Obtener ID del usuario actual
+      const currentUserId = typeof currentUser === 'object' ? 
+        (currentUser.id || currentUser.userId) : currentUser;
       
-      if (!currentUserId) {
-        console.error("No se puede determinar el ID del usuario actual");
-        return false;
-      }
+      if (!currentUserId) return false;
       
       // Obtener ID del remitente del mensaje
-      let senderId = null;
-      if (typeof msg.sender === 'object') {
-        senderId = msg.sender.id || msg.sender.userId;
-      } else {
-        senderId = msg.sender;
-      }
+      const senderId = typeof msg.sender === 'object' ? 
+        (msg.sender.id || msg.sender.userId) : msg.sender;
       
-      if (!senderId) {
-        console.error("No se puede determinar el ID del remitente del mensaje");
-        return false;
-      }
+      if (!senderId) return false;
       
-      // Convertir ambos a string para comparación consistente
       return String(currentUserId) === String(senderId);
-    };
+    }, [currentUser]);
   
-    // Función mejorada para obtener el nombre del receptor
-    const getReceiverDisplayName = () => {
-      if (!receiver) return "Chat";
+    // Efecto principal para manejar el ciclo de vida del componente
+    useEffect(() => {
+      isMountedRef.current = true;
       
-      if (typeof receiver === 'object') {
-        return receiver.username || 
-               `Usuario ${receiver.username}`;
+      // Configurar chat cuando cambia chatId
+      if (chatId) {
+        console.log(`Configurando chat para chatId: ${chatId}`);
+        
+        // Limpiar mensajes al cambiar de chat
+        setMessages([]);
+        setIsLoading(true);
+        
+        // Desconectar WebSocket actual y limpiar
+        cleanupConnection();
+        
+        // Cargar mensajes y luego conectar WebSocket
+        loadMessages().then(() => {
+          if (isMountedRef.current) {
+            connectWebSocket();
+          }
+        });
+      } else {
+        console.error("No se puede configurar chat: chatId es inválido");
       }
       
-      return `Usuario ${receiver.username}`;
-    };
+      // Limpieza al desmontar o cambiar chatId
+      return () => {
+        isMountedRef.current = false;
+        cleanupConnection();
+        processingMessageIdsRef.current.clear();
+      };
+    }, [chatId, cleanupConnection, connectWebSocket, loadMessages]);
+  
+    // Efecto para mantener scroll al fondo cuando llegan nuevos mensajes
+    useEffect(() => {
+      if (messages.length > 0) {
+        scrollToBottom();
+      }
+    }, [messages, scrollToBottom]);
   
     // Función para formatear la hora del mensaje
     const formatMessageTime = (timestamp) => {
@@ -462,6 +330,100 @@ function ChatMessage({ currentUser, chatId, receiver }) {
       } catch (error) {
         console.error("Error al formatear la hora:", error);
         return "";
+      }
+    };
+    
+    // Función para obtener el nombre del receptor
+    const getReceiverDisplayName = () => {
+      if (!receiver) return "Chat";
+      
+      if (typeof receiver === 'object') {
+        return receiver.username || `Usuario ${receiver.id || ''}`;
+      }
+      
+      return `Usuario ${receiver || ''}`;
+    };
+    
+    // Función para enviar mensaje
+    const sendMessage = (event) => {
+      event.preventDefault();
+  
+      const trimmedMessage = messageInput.trim();
+      if (!trimmedMessage) return;
+      
+      if (!stompClientRef.current?.connected) {
+        console.warn("No connected al servidor de chat");
+        setConnectionStatus('Reconnecting...');
+        connectWebSocket();
+        return;
+      }
+      
+      if (!chatId) {
+        console.error("No se puede enviar mensaje: chatId es inválido");
+        return;
+      }
+
+      try {
+        setMessageInput(''); // Limpiar input inmediatamente
+        
+        // Obtener el ID del usuario actual
+        const currentUserId = typeof currentUser === 'object' ? 
+            (currentUser.id || currentUser.userId) : currentUser;
+            
+        const receiverId = typeof receiver === 'object' ? 
+            (receiver.id || receiver.userId) : receiver;
+            
+        const chatMessage = {
+          sender: currentUserId,
+          receiver: receiverId,
+          content: trimmedMessage,
+          timestamp: new Date().toISOString(),
+          chatId: chatId
+        };
+
+        console.log(`Enviando mensaje en chat ${chatId}:`, chatMessage);
+        
+        // Generar una clave única para este mensaje
+        const messageKey = trimmedMessage + chatMessage.timestamp;
+        processingMessageIdsRef.current.set(messageKey, Date.now());
+        
+        // Optimistic UI update
+        const tempId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        setMessages(prevMessages => [
+          ...prevMessages, 
+          {
+            ...chatMessage,
+            _tempId: tempId,
+            _pending: true
+          }
+        ]);
+        
+        stompClientRef.current.publish({
+          destination: `/app/chat.sendMessage/${chatId}`,
+          body: JSON.stringify(chatMessage)
+        });
+        
+        // Timeout para detectar mensajes no confirmados
+        setTimeout(() => {
+          if (processingMessageIdsRef.current.has(messageKey)) {
+            console.warn("El servidor no confirmó la recepción del mensaje después de 5s");
+            processingMessageIdsRef.current.delete(messageKey);
+            
+            if (isMountedRef.current) {
+              setMessages(prevMessages => prevMessages.map(msg => {
+                if (msg._tempId === tempId) {
+                  return { ...msg, _sendError: true, _pending: false };
+                }
+                return msg;
+              }));
+            }
+          }
+        }, 5000);
+        
+      } catch (error) {
+        console.error("Error enviando mensaje:", error);
+        setMessageInput(trimmedMessage); // Restaurar el mensaje si falló
+        alert("Error al enviar el mensaje. Por favor, inténtalo de nuevo.");
       }
     };
   
@@ -480,7 +442,7 @@ function ChatMessage({ currentUser, chatId, receiver }) {
           <button 
             onClick={loadMessages} 
             className="refresh-button"
-            title="Reload messages"
+            title="Recargar mensajes"
             disabled={isLoading}
           >
             <RefreshCw size={16} className={isLoading ? "animate-spin" : ""} />
@@ -489,15 +451,15 @@ function ChatMessage({ currentUser, chatId, receiver }) {
   
         <div className="messages-container">
           {isLoading && messages.length === 0 ? (
-            <div className="loading-messages">Loading messages...</div>
+            <div className="loading-messages">Cargando mensajes...</div>
           ) : messages.length === 0 ? (
-            <div className="no-messages">Theres is no messages. ¡Send the first one!</div>
+            <div className="no-messages">No hay mensajes. ¡Envía el primero!</div>
           ) : (
             messages.map((msg, index) => {
               const isMine = isCurrentUserMessage(msg);
               return (
                 <div
-                  key={msg.id || `${msg.content}-${msg.timestamp}-${index}`}
+                  key={msg.id || msg._tempId || `${msg.content}-${msg.timestamp}-${index}`}
                   className={`message ${isMine ? 'outgoing' : 'incoming'} ${msg._pending ? 'pending' : ''} ${msg._sendError ? 'send-error' : ''}`}
                 >
                   <div className="message-content mr-4">{msg.content}</div>
