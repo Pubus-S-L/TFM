@@ -19,6 +19,7 @@ function ChatMessage({ currentUser, chatId, receiver }) {
     const API_BASE_URL = process.env.REACT_APP_API_URL;
     const connectionInProgressRef = useRef(false);
     const isMountedRef = useRef(true);
+    const currentChatIdRef = useRef(chatId);
     
     // Scroll al último mensaje
     const scrollToBottom = useCallback(() => {
@@ -44,7 +45,7 @@ function ChatMessage({ currentUser, chatId, receiver }) {
         const data = await response.json();
         
         // Verificar que todavía estamos en el mismo chat
-        if (chatId !== chatId) {
+        if (chatId !== currentChatIdRef.current) {
           console.log("El chatId cambió durante la carga de mensajes, ignorando resultados");
           return;
         }
@@ -288,6 +289,7 @@ function ChatMessage({ currentUser, chatId, receiver }) {
       // Configurar chat cuando cambia chatId
       if (chatId) {
         console.log(`Configurando chat para chatId: ${chatId}`);
+        currentChatIdRef.current = chatId;
         
         // Limpiar mensajes al cambiar de chat
         setMessages([]);
@@ -426,6 +428,37 @@ function ChatMessage({ currentUser, chatId, receiver }) {
         alert("Error al enviar el mensaje. Por favor, inténtalo de nuevo.");
       }
     };
+  
+    // Agregamos un efecto para manejar mensajes no persistidos al recargar
+    useEffect(() => {
+      // Intentar recuperar mensajes del almacenamiento local al iniciar
+      if (chatId) {
+        const cachedMessagesKey = `chat_messages_${chatId}`;
+        const cachedMessages = localStorage.getItem(cachedMessagesKey);
+        
+        if (cachedMessages) {
+          try {
+            const parsedMessages = JSON.parse(cachedMessages);
+            if (parsedMessages.length > 0) {
+              console.log(`Recuperados ${parsedMessages.length} mensajes del almacenamiento local para chat ${chatId}`);
+              setMessages(parsedMessages);
+            }
+          } catch (e) {
+            console.error("Error al recuperar mensajes del almacenamiento local:", e);
+          }
+        }
+      }
+    }, [chatId]);
+    
+    // Efecto para guardar mensajes en almacenamiento local cuando cambian
+    useEffect(() => {
+      if (chatId && messages.length > 0) {
+        const cachedMessagesKey = `chat_messages_${chatId}`;
+        // Guardar solo los últimos 100 mensajes para evitar problemas de almacenamiento
+        const messagesToCache = messages.slice(-100);
+        localStorage.setItem(cachedMessagesKey, JSON.stringify(messagesToCache));
+      }
+    }, [messages, chatId]);
   
     return (
       <div className="chat-message-container">
