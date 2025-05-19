@@ -16,7 +16,7 @@ function ChatMessage({ currentUser, chatId, receiver }) {
     const MAX_RECONNECT_ATTEMPTS = 5;
     const subscriptionRef = useRef(null); // Referencia para la suscripción
     const processingMessageIdsRef = useRef(new Set()); // Para rastrear mensajes en procesamiento
-    
+    const API_BASE_URL = process.env.REACT_APP_API_URL;
     // Referencia para debug - guardar currentUser para diagnóstico
     const currentUserRef = useRef(null);
     
@@ -38,7 +38,7 @@ function ChatMessage({ currentUser, chatId, receiver }) {
   
         setConnectionStatus('Conectando...');
   
-        const socket = new SockJS('https://tfm-m1dn.onrender.com/ws');
+        const socket = new SockJS('${API_BASE_URL}/ws');
         const client = new Client({
           webSocketFactory: () => socket,
           debug: function (str) {
@@ -114,7 +114,7 @@ function ChatMessage({ currentUser, chatId, receiver }) {
   
     // Función específica para cargar mensajes del servidor
     const loadMessages = () => {
-      fetch(`https://tfm-m1dn.onrender.com/api/v1/message/${chatId}/messages`)
+      fetch(`${API_BASE_URL}/api/v1/message/${chatId}/messages`)
         .then(response => response.json())
         .then(data => {
           console.log("Mensajes cargados:", data);

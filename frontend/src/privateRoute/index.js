@@ -7,8 +7,9 @@ const PrivateRoute = ({ children }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isValid, setIsValid] = useState(null);
     const [message, setMessage] = useState(null);
+    const API_BASE_URL = process.env.REACT_APP_API_URL;
     if (jwt) {
-        fetch(`https://tfm-m1dn.onrender.com/api/v1/auth/validate?token=${jwt}`, {
+        fetch(`${API_BASE_URL}/api/v1/auth/validate?token=${jwt}`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',

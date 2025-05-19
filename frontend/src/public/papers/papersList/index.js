@@ -13,10 +13,11 @@ export default function Papers() {
   const [types, setTypes] = useState([]);
   const [typesSelected, setTypeSelected] = useState([]);
    const [isLoading, setIsLoading] = useState(true);
+   const API_BASE_URL = process.env.REACT_APP_API_URL;
   
   async function setUpTypes() {
     let types = await (
-      await fetch(`https://tfm-m1dn.onrender.com/api/v1/papers/types`, {
+      await fetch(`${API_BASE_URL}/api/v1/papers/types`, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -51,7 +52,7 @@ export default function Papers() {
       for(const paperType of typesSelected){
         console.log(paperType)
         let papersByType = await (
-          await fetch(`https://tfm-m1dn.onrender.com/api/v1/papers/types/${paperType}`, {
+          await fetch(`${API_BASE_URL}/api/v1/papers/types/${paperType}`, {
             headers: {
               "Content-Type": "application/json",
             },
@@ -62,7 +63,7 @@ export default function Papers() {
     }
   
     let papersFiltered = await (
-      await fetch(`https://tfm-m1dn.onrender.com/api/v1/papers?search=${searchTerm}`, {
+      await fetch(`${API_BASE_URL}/api/v1/papers?search=${searchTerm}`, {
         headers: {
           "Content-Type": "application/json",
         },

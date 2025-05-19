@@ -1,4 +1,19 @@
 /* Paper List Page Styles */
+@media (max-width: 768px) {
+  .doi-form {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .search-input {
+    width: 100% !important;
+  }
+
+  .auth-button.pink {
+    width: 100%;
+  }
+}
+
 .paper-list-page-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -41,6 +56,17 @@
   display: flex;
   gap: 1rem;
   margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .auth-button {
+    width: 100%;
+  }
 }
 
 /* Paper Row Styles */

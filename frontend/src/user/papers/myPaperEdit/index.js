@@ -42,6 +42,7 @@ export default function UserPaperEdit({ id, onSave }) {
   // Estado para controlar el spinner de carga
   const [isSaving, setIsSaving] = useState(false)
   const navigate = useNavigate();
+  const API_BASE_URL = process.env.REACT_APP_API_URL;
 
   const validateField = (name, value, isEditing = false, isTouched = false) => {
     const field = paperEditFormInputs.find((input) => input.name === name)
@@ -156,7 +157,7 @@ export default function UserPaperEdit({ id, onSave }) {
     }))
 
     // Luego enviar la solicitud al servidor para eliminar el archivo
-    fetch(`https://tfm-m1dn.onrender.com/api/v1/papers/${paperId}/delete/${id}`, {
+    fetch(`${API_BASE_URL}/api/v1/papers/${paperId}/delete/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${jwt}`,
@@ -175,7 +176,7 @@ export default function UserPaperEdit({ id, onSave }) {
         setModalShow(true)
 
         // Si hay un error, restaurar el archivo en la UI
-        fetch(`https://tfm-m1dn.onrender.com/api/v1/papers/${paperId}`, {
+        fetch(`${API_BASE_URL}/api/v1/papers/${paperId}`, {
           headers: {
             Authorization: `Bearer ${jwt}`,
           },
@@ -191,7 +192,7 @@ export default function UserPaperEdit({ id, onSave }) {
   }
   function setupPaper() {
     if (paperId !== "" && paper.id == null) {
-      const paper = fetch(`https://tfm-m1dn.onrender.com/api/v1/papers/${paperId}`, {
+      const paper = fetch(`${API_BASE_URL}/api/v1/papers/${paperId}`, {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },
@@ -219,7 +220,7 @@ export default function UserPaperEdit({ id, onSave }) {
     }
 
     if (types.length === 0) {
-      fetch(`https://tfm-m1dn.onrender.com/api/v1/papers/types`, {
+      fetch(`${API_BASE_URL}/api/v1/papers/types`, {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },
@@ -355,7 +356,7 @@ export default function UserPaperEdit({ id, onSave }) {
         console.log("userId:", userId);
 
         // Usar la URL completa en lugar de relativa
-        const baseUrl = "https://tfm-m1dn.onrender.com";
+        const baseUrl = "${API_BASE_URL}";
         const url = `${baseUrl}/api/v1/papers${paperId ? "/" + paperId : ""}`;
         
         console.log("URL de la solicitud:", url);

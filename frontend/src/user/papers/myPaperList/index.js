@@ -35,6 +35,7 @@ let exportTitles = []
   // const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [selectedPaperId, setSelectedPaperId] = useState("");
   const navigate = useNavigate();
+  const API_BASE_URL = process.env.REACT_APP_API_URL;
 
   // const handleEditClick = (paperId) => {
   //   setSelectedPaperId(paperId);
@@ -43,7 +44,7 @@ let exportTitles = []
   // };
 
   function removePaper(id) {
-    fetch(`https://tfm-m1dn.onrender.com/api/v1/papers/${id}`, {
+    fetch(`${API_BASE_URL}/api/v1/papers/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${jwt}`,
@@ -71,7 +72,7 @@ let exportTitles = []
   async function setUp() {
     setIsLoading(true);
     try {
-      let response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/papers?userId=${user.id}`, {
+      let response = await fetch(`${API_BASE_URL}/api/v1/papers?userId=${user.id}`, {
         headers: {
           Authorization: `Bearer ${jwt}`,
           "Content-Type": "application/json",
@@ -120,7 +121,7 @@ let exportTitles = []
         setTotalSteps(jsonData.length || 100); 
 
         for (let i = 0; i < jsonData.length; i++) {
-            await fetch(`https://tfm-m1dn.onrender.com/api/v1/papers/importPaper/${user.id}`, {
+            await fetch(`${API_BASE_URL}/api/v1/papers/importPaper/${user.id}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(jsonData[i]),
@@ -158,7 +159,7 @@ useEffect(() => {
 
   function importPaperByDOI(searchTerm) {
     const params = new URLSearchParams({ searchTerm: searchTerm });
-    fetch(`https://tfm-m1dn.onrender.com/api/v1/papers/${user.id}/importByDOI?${params.toString()}`, {
+    fetch(`${API_BASE_URL}/api/v1/papers/${user.id}/importByDOI?${params.toString()}`, {
         method: "POST",
         headers: {
             Authorization: `Bearer ${jwt}`,
@@ -228,14 +229,14 @@ useEffect(() => {
           <h1 className="paper-list-title">My Papers</h1>
 
           {/* Search and Import by DOI */}
-          <div style={{ display: "flex", marginBottom: "2rem" }}>
+          <div style={{ display: "flex", marginBottom: "2rem", flexWrap: "wrap", gap: "0.5rem"}}>
             <form
               onSubmit={(event) => {
                 event.preventDefault();
                 importPaperByDOI(searchTerm);
               }}
               className="doi-form"
-              style={{ display: "flex", flex: 1 }} // Importante: el form también flex
+              style={{ display: "flex", flex: 1, flexWrap: "wrap", gap: "0.5rem" }} // Importante: el form también flex
             >
               <Input
                 type="text"
@@ -245,15 +246,13 @@ useEffect(() => {
                 className="search-input"
                 style={{
                   flex: 1,               // <-- el input se expande todo lo que pueda
-                  textAlign: "left",
-                  paddingLeft: "0.5rem",
                   minWidth: "250px",     // <-- un mínimo para que siempre sea grande
                 }}
               />
               <button
                 type="submit"
                 className="auth-button pink"
-                style={{ marginLeft: "8px", whiteSpace: "nowrap" }} // espacio entre input y botón
+                style={{minWidth: "140px" }} // espacio entre input y botón
               >
                 Import by DOI
               </button>
@@ -317,7 +316,7 @@ useEffect(() => {
           <p><strong>Type:</strong> {paper.type.name}</p>
         </CardDescription>
       </CardContent>
-      <CardFooter className="flex justify-center gap-20">
+      <CardFooter className="flex flex-wrap justify-center gap-4 sm:gap-6">
       <Sheet>
           <SheetTrigger asChild>
               <button className="auth-button blue" style={{ textDecoration: "none" }}> <PencilIcon className= "mr-1.5 h-5 w-5"/>Edit</button>

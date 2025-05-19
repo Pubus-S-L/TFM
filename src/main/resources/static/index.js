@@ -1,4 +1,5 @@
 let stompCliente = null;
+const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 const onConnectSocket = () => {
     console.log('Conectado al WebSocket!');
@@ -17,7 +18,7 @@ const onWebSocketClose = () => {
 const conectarWS = () => {
     onWebSocketClose();
     stompCliente = new StompJs.Client({
-        webSocketFactory: () => new WebSocket('ws://https://tfm-m1dn.onrender.com/websocket')
+        webSocketFactory: () => new WebSocket(`ws://${API_BASE_URL}/websocket0`)
     });
     stompCliente.onConnect = onConnectSocket;
     stompCliente.onWebSocketClose = onWebSocketClose;

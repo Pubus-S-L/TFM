@@ -41,6 +41,7 @@ export default function UserEditAdmin() {
     const [authority, setAuthority] = useState([])
     const editUserFormRef = useRef();
     const navigate = useNavigate();
+    const API_BASE_URL = process.env.REACT_APP_API_URL;
   
     useEffect(() => {
       setUpUser();
@@ -49,7 +50,7 @@ export default function UserEditAdmin() {
     async function setUpUser() {
     if (pathArray[3] !== "new" && user.id==null){
       setIsEdit(true);
-      const user = fetch(`https://tfm-m1dn.onrender.com/api/v1/users/${pathArray[3]}`, {
+      const user = fetch(`${API_BASE_URL}/api/v1/users/${pathArray[3]}`, {
         headers: {
           Authorization: `Bearer ${tokenService.getLocalAccessToken()}`,
         },
@@ -72,7 +73,7 @@ export default function UserEditAdmin() {
 
     } 
     if(authority.length===0){
-      fetch(`https://tfm-m1dn.onrender.com/api/v1/users/authorities`, {
+      fetch(`${API_BASE_URL}/api/v1/users/authorities`, {
         headers: {
           Authorization: `Bearer ${tokenService.getLocalAccessToken()}`,
         },
@@ -135,7 +136,7 @@ export default function UserEditAdmin() {
         }
       }
 
-        const response = await (await fetch("https://tfm-m1dn.onrender.com/api/v1/users" + (user.id ? "/" + userId : ""),
+        const response = await (await fetch("${API_BASE_URL}/api/v1/users" + (user.id ? "/" + userId : ""),
 
         {
           method:  pathArray[3] === "new" ? "POST" : "PUT",

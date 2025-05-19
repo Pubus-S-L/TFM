@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 export default function Login() {
   const [message, setMessage] = useState(null)
   const loginFormRef = React.createRef();
+  const API_BASE_URL = process.env.REACT_APP_API_URL;
   const navigate = useNavigate();
   const { linkedInLogin } = useLinkedIn({
     clientId: "77bspiilcaqccb",
@@ -24,7 +25,7 @@ export default function Login() {
   async function loginLinkedIn(code) {
     const reqBody = { code }; // Aquí estás creando el cuerpo de la solicitud con el código de autorización
     setMessage(null);
-    await fetch("https://tfm-m1dn.onrender.com/api/v1/auth/loginLinkedIn", {
+    await fetch("${API_BASE_URL}/api/v1/auth/loginLinkedIn", {
       headers: { "Content-Type": "application/json" },
       method: "POST",
       body: JSON.stringify(reqBody),
@@ -46,7 +47,7 @@ export default function Login() {
 
     const reqBody = values;
     setMessage(null);
-    await fetch("https://tfm-m1dn.onrender.com/api/v1/auth/signin", {
+    await fetch("${API_BASE_URL}/api/v1/auth/signin", {
       headers: { "Content-Type": "application/json" },
       method: "POST",
       body: JSON.stringify(reqBody),

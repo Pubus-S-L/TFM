@@ -23,9 +23,10 @@ export default function PaperDetail() {
     const user = tokenService.getUser();
     const [title, setTitle] = useState("");
     const [isLoading, setIsLoading] = useState(true)
+    const API_BASE_URL = process.env.REACT_APP_API_URL;
 
     function downloadFile(fileId,fileName) {
-        fetch(`https://tfm-m1dn.onrender.com/api/v1/papers/${paperId}/download/${fileId}`, {
+        fetch(`${API_BASE_URL}/api/v1/papers/${paperId}/download/${fileId}`, {
           method: "GET",
           headers: {
             Accept: "application/json",
@@ -59,7 +60,7 @@ export default function PaperDetail() {
     async function setUp() {
         setIsLoading(true)
         try {
-            let response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/papers/${paperId}`, {
+            let response = await fetch(`${API_BASE_URL}/api/v1/papers/${paperId}`, {
                 method: "GET",
                 headers: {
                     Accept: "application/json",
@@ -92,7 +93,7 @@ export default function PaperDetail() {
             return;
         }
         try {
-            let response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/papers/${user.id}/like/${paperId}`, {
+            let response = await fetch(`${API_BASE_URL}/api/v1/papers/${user.id}/like/${paperId}`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${jwt}`,

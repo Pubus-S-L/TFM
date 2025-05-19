@@ -10,6 +10,7 @@ function AppNavbar() {
     const jwt = tokenService.getLocalAccessToken();
     const [collapsed, setCollapsed] = useState(true);
     const [hasUnreadChats, setHasUnreadChats] = useState(false);
+    const API_BASE_URL = process.env.REACT_APP_API_URL;
 
     const toggleNavbar = () => setCollapsed(!collapsed);
 
@@ -18,11 +19,11 @@ function AppNavbar() {
             setRoles(jwt_decode(jwt).authorities);
             setUsername(jwt_decode(jwt).sub);
             const currentUser = tokenService.getUser();
-        fetch(`https://tfm-m1dn.onrender.com/api/v1/chat/users/${currentUser.id}/chats`)
+        fetch(`${API_BASE_URL}/api/v1/chat/users/${currentUser.id}/chats`)
             .then(response => response.json())
             .then(data => {
                 const fetchUnreadPromises = data.map(chat => 
-                    fetch(`https://tfm-m1dn.onrender.com/api/v1/message/${chat.id}/unread/${currentUser.id}`)
+                    fetch(`${API_BASE_URL}/api/v1/message/${chat.id}/unread/${currentUser.id}`)
                         .then(res => res.json())
                         .then(messages => messages.length > 0) // true si hay mensajes no leídos
                 );

@@ -8,7 +8,8 @@ import { useNavigate } from 'react-router-dom';
 
 export default function Register() {
   const registerFormRef = useRef();   
-  const navigate = useNavigate();   
+  const navigate = useNavigate();
+  const API_BASE_URL = process.env.REACT_APP_API_URL;   
   
   async function handleSubmit({ values }) {
 
@@ -17,7 +18,7 @@ export default function Register() {
     request["authority"] = 'user';
     let state = "";
 
-    fetch("https://tfm-m1dn.onrender.com/api/v1/auth/signup", {
+    fetch(`${API_BASE_URL}/api/v1/auth/signup`, {
       headers: { "Content-Type": "application/json" },
       method: "POST",
       body: JSON.stringify(request),
@@ -28,7 +29,7 @@ export default function Register() {
           username: request.username,
           password: request.password,
         };
-        fetch("https://tfm-m1dn.onrender.com/api/v1/auth/signin", {
+        fetch(`${API_BASE_URL}/api/v1/auth/signin`, {
           headers: { "Content-Type": "application/json" },
           method: "POST",
           body: JSON.stringify(loginRequest),

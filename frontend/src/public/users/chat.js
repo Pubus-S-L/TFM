@@ -8,12 +8,13 @@ const Chat = () => {
   const [messages, setMessages] = useState([]); // Lista de mensajes del chat
   const [input, setInput] = useState(""); // Mensaje que escribe el usuario
   const apiKey = process.env.REACT_APP_OPENAI_API_KEY;
+  const API_BASE_URL = process.env.REACT_APP_API_URL;
 
   const prompt = async function createPrompt(userMessage) {
     const params = new URLSearchParams({ text: userMessage });
     let data = [{}];
     try {
-        let response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/papers/users/${userId}/prompt?${params.toString()}`, {
+        let response = await fetch(`${API_BASE_URL}/api/v1/papers/users/${userId}/prompt?${params.toString()}`, {
             method: "GET",
             headers: {
                 Accept: "application/json",

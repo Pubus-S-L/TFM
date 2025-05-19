@@ -37,7 +37,7 @@ export default function UserProfile() {
   const startIndex = currentPage * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const papersToShow = favouritePapers.slice(startIndex, endIndex);
-
+  const API_BASE_URL = process.env.REACT_APP_API_URL;
   useEffect(() => {
     if (user && user.id) {
       setUpUser();
@@ -50,7 +50,7 @@ export default function UserProfile() {
 
   async function setUpUser() {
     try {
-      const response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/users/${userId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/users/${userId}`, {
         headers: {},
       });
 
@@ -72,7 +72,7 @@ export default function UserProfile() {
 
   async function setUpAvatar() {
     try {
-      const response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/users/${userId}/profileImage`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/users/${userId}/profileImage`, {
         headers: {},
       });
       if (!response.ok) {
@@ -93,7 +93,7 @@ export default function UserProfile() {
     console.log("Profile being sent:", updatedProfile);
     try {
 
-      const response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/users/${userId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/users/${userId}`, {
         method: "PUT",
         headers: {
           Accept: "application/json",
@@ -117,7 +117,7 @@ export default function UserProfile() {
 
   async function setUpFavorite() {
     try {
-      const response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/users/${userId}/favorite`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/users/${userId}/favorite`, {
         headers: {
         },
       });
@@ -147,7 +147,7 @@ export default function UserProfile() {
 
   async function setUpRecommended() {
     try {
-      const response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/users/${userId}/recommended`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/users/${userId}/recommended`, {
         headers: {
         },
       });
@@ -194,7 +194,7 @@ export default function UserProfile() {
       const formData = new FormData()
       formData.append("file", file)
 
-      const response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/users/${user.id}/upload`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/users/${user.id}/upload`, {
         method: "POST",
         body: formData,
       })
@@ -226,7 +226,7 @@ export default function UserProfile() {
   // Función para eliminar la foto de perfil
   const handleDeleteAvatar = async () => {
     try {
-      const response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/users/${user.id}/delete`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/users/${user.id}/delete`, {
         method: "DELETE",
       })
 

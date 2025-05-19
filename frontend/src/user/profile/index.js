@@ -40,6 +40,7 @@ export default function EditProfile() {
     const [userEdited, setUserEdited] = useState(emptyItem);
     const [userId, setUserId] = useState(user.id);
     const editUserFormRef = useRef();
+    const API_BASE_URL = process.env.REACT_APP_API_URL;
   
     useEffect(() => {
       setUpUser();
@@ -47,7 +48,7 @@ export default function EditProfile() {
   
     async function setUpUser() {
       try {
-        const response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/users/${userId}`, {
+        const response = await fetch(`${API_BASE_URL}/api/v1/users/${userId}`, {
           headers: {
           },
         });
@@ -102,7 +103,7 @@ export default function EditProfile() {
 
         console.log(myuser)
   
-        const response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/users/${userId}`, {
+        const response = await fetch(`${API_BASE_URL}/api/v1/users/${userId}`, {
           method: "PUT",
           headers: {
             Accept: "application/json",

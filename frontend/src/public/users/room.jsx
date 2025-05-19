@@ -20,10 +20,11 @@ function ChatList() {
     const [unreadMessages, setUnreadMessages] = useState({});
     const[hasUnreadChats, setHasUnreadChats] = useState(false);
     const [profileImageUrls, setProfileImageUrls] = useState({});
+    const API_BASE_URL = process.env.REACT_APP_API_URL;
   
     // Función para obtener mensajes no leídos
     const fetchUnreadMessages = useCallback((chatId) => {
-      fetch(`https://tfm-m1dn.onrender.com/api/v1/message/${chatId}/unread/${currentUser.id}`)
+      fetch(`${API_BASE_URL}/api/v1/message/${chatId}/unread/${currentUser.id}`)
         .then(response => response.json())
         .then(data => {
           setUnreadMessages(prev => ({
@@ -37,7 +38,7 @@ function ChatList() {
     useEffect(() => {
       setLoading(true)
       // Cargar lista de chats del usuario
-      fetch(`https://tfm-m1dn.onrender.com/api/v1/chat/users/${currentUser.id}/chats`)
+      fetch(`${API_BASE_URL}/api/v1/chat/users/${currentUser.id}/chats`)
         .then(response => response.json())
         .then(data => {
             console.log('DATA', data);
@@ -62,7 +63,7 @@ function ChatList() {
 
     const getUserProfileImage = useCallback(async (user) => {
       try {
-          const response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/users/${user.id}/profileImage`);
+          const response = await fetch(`${API_BASE_URL}/api/v1/users/${user.id}/profileImage`);
           if (response.ok) {
               const imageBlob = await response.blob();
               const imageUrl = URL.createObjectURL(imageBlob);
@@ -110,7 +111,7 @@ function ChatList() {
       
       // Marcar mensajes como leídos
       if (unreadMessages[chatId]) {
-        fetch(`https://tfm-m1dn.onrender.com/api/v1/message/${chatId}/markread/${currentUser.id}`, {
+        fetch(`${API_BASE_URL}/api/v1/message/${chatId}/markread/${currentUser.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
@@ -159,7 +160,7 @@ function ChatList() {
         
         for (const chat of chats) {
           try {
-            const response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/message/${chat.id}/messages`);
+            const response = await fetch(`${API_BASE_URL}/api/v1/message/${chat.id}/messages`);
             const data = await response.json();
             
             if (data.length > 0) {
@@ -194,7 +195,7 @@ function ChatList() {
         timestamp: new Date().toISOString(),
       }
   
-      fetch(`https://tfm-m1dn.onrender.com/api/v1/message/${selectedChatId}`, {
+      fetch(`${API_BASE_URL}/api/v1/message/${selectedChatId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

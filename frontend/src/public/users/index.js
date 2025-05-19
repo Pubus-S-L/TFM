@@ -29,6 +29,7 @@ export default function UserDetail() {
     const [roomExist, setRoomExist] = useState(false)
     const [hasFetched, setHasFetched] = useState(false);
     const [contactSheetOpen, setContactSheetOpen] = useState(false);
+    const API_BASE_URL = process.env.REACT_APP_API_URL;
   
     // Reiniciar la página si la lista de papers cambia
     useEffect(() => {
@@ -46,7 +47,7 @@ export default function UserDetail() {
 
     async function setUp() {
         try {
-            let response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/users/${userId}`, {
+            let response = await fetch(`${API_BASE_URL}/api/v1/users/${userId}`, {
                 method: "GET",
                 headers: {
                     Accept: "application/json",
@@ -73,7 +74,7 @@ export default function UserDetail() {
 
     async function setUpPapers() {
         try {
-            let response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/papers/users/${userId}?search=${searchTerm}`, {
+            let response = await fetch(`${API_BASE_URL}/api/v1/papers/users/${userId}?search=${searchTerm}`, {
                 method: "GET",
                 headers: {
                     Accept: "application/json",
@@ -92,7 +93,7 @@ export default function UserDetail() {
 
     async function setUpAvatar() {
       try {
-        const response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/users/${userId}/profileImage`, {
+        const response = await fetch(`${API_BASE_URL}/api/v1/users/${userId}/profileImage`, {
           headers: {},
         });
         if (!response.ok) {
@@ -116,7 +117,7 @@ export default function UserDetail() {
     useEffect(() => {
       if (currentUser && !hasFetched) {
         // Cargar lista de chats del usuario
-        fetch(`https://tfm-m1dn.onrender.com/api/v1/chat/users/${currentUser.id}/chats`)
+        fetch(`${API_BASE_URL}/api/v1/chat/users/${currentUser.id}/chats`)
           .then(response => response.json())
           .then(data => {
             console.log('DATA', data);
@@ -139,7 +140,7 @@ export default function UserDetail() {
 
     const handleCreateChat = async () => {
       try {
-        const response = await fetch(`https://tfm-m1dn.onrender.com/api/v1/chat/create/${userId}/${otherUserId}`, {
+        const response = await fetch(`${API_BASE_URL}/api/v1/chat/create/${userId}/${otherUserId}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
