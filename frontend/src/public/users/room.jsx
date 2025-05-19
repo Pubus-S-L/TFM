@@ -21,6 +21,24 @@ function ChatList() {
     const[hasUnreadChats, setHasUnreadChats] = useState(false);
     const [profileImageUrls, setProfileImageUrls] = useState({});
     const API_BASE_URL = process.env.REACT_APP_API_URL;
+    const isMobile = useIsMobile();
+
+    function useIsMobile() {
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+      const checkMobile = () => {
+        setIsMobile(window.innerWidth < 768); // Tailwind `md` breakpoint
+      };
+
+      checkMobile(); // check initially
+      window.addEventListener("resize", checkMobile);
+      return () => window.removeEventListener("resize", checkMobile);
+    }, []);
+
+    return isMobile;
+  }
+  
   
     // Función para obtener mensajes no leídos
     const fetchUnreadMessages = useCallback((chatId) => {
@@ -147,7 +165,7 @@ function ChatList() {
 
     const getUserDisplayName = (user) => {
       if (!user) return "Unknown User";
-      return user.name || user.username || user.email || `User ${user.id}`;
+      return user.name? user.name: user.username;
     };
 
     useEffect(() => {
@@ -224,7 +242,7 @@ function ChatList() {
   
   
     return (
-      <div className="chat-container mt-3">
+      <div className="chat-container mt-3 ml-3">
         {/* Sidebar */}
         <div className="chat-sidebar">
         <div className="chat-header">
@@ -314,6 +332,7 @@ function ChatList() {
         </div>
   
         {/* Main Chat Area */}
+        {isMobile && (
         <Sheet open={!!selectedChatId} onOpenChange={(open) => {
             if (!open) setSelectedChatId(null)
           }}>
@@ -340,6 +359,30 @@ function ChatList() {
               )}
             </SheetContent>
           </Sheet>
+        )}
+          {!selectedChatId ? (
+        <div className="hidden md:flex flex-col items-center justify-center w-full h-full bg-gray-50">
+          <MessageSquare size={64} className="mb-4 text-gray-300" />
+          <h3 className="text-xl font-semibold text-gray-600">Select a conversation</h3>
+          <p className="text-gray-500">Choose a chat from the list to start messaging</p>
+        </div>
+      ) : (
+        <div className="hidden md:block flex-grow">
+          <div className="chat-header border-b p-3">
+            <h3 className="font-semibold">
+              Chat with{" "}
+                  {selectedChatId && getReceiverFromChat(chats.find(c => c.id === selectedChatId), currentUser)?.firstName}
+            </h3>
+          </div>
+          <div className="h-[calc(100vh-7rem)] overflow-hidden">
+            <Chat
+              currentUser={currentUser}
+              chatId={selectedChatId}
+              receiver={getReceiverFromChat(chats.find(c => c.id === selectedChatId), currentUser)}
+            />
+          </div>
+        </div>
+      )}
       </div>
     );
   }
