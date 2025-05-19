@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Alert } from "reactstrap";
+import { Alert, Spinner } from "reactstrap";
 import FormGenerator from "../../components/formGenerator/formGenerator";
 import tokenService from "../../services/token.service";
 import "../../static/css/auth/authButton.css";
@@ -12,6 +12,7 @@ export default function Login() {
   const [message, setMessage] = useState(null)
   const loginFormRef = React.createRef();
   const API_BASE_URL = process.env.REACT_APP_API_URL;
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { linkedInLogin } = useLinkedIn({
     clientId: "77bspiilcaqccb",
@@ -47,6 +48,7 @@ export default function Login() {
 
     const reqBody = values;
     setMessage(null);
+    setLoading(true);
     await fetch(`${API_BASE_URL}/api/v1/auth/signin`, {
       headers: { "Content-Type": "application/json" },
       method: "POST",
@@ -63,7 +65,10 @@ export default function Login() {
       })
       .catch((error) => {         
         setMessage(error);
-      });            
+      }) 
+      .finally(() => {
+        setLoading(false);
+      });     
   }
 
     return (
@@ -83,8 +88,9 @@ export default function Login() {
             onSubmit={handleSubmit}
             numberOfColumns={1}
             listenEnterKey
-            buttonText="Login"
+            buttonText={loading ? <Spinner size="sm" /> : "Login"}
             buttonClassName="auth-button"
+            buttonDisabled={loading}
           />
         </div>
         {/* <img
