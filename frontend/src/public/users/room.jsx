@@ -4,8 +4,10 @@ import tokenService from "../../services/token.service";
 import { Search, Send, MessageSquare } from "lucide-react"
 import { Button } from "../../components/ui/button.tsx"
 import { Input } from "../../components/ui/input.tsx"
+import { ArrowRightSquare } from 'lucide-react';
 import '../../static/css/user/chatList.css'; 
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "../../components/ui/sheet.tsx";
+import { useNavigate } from 'react-router-dom';
 
 function ChatList() {
     const currentUser = tokenService.getUser();
@@ -23,6 +25,10 @@ function ChatList() {
     const [imageLoadingComplete, setImageLoadingComplete] = useState(false);
     const API_BASE_URL = process.env.REACT_APP_API_URL;
     const isMobile = useIsMobile();
+    const navigate = useNavigate();
+    const selectedChat = chats.find(c => c.id === selectedChatId)
+    const receiver = selectedChat ? getReceiverFromChat(selectedChat, currentUser) : null;
+    const receiverFirstName = receiver?.firstName;
 
     function useIsMobile() {
       const [isMobile, setIsMobile] = useState(false);
@@ -261,6 +267,15 @@ function ChatList() {
         })
         .catch((error) => console.error("Error sending message:", error))
     }
+
+    const handleNavigateToProfile = () => {
+        if (receiver && receiver.id) {
+            navigate(`/users/${receiver.id}`);
+        } else {
+            console.warn("Could not determine receiver ID for navigation.");
+            // Optionally, provide user feedback here (e.g., a toast notification)
+        }
+    };
   
   
     return (
@@ -361,8 +376,21 @@ function ChatList() {
             <SheetContent className="w-full sm:max-w-xl overflow-y-auto bg-white">
               <SheetHeader>
                 <SheetTitle>
+                  <span>
                   Chat with{" "}
-                  {selectedChatId && getReceiverFromChat(chats.find(c => c.id === selectedChatId), currentUser)?.firstName}
+                  {/* Display the receiver's first name */}
+                  {receiverFirstName}
+                  </span>
+                  {/* Show the button only if a chat is selected AND a receiver name is found */}
+                  {selectedChatId && receiverFirstName && ( 
+                      <button 
+                          onClick={handleNavigateToProfile} 
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+                          aria-label={`Go to ${receiverFirstName}'s profile`}
+                      >
+                          <ArrowRightSquare size={24} /> {/* Adjust icon size as needed */}
+                      </button>
+                  )}
                 </SheetTitle>
               </SheetHeader>
 
