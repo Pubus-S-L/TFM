@@ -168,7 +168,7 @@ export default function Papers() {
                   <CardHeader>
                     <CardTitle className="text-xl font-bold">{paper.title}</CardTitle>
                   </CardHeader>
-                  <CardContent className="pb-1">
+                  <CardContent className="pb-1 mb-1">
                     <CardDescription>
                       <p><strong>Authors:</strong> {paper.authors}</p>
                       <p><strong>Publication Year:</strong> {paper.publicationYear}</p>
@@ -186,7 +186,7 @@ export default function Papers() {
             ))}
 
             {/* Controles de paginación */}
-            <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-4 mt-4 text-sm">
+            <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-4 mt-4 mb-6 text-sm">
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
                 disabled={currentPage === 0}

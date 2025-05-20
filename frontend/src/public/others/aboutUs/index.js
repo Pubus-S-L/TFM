@@ -61,7 +61,7 @@ export default function AboutUs() {
           <div className="w-full md:w-1/2">
             <Card className="border-none shadow-lg">
               <CardHeader className="pb-2">
-                <CardTitle className="text-3xl font-bold text-center bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                <CardTitle className="text-3xl font-bold text-center bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
                   {loading ? <Skeleton className="h-10 w-3/4 mx-auto" /> : company?.name}
                 </CardTitle>
               </CardHeader>
@@ -77,15 +77,15 @@ export default function AboutUs() {
                 ) : (
                   <>
                     <div className="prose max-w-none text-center">
-                      <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{company?.description}</p>
+                      <p className="text-gray-500 leading-relaxed">{company?.description}</p>
                     </div>
 
                     <div className="grid gap-4">
                       <h3 className="text-xl font-semibold text-center">Contact Information</h3>
                       <div className="grid gap-3">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30">
-                            <Phone className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+                            <Phone className="h-5 w-5 text-green-600 dark:text-green-400" />
                           </div>
                           <div>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Phone</p>
@@ -93,8 +93,8 @@ export default function AboutUs() {
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30">
-                            <Mail className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+                            <Mail className="h-5 w-5 text-green-600 dark:text-green-400" />
                           </div>
                           <div>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
@@ -106,13 +106,13 @@ export default function AboutUs() {
 
                     <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
                       <div className="flex items-center gap-2 mb-4 justify-center">
-                        <ShieldCheck className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                        <ShieldCheck className="h-5 w-5 text-green-600 dark:text-purple-400" />
                         <h3 className="text-xl font-semibold">Support</h3>
                       </div>
                       <div className="grid gap-3">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-100 dark:bg-pink-900/30">
-                            <Phone className="h-5 w-5 text-pink-600 dark:text-pink-400" />
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
+                            <Phone className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                           </div>
                           <div>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Support Phone</p>
@@ -120,8 +120,8 @@ export default function AboutUs() {
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-100 dark:bg-pink-900/30">
-                            <Mail className="h-5 w-5 text-pink-600 dark:text-pink-400" />
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
+                            <Mail className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                           </div>
                           <div>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Support Email</p>
