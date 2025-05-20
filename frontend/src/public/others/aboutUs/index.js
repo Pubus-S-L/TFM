@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Image from "next/image"
 import { Mail, Phone, ShieldCheck } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card.tsx"
 import { Skeleton } from "../../../components/ui/skeleton.tsx"
@@ -45,14 +44,11 @@ export default function AboutUs() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
         <div className="relative overflow-hidden rounded-2xl shadow-xl transition-all duration-300 hover:shadow-2xl">
           <div className="aspect-video w-full relative">
-            {/* Replace with your actual GIF path */}
-            <Image
+            {/* Using standard img tag instead of Next.js Image component */}
+            <img
               src={myGif}
               alt="Company Presentation"
-              className="object-cover"
-              fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              priority
+              className="object-cover w-full h-full"
             />
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity duration-300 hover:opacity-100" />
