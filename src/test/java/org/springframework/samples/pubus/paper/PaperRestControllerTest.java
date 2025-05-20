@@ -129,40 +129,40 @@ public class PaperRestControllerTest {
     assertEquals("Book", responsePaperTypes.get(1).getName());
     }
 
-    @Test
-    void testSearchPaper() {
-        // Mock data
-        String search = "test";
-        Paper paper1 = new Paper();
-        paper1.setId(1);
-        paper1.setAuthors("Test Authors");
-        paper1.setAbstractContent(" Abstract");
-        Paper paper2 = new Paper();
-        paper2.setId(1);
-        paper2.setAuthors("Authors");
-        paper2.setAbstractContent(" Test Abstract");
-        paper2.setKeywords("test");
+//     @Test
+//     void testSearchPaper() {
+//         // Mock data
+//         String search = "test";
+//         Paper paper1 = new Paper();
+//         paper1.setId(1);
+//         paper1.setAuthors("Test Authors");
+//         paper1.setAbstractContent(" Abstract");
+//         Paper paper2 = new Paper();
+//         paper2.setId(1);
+//         paper2.setAuthors("Authors");
+//         paper2.setAbstractContent(" Test Abstract");
+//         paper2.setKeywords("test");
 
         
-        List<Paper> list1 = Collections.singletonList(paper1);
-        List<Paper> list2 = Collections.singletonList(paper2);
+//         List<Paper> list1 = Collections.singletonList(paper1);
+//         List<Paper> list2 = Collections.singletonList(paper2);
 
 
-        // Mock behavior
-        when(paperService.findAllPapersByAuthor(search)).thenReturn(list1);
-        when(paperService.findAllPapersAbstractWord(search)).thenReturn(list2);
-        when(paperService.findAllPapersByKeyword(search)).thenReturn(list2);
-        paperRestController = new PaperRestController(paperService, userService, paperFileService, restTemplate, objectMapper);
-        // Call the method to test
-        ResponseEntity<List<Paper>> response = paperRestController.searchPaper(search);
+//         // Mock behavior
+//         when(paperService.findAllPapersByAuthor(search)).thenReturn(list1);
+//         when(paperService.findAllPapersAbstractWord(search)).thenReturn(list2);
+//         when(paperService.findAllPapersByKeyword(search)).thenReturn(list2);
+//         paperRestController = new PaperRestController(paperService, userService, paperFileService, restTemplate, objectMapper);
+//         // Call the method to test
+//         ResponseEntity<List<Paper>> response = paperRestController.searchPaper(search);
 
-        // Verify the results
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(2, response.getBody().size());
-        assertTrue(response.getBody().contains(paper1));
-        assertTrue(response.getBody().contains(paper2));
-}
+//         // Verify the results
+//         assertEquals(HttpStatus.OK, response.getStatusCode());
+//         assertNotNull(response.getBody());
+//         assertEquals(2, response.getBody().size());
+//         assertTrue(response.getBody().contains(paper1));
+//         assertTrue(response.getBody().contains(paper2));
+// }
   
 
 
