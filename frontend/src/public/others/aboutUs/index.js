@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Image from "next/image"
 import { Mail, Phone, ShieldCheck } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card.tsx"
 import { Skeleton } from "../../../components/ui/skeleton.tsx"
 import myGif from "./PubUS.gif";
 
