@@ -74,7 +74,7 @@ export default function UserDetail() {
 
     async function setUpPapers() {
         try {
-            let response = await fetch(`${API_BASE_URL}/api/v1/papers/users/${userId}?search=${searchTerm}`, {
+            let response = await fetch(`${API_BASE_URL}/api/v1/papers/?userId=${userId}?search=${searchTerm}`, {
                 method: "GET",
                 headers: {
                     Accept: "application/json",
