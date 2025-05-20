@@ -412,37 +412,38 @@ function ChatList() {
         )}
           {!selectedChatId ? (
         <div className="hidden md:flex flex-col items-center justify-center w-full h-full bg-gray-50">
-          <MessageSquare size={64} className="mb-4 text-gray-300" />
-          <h3 className="text-xl font-semibold text-gray-600">Select a conversation</h3>
-          <p className="text-gray-500">Choose a chat from the list to start messaging</p>
-        </div>
-      ) : (
-        <div className="hidden md:block flex-grow">
-          <div className="chat-header border-b p-3 flex justify-between items-center">
-            <h3 className="font-semibold">
-              Chat with{" "}
-              {/* Updated desktop view header to use receiverName */}
-              {receiverName}
-            </h3>
-            {/* Added profile navigation button to desktop view */}
-            {receiver && receiver.id && (
-              <button 
-                onClick={handleNavigateToProfile} 
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
-                aria-label={`Go to ${receiverName}'s profile`}
-              >
-                <ArrowRightSquare size={24} />
-              </button>
-            )}
-          </div>
-          <div className="h-[calc(100vh-7rem)] overflow-hidden">
-            <Chat
-              currentUser={currentUser}
-              chatId={selectedChatId}
-              receiver={getReceiverFromChat(chats.find(c => c.id === selectedChatId), currentUser)}
-            />
-          </div>
-        </div>
+           <MessageSquare size={64} className="mb-4 text-gray-300" />
+           <h3 className="text-xl font-semibold text-gray-600">Select a conversation</h3>
+           <p className="text-gray-500">Choose a chat from the list to start messaging</p>
+         </div>
+       ) : (
+         <div className="hidden md:block flex-grow">
+           <div className="chat-header border-b p-3 flex justify-between items-center">
+             {/* Desktop View Adjustment */}
+             <h3 className="font-semibold flex items-center"> {/* Add flex and items-center here */}
+               Chat with{" "}
+               {/* Updated desktop view header to use receiverName */}
+               {receiverName}
+               {receiver && receiver.id && (
+                 <button
+                   onClick={handleNavigateToProfile}
+                   title="Go to profile"
+                   style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', marginLeft: '8px' }} /* Add marginLeft */
+                   aria-label={`Go to ${receiverName}'s profile`}
+                 >
+                   <ArrowRightSquare size={24} />
+                 </button>
+               )}
+             </h3>
+           </div>
+           <div className="h-[calc(100vh-7rem)] overflow-hidden">
+             <Chat
+               currentUser={currentUser}
+               chatId={selectedChatId}
+               receiver={getReceiverFromChat(chats.find(c => c.id === selectedChatId), currentUser)}
+             />
+           </div>
+         </div>
       )}
       </div>
     );
