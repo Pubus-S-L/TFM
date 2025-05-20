@@ -475,7 +475,7 @@ function ChatMessage({ currentUser, chatId, receiver }) {
           <button 
             onClick={loadMessages} 
             className="refresh-button"
-            title="Recargar mensajes"
+            title="Reload messages"
             disabled={isLoading}
           >
             <RefreshCw size={16} className={isLoading ? "animate-spin" : ""} />

@@ -377,22 +377,20 @@ function ChatList() {
           }}>
             <SheetContent className="w-full sm:max-w-xl overflow-y-auto bg-white">
               <SheetHeader>
-                <SheetTitle className="flex justify-between items-center">
-                  <span>
-                  Chat with{" "}
-                  {/* Use the new receiverName variable instead of receiverFirstName */}
-                  {receiverName}
-                  </span>
-                  {/* Updated condition to check for receiverName instead of receiverFirstName */}
-                  {selectedChatId && receiver && receiver.id && ( 
+                <SheetTitle>
+                  <div className="flex items-center">
+                    <span>Chat with{" "}{receiverName}</span>
+                    {selectedChatId && receiver && receiver.id && ( 
                       <button 
                           onClick={handleNavigateToProfile} 
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+                          title="Go to profile"
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', marginLeft: '8px', display: 'flex', alignItems: 'center' }}
                           aria-label={`Go to ${receiverName}'s profile`}
                       >
-                          <ArrowRightSquare size={24} /> {/* Adjust icon size as needed */}
+                          <ArrowRightSquare size={20} />
                       </button>
-                  )}
+                    )}
+                  </div>
                 </SheetTitle>
               </SheetHeader>
 
