@@ -40,7 +40,7 @@ export default function AboutUs() {
   }, [API_BASE_URL])
 
   return (
-    <div className="flex justify-center items-center min-h-[calc(100vh-100px)] pt-[100px] mt-[100px] bg-gray-50 dark:bg-gray-900">
+    <div className="flex justify-center items-center min-h-[calc(100vh-100px)] pt-[50px]">
       <div className="w-full max-w-5xl mx-auto p-4">
         <div className="flex flex-col md:flex-row gap-8 items-center justify-center">
           {/* Left side - Image */}

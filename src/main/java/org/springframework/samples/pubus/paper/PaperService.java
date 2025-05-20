@@ -2,6 +2,7 @@ package org.springframework.samples.pubus.paper;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -203,10 +204,12 @@ public class PaperService {
     //     return paperRepository.searchAllFieldsByUser(searchTerm.toLowerCase(), userId);
     // }
 
- 	public List<Paper> findPapersFiltered(Integer userId, List<String> types, String searchTerm) {
-        List<String> typesForQuery = (types == null || types.isEmpty()) ? null : types;
+	public List<Paper> findPapersFiltered(Integer userId, List<String> types, String searchTerm) {
+
+        boolean noTypeFilter = (types == null || types.isEmpty());
+        List<String> typesForQuery = noTypeFilter ? Collections.emptyList() : types;
         String searchTermForQuery = (searchTerm != null && searchTerm.isEmpty()) ? null : searchTerm;
-        return paperRepository.findFilteredPapers(userId, typesForQuery, searchTermForQuery);
+        return paperRepository.findFilteredPapers(userId, typesForQuery, noTypeFilter, searchTermForQuery);
     }
 
 }
