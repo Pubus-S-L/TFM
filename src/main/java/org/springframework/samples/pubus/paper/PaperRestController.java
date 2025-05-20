@@ -95,15 +95,19 @@ public class PaperRestController {
 		return new ResponseEntity<>((List<Paper>) this.paperService.findAllPapersByType(paperType), HttpStatus.OK);
 	}
 
- 	@GetMapping
+    @GetMapping
     public ResponseEntity<List<Paper>> findAll(
-		@RequestParam(required = false) Integer userId,
-		@RequestParam(required = false) List<String> types, // Cambia paperType a 'types' y que sea una lista
-		@RequestParam(required = false) String search) {
+            @RequestParam(required = false) Integer userId,
+            @RequestParam(required = false) List<String> types, // Spring Boot mapea esto automáticamente desde "types=Type1,Type2"
+            @RequestParam(required = false) String search) {
 
-			// Necesitarás adaptar el servicio para manejar esta lista
-		List<Paper> papers = paperService.findPapersFiltered(userId, types, search);
-		return new ResponseEntity<>(papers, HttpStatus.OK);
+        // Opcional: Logs para depuración en el controlador
+        System.out.println("API Request - userId: " + userId + ", types: " + types + ", search: " + search);
+
+        // Llama al servicio con los parámetros directamente recibidos
+        List<Paper> papers = paperService.findPapersFiltered(userId, types, search);
+
+        return new ResponseEntity<>(papers, HttpStatus.OK);
     }
 
 // // GET FILTERED
