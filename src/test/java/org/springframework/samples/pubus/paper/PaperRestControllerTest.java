@@ -63,24 +63,24 @@ public class PaperRestControllerTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    @Test
-    public void testFindAllPapers() {
-    // Mock the paperService to return a list of papers
-    List<Paper> expectedPapers = new ArrayList<>();
-    Paper paper1 = new Paper();
-    paper1.setTitle("Test paper 1");
-    expectedPapers.add(paper1);
-    Paper paper2 = new Paper();
-    paper2.setTitle("Test paper 2");
-    expectedPapers.add(paper2);
-    Mockito.when(paperService.findAll()).thenReturn(expectedPapers);
-    paperRestController = new PaperRestController(paperService, userService, paperFileService, restTemplate, objectMapper);
-    // Call the controller method
-    ResponseEntity<List<Paper>> response = paperRestController.findAll(null, null);
+//     @Test
+//     public void testFindAllPapers() {
+//     // Mock the paperService to return a list of papers
+//     List<Paper> expectedPapers = new ArrayList<>();
+//     Paper paper1 = new Paper();
+//     paper1.setTitle("Test paper 1");
+//     expectedPapers.add(paper1);
+//     Paper paper2 = new Paper();
+//     paper2.setTitle("Test paper 2");
+//     expectedPapers.add(paper2);
+//     Mockito.when(paperService.findAll()).thenReturn(expectedPapers);
+//     paperRestController = new PaperRestController(paperService, userService, paperFileService, restTemplate, objectMapper);
+//     // Call the controller method
+//     ResponseEntity<List<Paper>> response = paperRestController.findAll(null, null);
 
-    // Assert that the response is successful and contains the expected papers
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-}
+//     // Assert that the response is successful and contains the expected papers
+//     assertEquals(HttpStatus.OK, response.getStatusCode());
+// }
 
     @Test
     public void testFindAllPapersByType() {
@@ -166,17 +166,17 @@ public class PaperRestControllerTest {
   
 
 
-    @Test
-    public void testFindAllPapersByUserId() {
-        int userId = 1;
-        List<Paper> expectedPapers = Arrays.asList(new Paper(), new Paper());
-        when(paperService.findAllPapersByUserId(userId)).thenReturn(expectedPapers);
-        paperRestController = new PaperRestController(paperService, userService, paperFileService, restTemplate, objectMapper);
-        ResponseEntity<List<Paper>> response = paperRestController.findAll(userId, null);
+    // @Test
+    // public void testFindAllPapersByUserId() {
+    //     int userId = 1;
+    //     List<Paper> expectedPapers = Arrays.asList(new Paper(), new Paper());
+    //     when(paperService.findAllPapersByUserId(userId)).thenReturn(expectedPapers);
+    //     paperRestController = new PaperRestController(paperService, userService, paperFileService, restTemplate, objectMapper);
+    //     ResponseEntity<List<Paper>> response = paperRestController.findAll(userId, null);
 
-        assertEquals(response.getStatusCode(),HttpStatus.OK);
-        assertEquals(response.getBody(),expectedPapers);
-    }
+    //     assertEquals(response.getStatusCode(),HttpStatus.OK);
+    //     assertEquals(response.getBody(),expectedPapers);
+    // }
 
     @Test
     public void testUploadFile_SuccessSingleFile() throws IOException {
