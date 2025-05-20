@@ -9,7 +9,7 @@ import myGif from "./PubUS.gif";
 export default function AboutUs() {
   const [company, setCompany] = useState(null)
   const [loading, setLoading] = useState(true)
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
+  const API_BASE_URL = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     async function fetchCompanyData() {
@@ -40,7 +40,7 @@ export default function AboutUs() {
   }, [API_BASE_URL])
 
   return (
-    <div className="flex justify-center items-center min-h-[calc(100vh-100px)] pt-[50px]">
+    <div className="flex justify-center items-center min-h-screen pt-[80px]">
       <div className="w-full max-w-5xl mx-auto p-4">
         <div className="flex flex-col md:flex-row gap-8 items-center justify-center">
           {/* Left side - Image */}

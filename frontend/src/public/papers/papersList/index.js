@@ -149,7 +149,7 @@ export default function Papers() {
               to={"/papers/" + paper.id}
               style={{ textDecoration: "none", display: "block", width: "100%" }}
             >
-              <Card className="w-4/5 mx-auto mt-6 mb-1 shadow-lg border border-gray-200 hover:bg-gray-200 transition-colors">
+              <Card className="w-4/5 mx-auto mt-6 mb-4 shadow-lg border border-gray-200 hover:bg-gray-200 transition-colors">
                 <CardHeader>
                   <CardTitle className="text-xl font-bold">{paper.title}</CardTitle>
                 </CardHeader>
