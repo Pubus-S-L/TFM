@@ -7,7 +7,7 @@ import '../../static/css/user/chatMessage.css';
 function ChatMessage({ currentUser, chatId, receiver }) {
     const [messages, setMessages] = useState([]);
     const [messageInput, setMessageInput] = useState('');
-    const [connectionStatus, setConnectionStatus] = useState('Desconectado');
+    const [connectionStatus, setConnectionStatus] = useState('Disconnected');
     const [isLoading, setIsLoading] = useState(true);
     const stompClientRef = useRef(null);
     const messagesEndRef = useRef(null);
@@ -185,7 +185,7 @@ function ChatMessage({ currentUser, chatId, receiver }) {
         // Limpieza de conexiones previas
         cleanupConnection();
         
-        setConnectionStatus('Conectando...');
+        setConnectionStatus('Connecting...');
   
         const socket = new SockJS(`${API_BASE_URL}/ws`);
         const client = new Client({
@@ -207,7 +207,7 @@ function ChatMessage({ currentUser, chatId, receiver }) {
             return;
           }
           
-          setConnectionStatus('Conectado');
+          setConnectionStatus('Connected');
           reconnectAttemptsRef.current = 0;
   
           // Suscripción al topic de chat
@@ -233,7 +233,7 @@ function ChatMessage({ currentUser, chatId, receiver }) {
         client.onWebSocketClose = () => {
           console.log("WebSocket cerrado");
           if (isMountedRef.current) {
-            setConnectionStatus('Desconectado');
+            setConnectionStatus('Disconnected');
             scheduleReconnect();
           }
           connectionInProgressRef.current = false;
@@ -355,7 +355,7 @@ function ChatMessage({ currentUser, chatId, receiver }) {
       
       if (!stompClientRef.current?.connected) {
         console.warn("No conectado al servidor de chat");
-        setConnectionStatus('Reconectando...');
+        setConnectionStatus('Reconnecting...');
         connectWebSocket();
         return;
       }
@@ -464,8 +464,8 @@ function ChatMessage({ currentUser, chatId, receiver }) {
       <div className="chat-message-container">
         <div className="chat-header">
           <h3 style={{ color: 'black' }}>{getReceiverDisplayName()}</h3>
-          <div className={`connection-status ${connectionStatus === 'Conectado' ? 'connected' : 'disconnected'}`}>
-            {connectionStatus === 'Conectado' ? (
+          <div className={`connection-status ${connectionStatus === 'Connected' ? 'connected' : 'disconnected'}`}>
+            {connectionStatus === 'Connected' ? (
               <Wifi size={16} className="inline-block mr-1" />
             ) : (
               <WifiOff size={16} className="inline-block mr-1" />
@@ -520,7 +520,7 @@ function ChatMessage({ currentUser, chatId, receiver }) {
             className="ml-1 flex items-center justify-center bg-green-600 hover:bg-green-700 disabled:bg-gray-400 rounded-[20px] disabled:cursor-not-allowed text-white px-4 py-2 transition-colors"
             aria-label="Send"
           >
-            <span className="hidden sm:inline">Enviar</span>
+            <span className="hidden sm:inline">Send</span>
             <Send className="sm:hidden w-5 h-5" />
           </button>
         </form>

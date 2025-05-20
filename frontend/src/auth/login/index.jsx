@@ -62,6 +62,7 @@ export default function Login() {
         tokenService.setUser(data);
         tokenService.updateLocalAccessToken(data.token);
         navigate("/papers");
+        window.location.reload();
       })
       .catch((error) => {         
         setMessage(error);

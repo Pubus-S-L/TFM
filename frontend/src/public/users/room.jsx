@@ -20,25 +20,25 @@ function ChatList() {
     const [unreadMessages, setUnreadMessages] = useState({});
     const[hasUnreadChats, setHasUnreadChats] = useState(false);
     const [profileImageUrls, setProfileImageUrls] = useState({});
+    const [imageLoadingComplete, setImageLoadingComplete] = useState(false);
     const API_BASE_URL = process.env.REACT_APP_API_URL;
     const isMobile = useIsMobile();
 
     function useIsMobile() {
-    const [isMobile, setIsMobile] = useState(false);
+      const [isMobile, setIsMobile] = useState(false);
 
-    useEffect(() => {
-      const checkMobile = () => {
-        setIsMobile(window.innerWidth < 768); // Tailwind `md` breakpoint
-      };
+      useEffect(() => {
+        const checkMobile = () => {
+          setIsMobile(window.innerWidth < 768); // Tailwind `md` breakpoint
+        };
 
-      checkMobile(); // check initially
-      window.addEventListener("resize", checkMobile);
-      return () => window.removeEventListener("resize", checkMobile);
-    }, []);
+        checkMobile(); // check initially
+        window.addEventListener("resize", checkMobile);
+        return () => window.removeEventListener("resize", checkMobile);
+      }, []);
 
-    return isMobile;
-  }
-  
+      return isMobile;
+    }
   
     // Función para obtener mensajes no leídos
     const fetchUnreadMessages = useCallback((chatId) => {
@@ -79,9 +79,14 @@ function ChatList() {
       setHasUnreadChats(anyUnread);
     }, [unreadMessages]);
 
-    const getUserProfileImage = useCallback(async (user) => {
+    const getUserProfileImage = useCallback(async (userId) => {
+      // Verificar si ya tenemos la URL de la imagen
+      if (profileImageUrls[userId]) {
+        return profileImageUrls[userId];
+      }
+      
       try {
-          const response = await fetch(`${API_BASE_URL}/api/v1/users/${user.id}/profileImage`);
+          const response = await fetch(`${API_BASE_URL}/api/v1/users/${userId}/profileImage`);
           if (response.ok) {
               const imageBlob = await response.blob();
               const imageUrl = URL.createObjectURL(imageBlob);
@@ -94,7 +99,7 @@ function ChatList() {
           console.error('Error de red al obtener la imagen de perfil:', error);
           return null;
       }
-  }, []);
+  }, [profileImageUrls]);
 
   const filteredChats = chats.filter(chat => {
     const otherUser = chat.users.find(u => u.id !== currentUser.id);
@@ -103,25 +108,42 @@ function ChatList() {
        otherUser.username?.toLowerCase().includes(searchTerm.toLowerCase()));
   });
 
-    useEffect(() => {
-      async function loadProfileImages() {
-          const urls = {};
-          for (const chat of filteredChats) {
-              const otherUser = chat.users.find(u => u.id !== currentUser.id);
-              if (otherUser) {
-                  const imageUrl = await getUserProfileImage(otherUser);
-                  if (imageUrl) {
-                      urls[otherUser.id] = imageUrl;
-                  }
-              }
+  // Efecto para cargar las imágenes de perfil solo cuando cambian los chats o el término de búsqueda
+  useEffect(() => {
+    // Evitamos cargar imágenes si ya estamos en proceso de carga
+    if (loading || imageLoadingComplete) return;
+    
+    async function loadProfileImages() {
+      if (filteredChats.length === 0) return;
+      
+      const newUrls = {...profileImageUrls};
+      let hasNewImages = false;
+      
+      for (const chat of filteredChats) {
+        const otherUser = chat.users.find(u => u.id !== currentUser.id);
+        if (otherUser && !newUrls[otherUser.id]) {
+          const imageUrl = await getUserProfileImage(otherUser.id);
+          if (imageUrl) {
+            newUrls[otherUser.id] = imageUrl;
+            hasNewImages = true;
           }
-          setProfileImageUrls(urls);
+        }
       }
-  
-      if (filteredChats.length > 0) {
-          loadProfileImages();
+      
+      if (hasNewImages) {
+        setProfileImageUrls(newUrls);
       }
-  }, [filteredChats, getUserProfileImage, currentUser.id]); // Cambiado currentUser por currentUser.id
+      
+      setImageLoadingComplete(true);
+    }
+    
+    loadProfileImages();
+  }, [filteredChats, loading, currentUser.id, getUserProfileImage, imageLoadingComplete, profileImageUrls]);
+
+  // Efecto para resetear el flag de carga completa cuando cambia el término de búsqueda
+  useEffect(() => {
+    setImageLoadingComplete(false);
+  }, [searchTerm]);
 
     // Marcar mensajes como leídos cuando se selecciona un chat
     const handleSelectChat = (chatId) => {
@@ -282,7 +304,7 @@ function ChatList() {
               filteredChats.map((chat) => {
                 const otherUser = chat.users.find((u) => u.id !== currentUser.id);
                 const isActive = selectedChatId === chat.id;
-                const profileImageUrl = profileImageUrls[otherUser?.id];
+                const profileImageUrl = otherUser ? profileImageUrls[otherUser.id] : null;
                 const hasUnread = unreadMessages[chat.id];
   
                 return (
