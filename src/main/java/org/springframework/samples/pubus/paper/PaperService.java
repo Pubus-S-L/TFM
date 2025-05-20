@@ -194,14 +194,14 @@ public class PaperService {
 		return recommendedPapers;
 	}
 
-	 public List<Paper> searchPapers(String searchTerm) {
-        // Asegúrate de que el término de búsqueda esté en minúsculas para la base de datos
-        return paperRepository.searchAllFields(searchTerm.toLowerCase());
-    }
-		 public List<Paper> searchPapersByUserId(Integer userId, String searchTerm) {
-        // Asegúrate de que el término de búsqueda esté en minúsculas para la base de datos
-        return paperRepository.searchAllFieldsByUser(searchTerm.toLowerCase(), userId);
-    }
+	//  public List<Paper> searchPapers(String searchTerm) {
+    //     // Asegúrate de que el término de búsqueda esté en minúsculas para la base de datos
+    //     return paperRepository.searchAllFields(searchTerm.toLowerCase());
+    // }
+	// 	 public List<Paper> searchPapersByUserId(Integer userId, String searchTerm) {
+    //     // Asegúrate de que el término de búsqueda esté en minúsculas para la base de datos
+    //     return paperRepository.searchAllFieldsByUser(searchTerm.toLowerCase(), userId);
+    // }
 
 	public List<Paper> findPapersFiltered(Integer userId, List<String> types, String searchTerm) {
     // Pasar los parámetros directamente al repositorio. El repositorio se encarga de la lógica NULL.
