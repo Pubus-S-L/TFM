@@ -90,14 +90,14 @@ const Chat = () => {
   useEffect(() => {
     const welcomeMessage = {
       sender: "bot",
-      text: "¡Hola! Soy Pubus 🤖. ¿En qué puedo ayudarte hoy?",
+      text: "¡Hello! I'm Pubus 🤖. ¿How can I help you today?",
     };
     setMessages([welcomeMessage]);
   }, []);
 
   return (
     <div className="pubus-chat-container">
-      <div className="pubus-chat-header">Chat con Pubus</div>
+      <div className="pubus-chat-header">Chat with Pubus</div>
       <div className="pubus-chat-messages">
       {messages.map((msg, index) => (
         <div key={index} className={`pubus-message ${msg.sender}`}>
@@ -119,9 +119,9 @@ const Chat = () => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Escribe tu mensaje..."
+          placeholder="Write a message..."
         />
-        <button onClick={handleSend}>Enviar</button>
+        <button onClick={handleSend}>Send</button>
       </div>
     </div>
   );

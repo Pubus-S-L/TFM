@@ -95,41 +95,41 @@ public class PaperRestController {
 		return new ResponseEntity<>((List<Paper>) this.paperService.findAllPapersByType(paperType), HttpStatus.OK);
 	}
 
-	@GetMapping
-	public ResponseEntity<List<Paper>> findAll(@RequestParam(required = false) Integer userId,@RequestParam(required = false) String search) {
-		if (userId != null) {
-				return new ResponseEntity<>(paperService.findAllPapersByUserId(userId), HttpStatus.OK);
-		} else {			
-			if (search != null && !search.isEmpty()) {
-				ResponseEntity<List<Paper>> res = searchPaper(search);
-				return res;
-			}
-			else{
-				return new ResponseEntity<>((List<Paper>) this.paperService.findAll(), HttpStatus.OK);
-			}				
-		}
-	}
+ 	@GetMapping
+    public ResponseEntity<List<Paper>> findAll(
+            @RequestParam(required = false) Integer userId,
+            @RequestParam(required = false) String search) {
 
-// GET FILTERED
+        if (userId != null) {
+            return new ResponseEntity<>(paperService.findAllPapersByUserId(userId), HttpStatus.OK);
+        } else if (search != null && !search.isEmpty()) {
+            // Ahora solo una llamada al servicio, que internamente hace una sola consulta a la BD
+            return new ResponseEntity<>(this.paperService.searchPapers(search), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>((List<Paper>)this.paperService.findAll(), HttpStatus.OK);
+        }
+    }
 
-	public ResponseEntity<List<Paper>> searchPaper(String originalSearch) {
-		String search = originalSearch.toLowerCase();
-		Set<Paper> set_complete = new HashSet<>();
+// // GET FILTERED
 
-		List<Paper> list1 = this.paperService.findAllPapersByAuthor(search);
-		List<Paper> list2 = this.paperService.findAllPapersAbstractWord(search);
-		List<Paper> list3 = this.paperService.findAllPapersByKeyword(search);
-		List<Paper> list4 = this.paperService.findPaperByTitle(search);
+// 	public ResponseEntity<List<Paper>> searchPaper(String originalSearch) {
+// 		String search = originalSearch.toLowerCase();
+// 		Set<Paper> set_complete = new HashSet<>();
 
-		set_complete.addAll(list1);
-		set_complete.addAll(list2);
-		set_complete.addAll(list3);
-		set_complete.addAll(list4);
+// 		List<Paper> list1 = this.paperService.findAllPapersByAuthor(search);
+// 		List<Paper> list2 = this.paperService.findAllPapersAbstractWord(search);
+// 		List<Paper> list3 = this.paperService.findAllPapersByKeyword(search);
+// 		List<Paper> list4 = this.paperService.findPaperByTitle(search);
 
-		List<Paper> list_complete = set_complete.stream().collect(Collectors.toList());
+// 		set_complete.addAll(list1);
+// 		set_complete.addAll(list2);
+// 		set_complete.addAll(list3);
+// 		set_complete.addAll(list4);
 
-		return new ResponseEntity<>((List<Paper>) list_complete, HttpStatus.OK);
-	}
+// 		List<Paper> list_complete = set_complete.stream().collect(Collectors.toList());
+
+// 		return new ResponseEntity<>((List<Paper>) list_complete, HttpStatus.OK);
+// 	}
 
 //UPLOAD FILE
 

@@ -193,4 +193,10 @@ public class PaperService {
 		}
 		return recommendedPapers;
 	}
+
+	 public List<Paper> searchPapers(String searchTerm) {
+        // Asegúrate de que el término de búsqueda esté en minúsculas para la base de datos
+        return paperRepository.searchAllFields(searchTerm.toLowerCase());
+    }
+
 }

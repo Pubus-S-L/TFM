@@ -486,7 +486,7 @@ function ChatMessage({ currentUser, chatId, receiver }) {
           {isLoading && messages.length === 0 ? (
             <div className="loading-messages">Cargando mensajes...</div>
           ) : messages.length === 0 ? (
-            <div className="no-messages">No hay mensajes. ¡Envía el primero!</div>
+            <div className="no-messages">There is no message ¡Send the first one!</div>
           ) : (
             messages.map((msg, index) => {
               const isMine = isCurrentUserMessage(msg);
@@ -511,7 +511,7 @@ function ChatMessage({ currentUser, chatId, receiver }) {
             type="text"
             value={messageInput}
             onChange={(e) => setMessageInput(e.target.value)}
-            placeholder="Escribe un mensaje..."
+            placeholder="Write a message..."
             className="message-input"
           />
           <button

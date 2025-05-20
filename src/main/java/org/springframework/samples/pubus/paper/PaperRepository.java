@@ -67,4 +67,10 @@ public interface PaperRepository extends CrudRepository<Paper, Integer> {
 	@Query(("SELECT p FROM Paper p WHERE LOWER(p.authors) LIKE %:author AND p.user.id = :id"))
 	List<Paper> findAllPapersByAuthorAndUser(@Param("author") String author, @Param("id") int id);
 
+	@Query("SELECT p FROM Paper p WHERE " +
+           "LOWER(p.author) LIKE %:searchTerm% OR " +
+           "LOWER(p.abstractText) LIKE %:searchTerm% OR " +
+           "LOWER(p.keywords) LIKE %:searchTerm% OR " +
+           "LOWER(p.title) LIKE %:searchTerm%")
+    List<Paper> searchAllFields(@Param("searchTerm") String searchTerm);
 }
