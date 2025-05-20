@@ -38,6 +38,8 @@ export default function UserProfile() {
   const endIndex = startIndex + itemsPerPage;
   const papersToShow = favouritePapers.slice(startIndex, endIndex);
   const API_BASE_URL = process.env.REACT_APP_API_URL;
+  
+  // Modificado: Cargar datos del usuario solo al montar el componente o cuando cambie el ID
   useEffect(() => {
     if (user && user.id) {
       setUpUser();
@@ -46,7 +48,7 @@ export default function UserProfile() {
       setMessage("Usuario no encontrado");
       setModalShow(true);
     }
- }, [userData]);
+  }, [userId]); // Cambiado de [userData] a [userId]
 
   async function setUpUser() {
     try {
@@ -137,11 +139,12 @@ export default function UserProfile() {
     }
   }
 
+  // Cargar datos adicionales solo cuando el usuario ID esté disponible
   useEffect(() => {
     if (userId) {
       setUpRecommended();
       setUpFavorite();
-      setUpAvatar()
+      setUpAvatar();
     }
   }, [userId]);
 
@@ -451,4 +454,3 @@ export default function UserProfile() {
     </div>
   )
 }
-

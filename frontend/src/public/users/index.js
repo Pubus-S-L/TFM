@@ -66,10 +66,10 @@ export default function UserDetail() {
         }
     }
     
-
+    // Este es el useEffect problemático - ahora tiene un array de dependencias vacío
     useEffect(() => {
         setUp();
-    },);
+    }, [userId]); // Ahora solo se ejecuta cuando cambia el userId
 
 
     async function setUpPapers() {
@@ -105,13 +105,14 @@ export default function UserDetail() {
         setImageUrl(imageUrl);
   
       } catch (error) {
+        // Manejo de error silencioso
       }
     }
 
     useEffect(() => {
         setUpPapers();
         setUpAvatar();
-    },  [userId]);
+    }, [userId, searchTerm]); // Agregado searchTerm como dependencia para actualizar papers cuando cambia la búsqueda
 
 
     useEffect(() => {
@@ -128,10 +129,10 @@ export default function UserDetail() {
             setRoomExist(roomExists);
             if(roomExists){
               const chatRoomEncontrado = data.find(chatRoom =>
-                chatRoom.users.some(user => user.id === currentUser.id)
+                chatRoom.users.some(user => user.id === parseFloat(userId))
               );
               setRoom(chatRoomEncontrado)
-          }
+            }
             setHasFetched(true); // Marca que la petición se ha realizado
           })
           .catch(error => console.error('Error al cargar chats:', error));
