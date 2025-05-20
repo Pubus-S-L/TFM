@@ -7,7 +7,7 @@ import { Heart } from "lucide-react";
 import like from "../../../static/images/like.png";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../components/ui/card.tsx"
 import { Input } from "../../../components/ui/input.tsx";
-import _ from "lodash"; // Asegúrate de tener lodash instalado
+import _ from "lodash";
 
 export default function Papers() {
   const [papers, setPapers] = useState([]);
@@ -15,6 +15,9 @@ export default function Papers() {
   const [types, setTypes] = useState([]);
   const [typesSelected, setTypeSelected] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const papersPerPage = 10;
   const API_BASE_URL = process.env.REACT_APP_API_URL;
   
   // Cargar tipos de papers una sola vez al montar el componente
@@ -66,9 +69,13 @@ export default function Papers() {
         
         const data = await response.json();
         setPapers(data);
+        setTotalPages(Math.ceil(data.length / papersPerPage));
+        // Reset to first page when filters change
+        setCurrentPage(0);
       } catch (error) {
         console.error("Error loading papers:", error);
         setPapers([]);
+        setTotalPages(1);
       } finally {
         setIsLoading(false);
       }
@@ -97,6 +104,13 @@ export default function Papers() {
         return prev.filter(type => type !== value);
       }
     });
+  };
+
+  // Get current page papers
+  const getCurrentPagePapers = () => {
+    const startIndex = currentPage * papersPerPage;
+    const endIndex = startIndex + papersPerPage;
+    return papers.slice(startIndex, endIndex);
   };
 
   return (
@@ -143,32 +157,57 @@ export default function Papers() {
             </CardContent>
           </Card>
         ) : papers && papers.length > 0 ? (
-          papers.map((paper) => (
-            <Link
-              key={paper.id}
-              to={"/papers/" + paper.id}
-              style={{ textDecoration: "none", display: "block", width: "100%" }}
-            >
-              <Card className="w-4/5 mx-auto mt-6 mb-4 shadow-lg border border-gray-200 hover:bg-gray-200 transition-colors">
-                <CardHeader>
-                  <CardTitle className="text-xl font-bold">{paper.title}</CardTitle>
-                </CardHeader>
-                <CardContent className="pb-0">
-                  <CardDescription>
-                    <p><strong>Authors:</strong> {paper.authors}</p>
-                    <p><strong>Publication Year:</strong> {paper.publicationYear}</p>
-                    <p><strong>Type:</strong> {paper.type?.name}</p>
-                    {paper.likes != null && paper.likes > 0 && (
-                      <span className="inline-flex items-center gap-1 text-sm font-medium text-gray-700 self-start">
-                        <Heart size={16} className="text-red-500" />
-                        {paper.likes}
-                      </span>
-                    )}
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            </Link>
-          ))
+          <>
+            {getCurrentPagePapers().map((paper) => (
+              <Link
+                key={paper.id}
+                to={"/papers/" + paper.id}
+                style={{ textDecoration: "none", display: "block", width: "100%" }}
+              >
+                <Card className="w-4/5 mx-auto mt-6 mb-1 shadow-lg border border-gray-200 hover:bg-gray-200 transition-colors">
+                  <CardHeader>
+                    <CardTitle className="text-xl font-bold">{paper.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pb-1">
+                    <CardDescription>
+                      <p><strong>Authors:</strong> {paper.authors}</p>
+                      <p><strong>Publication Year:</strong> {paper.publicationYear}</p>
+                      <p><strong>Type:</strong> {paper.type?.name}</p>
+                      {paper.likes != null && paper.likes > 0 && (
+                        <span className="inline-flex items-center gap-1 text-sm font-medium text-gray-700 self-start">
+                          <Heart size={16} className="text-red-500" />
+                          {paper.likes}
+                        </span>
+                      )}
+                    </CardDescription>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+
+            {/* Controles de paginación */}
+            <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-4 mt-4 text-sm">
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
+                disabled={currentPage === 0}
+                className="px-3 py-1.5 bg-gray-200 text-black rounded disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              >
+                Previous
+              </button>
+
+              <span className="text-black whitespace-nowrap">
+                Page {currentPage + 1} of {totalPages}
+              </span>
+
+              <button
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages - 1))}
+                disabled={currentPage >= totalPages - 1}
+                className="px-3 py-1.5 bg-gray-200 text-black rounded disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              >
+                Next
+              </button>
+            </div>
+          </>
         ) : (
           <Card className="w-4/5 p-4 text-center mx-auto mt-6">
             <CardContent>
