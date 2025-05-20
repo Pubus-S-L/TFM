@@ -73,4 +73,25 @@ public interface PaperRepository extends CrudRepository<Paper, Integer> {
            "LOWER(p.keywords) LIKE %:searchTerm% OR " +
            "LOWER(p.title) LIKE %:searchTerm%")
     List<Paper> searchAllFields(@Param("searchTerm") String searchTerm);
+
+	@Query("SELECT p FROM Paper p WHERE p.user.id = :id AND WHERE " +
+           "LOWER(p.authors) LIKE %:searchTerm% OR " +
+           "LOWER(p.abstractContent) LIKE %:searchTerm% OR " +
+           "LOWER(p.keywords) LIKE %:searchTerm% OR " +
+           "LOWER(p.title) LIKE %:searchTerm%")
+    List<Paper> searchAllFieldsByUser(@Param("searchTerm") String searchTerm, @Param("userId") Integer userId);
+
+	@Query("SELECT p FROM Paper p WHERE " +
+           "(CAST(:userId AS int) IS NULL OR p.userId = :userId) AND " +
+           // Esta es la parte que cambia: usa 'IN' para filtrar por múltiples tipos
+           "(:types IS NULL OR p.paperType IN :types) AND " +
+           "(:searchTerm IS NULL OR :searchTerm = '' OR " +
+           "  LOWER(p.authors) LIKE CONCAT('%', LOWER(:searchTerm), '%') OR " +
+           "  LOWER(p.abstractContent) LIKE CONCAT('%', LOWER(:searchTerm), '%') OR " +
+           "  LOWER(p.keywords) LIKE CONCAT('%', LOWER(:searchTerm), '%') OR " +
+           "  LOWER(p.title) LIKE CONCAT('%', LOWER(:searchTerm), '%'))")
+    List<Paper> findFilteredPapers(
+            @Param("userId") Integer userId,
+            @Param("types") List<String> types, // El parámetro ahora es una lista
+            @Param("searchTerm") String searchTerm);
 }

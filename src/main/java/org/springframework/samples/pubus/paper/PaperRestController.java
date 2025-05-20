@@ -97,17 +97,13 @@ public class PaperRestController {
 
  	@GetMapping
     public ResponseEntity<List<Paper>> findAll(
-            @RequestParam(required = false) Integer userId,
-            @RequestParam(required = false) String search) {
+		@RequestParam(required = false) Integer userId,
+		@RequestParam(required = false) List<String> types, // Cambia paperType a 'types' y que sea una lista
+		@RequestParam(required = false) String search) {
 
-        if (userId != null) {
-            return new ResponseEntity<>(paperService.findAllPapersByUserId(userId), HttpStatus.OK);
-        } else if (search != null && !search.isEmpty()) {
-            // Ahora solo una llamada al servicio, que internamente hace una sola consulta a la BD
-            return new ResponseEntity<>(this.paperService.searchPapers(search), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>((List<Paper>)this.paperService.findAll(), HttpStatus.OK);
-        }
+			// Necesitarás adaptar el servicio para manejar esta lista
+		List<Paper> papers = paperService.findPapersFiltered(userId, types, search);
+		return new ResponseEntity<>(papers, HttpStatus.OK);
     }
 
 // // GET FILTERED

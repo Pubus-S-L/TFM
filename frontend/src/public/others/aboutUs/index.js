@@ -9,7 +9,7 @@ import myGif from "./PubUS.gif";
 export default function AboutUs() {
   const [company, setCompany] = useState(null)
   const [loading, setLoading] = useState(true)
-  const API_BASE_URL = process.env.REACT_APP_API_URL
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
 
   useEffect(() => {
     async function fetchCompanyData() {
@@ -40,95 +40,102 @@ export default function AboutUs() {
   }, [API_BASE_URL])
 
   return (
-    <div className="container mx-auto px-4 py-12 max-w-6xl">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-        <div className="relative overflow-hidden rounded-2xl shadow-xl transition-all duration-300 hover:shadow-2xl">
-          <div className="aspect-video w-full relative">
-            {/* Using standard img tag instead of Next.js Image component */}
-            <img
-              src={myGif}
-              alt="Company Presentation"
-              className="object-cover w-full h-full"
-            />
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity duration-300 hover:opacity-100" />
-        </div>
-
-        <Card className="border-none shadow-lg">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              {loading ? <Skeleton className="h-10 w-3/4" /> : company?.name}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {loading ? (
-              <div className="space-y-4">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-                <Skeleton className="h-4 w-2/3" />
+    <div className="flex justify-center items-center min-h-[calc(100vh-100px)] bg-gray-50 dark:bg-gray-900">
+      <div className="w-full max-w-5xl mx-auto p-4">
+        <div className="flex flex-col md:flex-row gap-8 items-center justify-center">
+          {/* Left side - Image */}
+          <div className="w-full md:w-1/2 flex justify-center">
+            <div className="relative w-full max-w-md overflow-hidden rounded-2xl shadow-xl">
+              <div className="aspect-square w-full">
+                <img
+                  src={myGif}
+                  alt="Company Presentation"
+                  className="object-cover w-full h-full"
+                />
               </div>
-            ) : (
-              <>
-                <div className="prose max-w-none">
-                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{company?.description}</p>
-                </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity duration-300 hover:opacity-100" />
+            </div>
+          </div>
 
-                <div className="grid gap-4">
-                  <h3 className="text-xl font-semibold">Contact Information</h3>
-                  <div className="grid gap-3">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30">
-                        <Phone className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Phone</p>
-                        <p className="font-medium">{company?.phone}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30">
-                        <Mail className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
-                        <p className="font-medium">{company?.email}</p>
-                      </div>
-                    </div>
+          {/* Right side - Company Info */}
+          <div className="w-full md:w-1/2">
+            <Card className="border-none shadow-lg">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-3xl font-bold text-center bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  {loading ? <Skeleton className="h-10 w-3/4 mx-auto" /> : company?.name}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {loading ? (
+                  <div className="space-y-4">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-3/4 mx-auto" />
+                    <Skeleton className="h-4 w-1/2 mx-auto" />
+                    <Skeleton className="h-4 w-2/3 mx-auto" />
                   </div>
-                </div>
+                ) : (
+                  <>
+                    <div className="prose max-w-none text-center">
+                      <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{company?.description}</p>
+                    </div>
 
-                <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
-                  <div className="flex items-center gap-2 mb-4">
-                    <ShieldCheck className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                    <h3 className="text-xl font-semibold">Support</h3>
-                  </div>
-                  <div className="grid gap-3">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-100 dark:bg-pink-900/30">
-                        <Phone className="h-5 w-5 text-pink-600 dark:text-pink-400" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Support Phone</p>
-                        <p className="font-medium">{company?.supportPhone}</p>
+                    <div className="grid gap-4">
+                      <h3 className="text-xl font-semibold text-center">Contact Information</h3>
+                      <div className="grid gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30">
+                            <Phone className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Phone</p>
+                            <p className="font-medium">{company?.phone}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30">
+                            <Mail className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
+                            <p className="font-medium">{company?.email}</p>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-100 dark:bg-pink-900/30">
-                        <Mail className="h-5 w-5 text-pink-600 dark:text-pink-400" />
+
+                    <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
+                      <div className="flex items-center gap-2 mb-4 justify-center">
+                        <ShieldCheck className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                        <h3 className="text-xl font-semibold">Support</h3>
                       </div>
-                      <div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Support Email</p>
-                        <p className="font-medium">{company?.supportEmail}</p>
+                      <div className="grid gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-100 dark:bg-pink-900/30">
+                            <Phone className="h-5 w-5 text-pink-600 dark:text-pink-400" />
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Support Phone</p>
+                            <p className="font-medium">{company?.supportPhone}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-100 dark:bg-pink-900/30">
+                            <Mail className="h-5 w-5 text-pink-600 dark:text-pink-400" />
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Support Email</p>
+                            <p className="font-medium">{company?.supportEmail}</p>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   )
