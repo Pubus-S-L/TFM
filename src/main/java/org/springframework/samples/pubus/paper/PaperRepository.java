@@ -81,16 +81,17 @@ public interface PaperRepository extends CrudRepository<Paper, Integer> {
     //        "LOWER(p.title) LIKE %:searchTerm%")
     // List<Paper> searchAllFieldsByUser(@Param("searchTerm") String searchTerm, @Param("userId") Integer userId);
 
-	 @Query("SELECT p FROM Paper p WHERE " +
-           "(CAST(:userId AS int) IS NULL OR p.user.id = :userId) AND " +
-           "(:types IS NULL OR p.type.name IN :types) AND " +
-           "(:searchTerm IS NULL OR :searchTerm = '' OR " +
-           "  LOWER(p.authors) LIKE CONCAT('%', LOWER(:searchTerm), '%') OR " +
-           "  LOWER(p.abstractContent) LIKE CONCAT('%', LOWER(:searchTerm), '%') OR " +
-           "  LOWER(p.keywords) LIKE CONCAT('%', LOWER(:searchTerm), '%') OR " +
-           "  LOWER(p.title) LIKE CONCAT('%', LOWER(:searchTerm), '%'))")
-    List<Paper> findFilteredPapers(
-            @Param("userId") Integer userId,
-            @Param("types") List<String> types,
-            @Param("searchTerm") String searchTerm);
+	@Query("SELECT p FROM Paper p WHERE " +
+		"(:userId IS NULL OR p.user.id = :userId) AND " +
+		"(:types IS NULL OR p.type.name IN :types) AND " +
+		"(:searchTerm IS NULL OR :searchTerm = '' OR " +
+		"  LOWER(p.authors) LIKE CONCAT('%', LOWER(:searchTerm), '%') OR " +
+		"  LOWER(p.abstractContent) LIKE CONCAT('%', LOWER(:searchTerm), '%') OR " +
+		"  LOWER(p.keywords) LIKE CONCAT('%', LOWER(:searchTerm), '%') OR " +
+		"  LOWER(p.title) LIKE CONCAT('%', LOWER(:searchTerm), '%'))")
+	List<Paper> findFilteredPapers(
+			@Param("userId") Integer userId,
+			@Param("types") List<String> types,
+			@Param("searchTerm") String searchTerm);
+
 }
