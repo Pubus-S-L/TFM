@@ -28,7 +28,9 @@ function ChatList() {
     const navigate = useNavigate();
     const selectedChat = chats.find(c => c.id === selectedChatId)
     const receiver = selectedChat ? getReceiverFromChat(selectedChat, currentUser) : null;
-    const receiverFirstName = receiver?.firstName;
+    
+    // Modified line to use name if firstName is not available
+    const receiverName = receiver ? (receiver.firstName || getUserDisplayName(receiver)) : null;
 
     function useIsMobile() {
       const [isMobile, setIsMobile] = useState(false);
@@ -375,18 +377,18 @@ function ChatList() {
           }}>
             <SheetContent className="w-full sm:max-w-xl overflow-y-auto bg-white">
               <SheetHeader>
-                <SheetTitle>
+                <SheetTitle className="flex justify-between items-center">
                   <span>
                   Chat with{" "}
-                  {/* Display the receiver's first name */}
-                  {receiverFirstName}
+                  {/* Use the new receiverName variable instead of receiverFirstName */}
+                  {receiverName}
                   </span>
-                  {/* Show the button only if a chat is selected AND a receiver name is found */}
-                  {selectedChatId && receiverFirstName && ( 
+                  {/* Updated condition to check for receiverName instead of receiverFirstName */}
+                  {selectedChatId && receiver && receiver.id && ( 
                       <button 
                           onClick={handleNavigateToProfile} 
                           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
-                          aria-label={`Go to ${receiverFirstName}'s profile`}
+                          aria-label={`Go to ${receiverName}'s profile`}
                       >
                           <ArrowRightSquare size={24} /> {/* Adjust icon size as needed */}
                       </button>
@@ -418,11 +420,22 @@ function ChatList() {
         </div>
       ) : (
         <div className="hidden md:block flex-grow">
-          <div className="chat-header border-b p-3">
+          <div className="chat-header border-b p-3 flex justify-between items-center">
             <h3 className="font-semibold">
               Chat with{" "}
-                  {selectedChatId && getReceiverFromChat(chats.find(c => c.id === selectedChatId), currentUser)?.firstName}
+              {/* Updated desktop view header to use receiverName */}
+              {receiverName}
             </h3>
+            {/* Added profile navigation button to desktop view */}
+            {receiver && receiver.id && (
+              <button 
+                onClick={handleNavigateToProfile} 
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+                aria-label={`Go to ${receiverName}'s profile`}
+              >
+                <ArrowRightSquare size={24} />
+              </button>
+            )}
           </div>
           <div className="h-[calc(100vh-7rem)] overflow-hidden">
             <Chat
