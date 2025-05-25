@@ -55,10 +55,8 @@ public class PaperFileServiceImpl implements PaperFileService {
     @Lazy
     private PaperService paperService;
 
-    // Constructor que usa inyección de dependencias
-    public PaperFileServiceImpl(PaperFileRepository paperFileRepository, PaperService paperService) {
+    public PaperFileServiceImpl(PaperFileRepository paperFileRepository) {
         this.paperFileRepository = paperFileRepository;
-        this.paperService = paperService; // Inyecta PaperService aquí
     }
 
     @Transactional
