@@ -25,4 +25,5 @@ public interface PaperFileService {
     double cosineSimilarity(float[] vec1, float[] vec2);
     float[] deserializeToFloatArray(byte[] data) throws IOException;
     String extractTextFromPdf(MultipartFile file) throws IOException;
+    String getProcessingStatus(Integer id);
 }

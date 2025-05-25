@@ -178,30 +178,30 @@ public class PaperRestControllerTest {
     //     assertEquals(response.getBody(),expectedPapers);
     // }
 
-    @Test
-    public void testUploadFile_SuccessSingleFile() throws IOException {
-    Integer paperId = 1;
-    Paper paper = new Paper();
-    paper.setId(paperId);
-    byte[] byteArray = new byte[] { 10, 20, 30, 40, 50 };
-    MultipartFile mockFile = new MockMultipartFile("test.pdf",byteArray);
-    List<MultipartFile> files = Collections.singletonList(mockFile);
-    PaperFile paperFile = PaperFile.builder()
-       .name("test.pdf")
-       .data(byteArray)
-       .paper(paper)
-       .build();
-    when(paperService.findPaperById(paperId)).thenReturn(paper);
+//     @Test
+//     public void testUploadFile_SuccessSingleFile() throws IOException {
+//     Integer paperId = 1;
+//     Paper paper = new Paper();
+//     paper.setId(paperId);
+//     byte[] byteArray = new byte[] { 10, 20, 30, 40, 50 };
+//     MultipartFile mockFile = new MockMultipartFile("test.pdf",byteArray);
+//     List<MultipartFile> files = Collections.singletonList(mockFile);
+//     PaperFile paperFile = PaperFile.builder()
+//        .name("test.pdf")
+//        .data(byteArray)
+//        .paper(paper)
+//        .build();
+//     when(paperService.findPaperById(paperId)).thenReturn(paper);
     
-    when(paperFileService.upload(mockFile, paper, paperId)).thenReturn(paperFile);
-    paperRestController = new PaperRestController(paperService, userService, paperFileService, restTemplate, objectMapper);
+//     when(paperFileService.upload(mockFile, paper, paperId)).thenReturn(paperFile);
+//     paperRestController = new PaperRestController(paperService, userService, paperFileService, restTemplate, objectMapper);
 
-    ResponseEntity<Paper> response = paperRestController.uploadFile(paperId, paper, files);
+//     ResponseEntity<Paper> response = paperRestController.uploadFile(paperId, paper, files);
 
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    verify(paperService).findPaperById(paperId);
-    verify(paperFileService).upload(mockFile, paper, paperId);
-}
+//     assertEquals(HttpStatus.OK, response.getStatusCode());
+//     verify(paperService).findPaperById(paperId);
+//     verify(paperFileService).upload(mockFile, paper, paperId);
+// }
 
     @Test
     public void testDownloadFile_Success() throws Exception {

@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.pubus.exceptions.ResourceNotFoundException;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -37,7 +39,6 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import com.knuddels.jtokkit.Encodings;
 import com.knuddels.jtokkit.api.Encoding;
-
 
 @Service
 public class PaperFileServiceImpl implements PaperFileService {
@@ -60,16 +61,17 @@ public class PaperFileServiceImpl implements PaperFileService {
     public PaperFile save(PaperFile paperFile) {
         return paperFileRepository.save(paperFile);
     }
+    
     private static final int MAX_TOKENS = 7000;
     private static final Encoding ENCODING = Encodings.newDefaultEncodingRegistry()
-    .getEncoding("cl100k_base")
-    .orElseThrow(() -> new IllegalArgumentException("Encoding 'cl100k_base' not found"));
+        .getEncoding("cl100k_base")
+        .orElseThrow(() -> new IllegalArgumentException("Encoding 'cl100k_base' not found"));
 
-
-   @Override
+    @Override
     public PaperFile upload(MultipartFile file, Paper paper, Integer paperId) throws IOException {
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
 
+        // Crear el archivo inicial sin embeddings
         PaperFile paperFile;
         try (InputStream inputStream = file.getInputStream()) {
             paperFile = PaperFile.builder()
@@ -77,33 +79,58 @@ public class PaperFileServiceImpl implements PaperFileService {
                 .type(file.getContentType())
                 .data(inputStream.readAllBytes())
                 .paper(paper)
+                .processingStatus("PROCESSING") // Nuevo campo para indicar el estado
                 .build();
         }
 
-        // Embedding
-        Map<String, byte[]> embeddingMap = new HashMap<>();
-        if ("application/pdf".equals(file.getContentType())) {
-            String extractedText = extractTextFromPdf(file);
-            int tokenCount = estimateTokenCount(extractedText);
+        // Guardar el archivo inicial
+        PaperFile savedPaperFile = paperFileRepository.save(paperFile);
 
-            if (tokenCount > MAX_TOKENS) {
-                List<String> chunks = splitTextIntoChunks(extractedText);
-                for (String chunk : chunks) {
-                    embeddingMap = addEmbedding(chunk, embeddingMap);
-                }
-            } else {
-                embeddingMap = addEmbedding(extractedText, embeddingMap);
-            }
-        }
-
-        paperFile.setEmbeddings(embeddingMap);
-
+        // Agregar a la lista del paper
         List<PaperFile> paperFiles = paper.getPaperFiles();
-        paperFiles.add(paperFile);
+        paperFiles.add(savedPaperFile);
         paper.setPaperFiles(paperFiles);
         paperService.updatePaper(paper, paperId);
 
-        return paperFileRepository.save(paperFile);
+        // Procesar embeddings de forma asíncrona
+        processEmbeddingsAsync(savedPaperFile, file);
+
+        return savedPaperFile;
+    }
+
+    @Async("taskExecutor")
+    public CompletableFuture<Void> processEmbeddingsAsync(PaperFile paperFile, MultipartFile file) {
+        try {
+            Map<String, byte[]> embeddingMap = new HashMap<>();
+            
+            if ("application/pdf".equals(file.getContentType())) {
+                String extractedText = extractTextFromPdf(file);
+                int tokenCount = estimateTokenCount(extractedText);
+
+                if (tokenCount > MAX_TOKENS) {
+                    List<String> chunks = splitTextIntoChunks(extractedText);
+                    for (String chunk : chunks) {
+                        embeddingMap = addEmbedding(chunk, embeddingMap);
+                    }
+                } else {
+                    embeddingMap = addEmbedding(extractedText, embeddingMap);
+                }
+            }
+
+            // Actualizar el archivo con los embeddings
+            paperFile.setEmbeddings(embeddingMap);
+            paperFile.setProcessingStatus("COMPLETED");
+            paperFileRepository.save(paperFile);
+            
+        } catch (Exception e) {
+            // En caso de error, marcar como fallido
+            paperFile.setProcessingStatus("FAILED");
+            paperFileRepository.save(paperFile);
+            // Log del error
+            e.printStackTrace();
+        }
+        
+        return CompletableFuture.completedFuture(null);
     }
     
     @Override
@@ -197,6 +224,12 @@ public class PaperFileServiceImpl implements PaperFileService {
         return ENCODING.encode(text).size();
     }
 
+    // Método para verificar el estado del procesamiento
+    public String getProcessingStatus(Integer fileId) {
+        Optional<PaperFile> paperFile = paperFileRepository.findById(fileId);
+        return paperFile.map(PaperFile::getProcessingStatus).orElse("NOT_FOUND");
+    }
+
     public Pair<Integer,String> getContext(byte[] data, Integer userId) throws JsonProcessingException {
  
         List<PaperFile> files = getAllFilesByUserId(userId);
@@ -281,10 +314,8 @@ public class PaperFileServiceImpl implements PaperFileService {
         return closestKey;
     }
 
-
     public List<PaperFile> getAllFilesByUserId(Integer userId) {
         return paperFileRepository.findByUserId(userId);
-           
     }
 
     @Override
@@ -317,7 +348,6 @@ public class PaperFileServiceImpl implements PaperFileService {
     @Override
     public void deletePaperFile(Integer id) {
         paperFileRepository.deleteById(id);
-       
     }
 
     @Override

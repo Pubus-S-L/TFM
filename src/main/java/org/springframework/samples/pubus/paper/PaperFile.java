@@ -50,6 +50,10 @@ public class PaperFile extends BaseEntity {
     @Lob
 	private byte[] embeddingsBlob;
 
+    @Column(name = "processing_status")
+    @Builder.Default
+    private String processingStatus = "PENDING";
+
 
     @Transient
     private Map<String, byte[]> embeddings;
