@@ -324,6 +324,7 @@ export default function UserPaperEdit({ id, onSave }) {
         keywords: paper.keywords,
         notes: paper.notes,
         source: paper.source,
+        doi: paper.doi,
         scopus: paper.scopus,
         user: paper.user,
     };
@@ -339,6 +340,7 @@ export default function UserPaperEdit({ id, onSave }) {
     f.append("keywords", mypaper.keywords);
     f.append("notes", mypaper.notes);
     f.append("source", mypaper.source);
+    f.append("doi", mypaper.doi);
     f.append("scopus", mypaper.scopus);
     f.append("userId", userId.toString());
 
@@ -488,6 +490,7 @@ export default function UserPaperEdit({ id, onSave }) {
     paperEditFormInputs[8].defaultValue = paper.keywords || ""
     paperEditFormInputs[9].defaultValue = paper.scopus || ""
     paperEditFormInputs[10].defaultValue = paper.source || ""
+    paperEditFormInputs[11].defaultValue = paper.doi || ""
   }
 
   function handleShow() {
@@ -504,7 +507,7 @@ export default function UserPaperEdit({ id, onSave }) {
     ? [titleInput, authorsInput, typeInput]
     : [paperEditFormInputs[0], paperEditFormInputs[1], paperEditFormInputs[5]]
 
-  const publicationInfoInputs = [paperEditFormInputs[2], paperEditFormInputs[3], paperEditFormInputs[4]]
+  const publicationInfoInputs = [paperEditFormInputs[2], paperEditFormInputs[3], paperEditFormInputs[4], paperEditFormInputs[11]]
   const contentInfoInputs = [paperEditFormInputs[6], paperEditFormInputs[7], paperEditFormInputs[8]]
   const additionalInfoInputs = [paperEditFormInputs[9], paperEditFormInputs[10]]
 

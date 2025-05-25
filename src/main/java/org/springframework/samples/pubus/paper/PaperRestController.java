@@ -226,6 +226,7 @@ public class PaperRestController {
         @RequestParam(value = "keywords", required = false) String keywords,
         @RequestParam(value = "notes", required = false) String notes,
         @RequestParam(value = "source", required = false) String source,
+		@RequestParam(value = "doi", required = false) String doi,
         @RequestParam(value = "scopus", required = false) String scopus,
         @RequestParam("userId") String userId,
         @RequestParam(value = "files", required = false) List<MultipartFile> files)
@@ -259,6 +260,7 @@ public class PaperRestController {
         newPaper.setKeywords(keywords);
         newPaper.setNotes(notes);
         newPaper.setSource(source);
+		newPaper.setDOI(doi);
         newPaper.setScopus(scopus);
         newPaper.setUser(user);
         logger.debug("Paper antes de guardar: " + newPaper);
@@ -296,6 +298,7 @@ public class PaperRestController {
 		@RequestParam(value = "keywords", required = false) String keywords,
 		@RequestParam(value = "notes", required = false) String notes,
 		@RequestParam(value = "source", required = false) String source,
+		@RequestParam(value = "doi", required = false) String doi,
 		@RequestParam(value = "scopus", required = false) String scopus,
 		@RequestParam("userId") String userId,
 		@RequestParam(value = "files", required = false) List<MultipartFile> files) {
@@ -320,6 +323,7 @@ public class PaperRestController {
 			newPaper.setKeywords(keywords);
 			newPaper.setNotes(notes);
 			newPaper.setSource(source);
+			newPaper.setDOI(doi);
 			newPaper.setScopus(scopus);
 			newPaper.setUser(paperUser);
 
@@ -537,7 +541,7 @@ public class PaperRestController {
 				byte [] embedding = paperFileService.getEmbeddingFromOpenAI(text);
 				Pair<Integer,String> context = paperFileService.getContext(embedding, userId);
 				Paper paper = paperFileService.getPaperFileById(context.getFirst()).getPaper();
-				String enlace = (paper.getDOI()!="" && paper.getDOI()!=null) ? "https://doi.org/" + paper.getDOI() : "http://localhost:3000/papers/" + paper.getId();
+				String enlace = (paper.getDOI()!="" && paper.getDOI()!=null) ? "https://doi.org/" + paper.getDOI() : "https://pubus.onrender.com/papers/" + paper.getId();
 				String apa = paper.getAuthors() + ". (" + paper.getPublicationYear() + "). " + paper.getTitle() + ". " + enlace;
 				String prompt = "Your are an asistant. Resolve this request: "+text + " using this context " + context.getSecond();;
 				Map<String, String> response = new HashMap<>();

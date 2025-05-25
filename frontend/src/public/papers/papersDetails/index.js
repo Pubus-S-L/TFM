@@ -189,6 +189,13 @@ export default function PaperDetail() {
                    <p className="text-sm text-muted-foreground">{paper.publicationData}</p>
                  </div>
                </div>
+              <div className="flex items-start gap-2">
+                 <Info className="h-4 w-4 mt-1 text-muted-foreground" />
+                 <div>
+                   <p className="text-sm font-medium">Publication Data</p>
+                   <p className="text-sm text-muted-foreground">{paper.doi}</p>
+                 </div>
+               </div>
  
                <div className="flex items-start gap-2">
                  <Globe className="h-4 w-4 mt-1 text-muted-foreground" />

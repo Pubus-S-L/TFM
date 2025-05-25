@@ -90,4 +90,12 @@ export const paperEditFormInputs = [
     isRequired: false,
     validators: [],
   },
+    {
+    tag: "DOI",
+    name: "doi",
+    type: "text",
+    defaultValue: "",
+    isRequired: false,
+    validators: [],
+  },
 ];
