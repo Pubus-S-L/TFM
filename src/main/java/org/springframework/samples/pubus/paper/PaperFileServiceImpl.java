@@ -1,6 +1,7 @@
 package org.springframework.samples.pubus.paper;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,41 +66,46 @@ public class PaperFileServiceImpl implements PaperFileService {
     .orElseThrow(() -> new IllegalArgumentException("Encoding 'cl100k_base' not found"));
 
 
-    @Override
+   @Override
     public PaperFile upload(MultipartFile file, Paper paper, Integer paperId) throws IOException {
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
 
-       PaperFile paperFile = PaperFile.builder()
-       .name(fileName)
-       .type(file.getContentType())
-       .data(file.getBytes())
-       .paper(paper)
-       .build();
+        PaperFile paperFile;
+        try (InputStream inputStream = file.getInputStream()) {
+            paperFile = PaperFile.builder()
+                .name(fileName)
+                .type(file.getContentType())
+                .data(inputStream.readAllBytes())
+                .paper(paper)
+                .build();
+        }
 
-
-        //Embedding
+        // Embedding
         Map<String, byte[]> embeddingMap = new HashMap<>();
-        if(file.getContentType().equals("application/pdf")){
+        if ("application/pdf".equals(file.getContentType())) {
             String extractedText = extractTextFromPdf(file);
             int tokenCount = estimateTokenCount(extractedText);
-            if (tokenCount > MAX_TOKENS){
+
+            if (tokenCount > MAX_TOKENS) {
                 List<String> chunks = splitTextIntoChunks(extractedText);
                 for (String chunk : chunks) {
                     embeddingMap = addEmbedding(chunk, embeddingMap);
                 }
-            }else{
+            } else {
                 embeddingMap = addEmbedding(extractedText, embeddingMap);
             }
-            
         }
+
         paperFile.setEmbeddings(embeddingMap);
+
         List<PaperFile> paperFiles = paper.getPaperFiles();
         paperFiles.add(paperFile);
         paper.setPaperFiles(paperFiles);
         paperService.updatePaper(paper, paperId);
 
-       return paperFileRepository.save(paperFile);
+        return paperFileRepository.save(paperFile);
     }
+    
     @Override
     public Map<String,byte[]> addEmbedding(String text, Map<String,byte[]> embeddingMap) {
         try {
