@@ -28,4 +28,4 @@ EXPOSE 8080
 ENV OPENAI_API_KEY=${OPENAI_API_KEY}
 
 # Comando para ejecutar la app
-ENTRYPOINT ["java", "-jar", "/app/my-springboot-app.jar"]
+ENTRYPOINT ["java", "-Xms512m", "-Xmx1024m", "-jar", "/app/my-springboot-app.jar"]
