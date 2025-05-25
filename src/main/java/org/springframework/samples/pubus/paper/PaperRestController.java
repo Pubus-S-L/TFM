@@ -60,19 +60,18 @@ public class PaperRestController {
 	private final PaperService paperService;
 	private final UserService userService;
 	private final PaperFileService paperFileService;
-	private static final String USER_AUTH = "USER";
-	private static final String ADMIN_AUTH = "ADMIN";
-	private final RestTemplate restTemplate;
+	// private static final String USER_AUTH = "USER"; // No usado
+	// private static final String ADMIN_AUTH = "ADMIN"; // No usado
+	// private final RestTemplate restTemplate; // No usado en el controller
 	private final ObjectMapper objectMapper;
 	private static final Logger logger = LoggerFactory.getLogger(PaperRestController.class);
 
 	@Autowired
-	public PaperRestController(PaperService paperService, UserService userService, PaperFileService paperFileService, RestTemplate restTemplate,ObjectMapper objectMapper) {
+	public PaperRestController(PaperService paperService, UserService userService, PaperFileService paperFileService, ObjectMapper objectMapper) {
 		this.paperService = paperService;
 		this.userService = userService;
 		this.paperFileService = paperFileService;
-		this.restTemplate = restTemplate;
-		this.objectMapper = objectMapper;
+		this.objectMapper = objectMapper; // Usa el ObjectMapper inyectado
 	}
 
 	@InitBinder("paper")
@@ -101,7 +100,7 @@ public class PaperRestController {
             @RequestParam(required = false) List<String> types,
             @RequestParam(required = false) String search) {
 
-        System.out.println("API Request - userId: " + userId + ", types: " + types + ", search: " + search);
+        logger.debug("API Request - userId: {}, types: {}, search: {}", userId, types, search);
 
         List<Paper> papers = paperService.findPapersFiltered(userId, types, search);
 
@@ -110,13 +109,16 @@ public class PaperRestController {
 
 //UPLOAD FILE - VERSIÓN ASÍNCRONA
 
-	public ResponseEntity<Map<String, Object>> uploadFile(Integer paperId, Paper paper, List<MultipartFile> files) {
+	@PostMapping("/{paperId}/files") // Nuevo endpoint para subir archivos a un paper existente
+	public ResponseEntity<Map<String, Object>> uploadFile(@PathVariable Integer paperId, @RequestParam("files") List<MultipartFile> files) {
 		try {
+			Paper paper = RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
+
 			List<Map<String, Object>> uploadedFiles = new ArrayList<>();
 			
 			for(MultipartFile file: files){	
 				long fileSize = file.getSize();
-				long maxfileSize = 199 * 1024 * 1024;
+				long maxfileSize = 199 * 1024 * 1024; // 199 MB
 				if (fileSize > maxfileSize) {
 					Map<String, Object> errorResponse = new HashMap<>();
 					errorResponse.put("error", "File size exceeds limit");
@@ -144,6 +146,7 @@ public class PaperRestController {
 			return ResponseEntity.status(HttpStatus.OK).body(response);
 			
 		} catch (IOException e) {
+			logger.error("Error al subir archivos: {}", e.getMessage(), e);
 			Map<String, Object> errorResponse = new HashMap<>();
 			errorResponse.put("error", "Failed to upload files");
 			errorResponse.put("message", e.getMessage());
@@ -233,9 +236,10 @@ public class PaperRestController {
 			return ResponseEntity.status(HttpStatus.OK)
 					.header(HttpHeaders.CONTENT_TYPE, paperFile.getType())
 					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + paperFile.getName()+ "\"")
-					.body(paperFile.getData());
+					.body(paperFile.getData()); // CUIDADO: Carga el archivo completo si está en DB
 					
 		} catch (NotFoundException e) {
+			logger.warn("File with ID {} not found for download.", paperFileId);
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
 		}
 	}
@@ -244,7 +248,7 @@ public class PaperRestController {
 
 	@GetMapping("/{paperId}/files")
 	public ResponseEntity<List<ResponseFile>> getListFiles(@PathVariable int paperId){
-		Paper paper = RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
+		RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
 		List<ResponseFile> files = paperFileService.getAllFilesByPaperId(paperId);
 		return ResponseEntity.status(HttpStatus.OK).body(files);
 	}
@@ -255,7 +259,7 @@ public class PaperRestController {
 	public ResponseEntity<Paper> findById(@PathVariable("paperId") int paperId) {
 		Paper paper = RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
 			return new ResponseEntity<>(paper, HttpStatus.OK);
-	} 
+	}	
 	
 //GET BY USERID
 
@@ -307,15 +311,14 @@ public class PaperRestController {
         throws DataAccessException, DuplicatedPaperTitleException {
 
     logger.debug("Iniciando creación de Paper (atributos separados)");
-    logger.debug("Title recibido: " + title);
-    logger.debug("Files recibidos: " + (files != null ? files.size() : "null"));
+    logger.debug("Title recibido: {}", title);
+    logger.debug("Files recibidos: {}", (files != null ? files.size() : "null"));
 
     try {
         Integer id = Integer.parseInt(userId);
         User user = userService.findUser(id);
-        logger.debug("Usuario encontrado: " + user);
+        logger.debug("Usuario encontrado: {}", user);
 
-        ObjectMapper objectMapper = new ObjectMapper();
         PaperType type = objectMapper.readValue(typeJson, PaperType.class);
 
         Paper newPaper = new Paper();
@@ -334,15 +337,18 @@ public class PaperRestController {
         newPaper.setUser(user);
 
         Paper savedPaper = this.paperService.savePaper(newPaper);
-        logger.debug("Paper guardado: " + savedPaper);
+        logger.debug("Paper guardado: {}", savedPaper);
 
         if (files != null && !files.isEmpty()) {
             logger.debug("Procesando archivos de forma asíncrona...");
-            // Cambiar el tipo de retorno para manejar la respuesta asíncrona
-            ResponseEntity<Map<String, Object>> fileResponse = uploadFile(savedPaper.getId(), savedPaper, files);
+            // Llamar al nuevo endpoint uploadFile
+            ResponseEntity<Map<String, Object>> fileResponse = uploadFile(savedPaper.getId(), files);
             
             // Agregar información del paper creado a la respuesta
             Map<String, Object> response = fileResponse.getBody();
+            if (response == null) { // Asegurar que el cuerpo no es nulo
+                response = new HashMap<>();
+            }
             response.put("paper", savedPaper);
             
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -350,8 +356,7 @@ public class PaperRestController {
 
         return new ResponseEntity<>(savedPaper, HttpStatus.CREATED);
     } catch (Exception e) {
-        logger.debug("Error al crear el paper: " + e.getMessage());
-        e.printStackTrace();
+        logger.error("Error al crear el paper: {}", e.getMessage(), e); // Log con stack trace
         
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("error", "Failed to create paper");
@@ -367,7 +372,7 @@ public class PaperRestController {
 
 	@PutMapping("{paperId}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<?> update(@PathVariable("paperId") int paperId, 
+	public ResponseEntity<?> update(@PathVariable("paperId") int paperId,	
 		@RequestParam("title") String title,
 		@RequestParam("authors") String authors,
 		@RequestParam("publicationYear") String publicationYear,
@@ -388,11 +393,10 @@ public class PaperRestController {
 		User loggedUser = userService.findUser(id);
 		User paperUser = aux.getUser();
 		Paper newPaper = new Paper();
-		ObjectMapper objectMapper = new ObjectMapper();
-        PaperType type;
+        // ObjectMapper objectMapper = new ObjectMapper(); // Ya está inyectado
 
 		try {
-			type = objectMapper.readValue(typeJson, PaperType.class);
+			PaperType type = objectMapper.readValue(typeJson, PaperType.class);
 			newPaper.setTitle(title);
 			newPaper.setAuthors(authors);
 			newPaper.setPublicationYear(Integer.parseInt(publicationYear));
@@ -408,23 +412,27 @@ public class PaperRestController {
 			newPaper.setUser(paperUser);
 
 			if (loggedUser.getId().equals(paperUser.getId())) {
+				Paper paper = paperService.updatePaper(newPaper, paperId); // Actualizar primero el paper
+				
 				if(files != null && !files.isEmpty()){
-					Paper paper = paperService.updatePaper(newPaper, paperId);
-					// Respuesta asíncrona para archivos
-					ResponseEntity<Map<String, Object>> fileResponse = uploadFile(paperId, paper, files);
+					// Llamar al nuevo endpoint uploadFile
+					ResponseEntity<Map<String, Object>> fileResponse = uploadFile(paperId, files);
 					
 					Map<String, Object> response = fileResponse.getBody();
-					response.put("paper", paper);
+					if (response == null) { // Asegurar que el cuerpo no es nulo
+						response = new HashMap<>();
+					}
+					response.put("paper", paper); // Añadir el paper actualizado
 					
 					return ResponseEntity.ok(response);
 				} else {
-					Paper res = paperService.updatePaper(newPaper, paperId);
-					return new ResponseEntity<>(res, HttpStatus.OK);
+					return new ResponseEntity<>(paper, HttpStatus.OK); // Si no hay archivos, retorna solo el paper
 				}
 			} else {
 				throw new ResourceNotOwnedException(aux);
 			}
 		} catch (JsonMappingException e) {
+			logger.error("Error de mapeo JSON al actualizar paper: {}", e.getMessage(), e);
 			Map<String, Object> errorResponse = new HashMap<>();
 			errorResponse.put("error", "JSON mapping error");
 			errorResponse.put("message", e.getMessage());
@@ -432,8 +440,7 @@ public class PaperRestController {
 				.status(HttpStatus.INTERNAL_SERVER_ERROR)
 				.body(errorResponse);
 		} catch (JsonProcessingException e) {
-			logger.debug("Error al actualizar el paper: " + e.getMessage());
-			e.printStackTrace();
+			logger.error("Error de procesamiento JSON al actualizar paper: {}", e.getMessage(), e);
 			
 			Map<String, Object> errorResponse = new HashMap<>();
 			errorResponse.put("error", "JSON processing error");
@@ -442,7 +449,15 @@ public class PaperRestController {
 			return ResponseEntity
 					.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body(errorResponse);
-		}
+		} catch (IOException e) { // Catch para errores de I/O de uploadFile
+            logger.error("Error de I/O al actualizar paper y subir archivos: {}", e.getMessage(), e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "File upload failed during paper update");
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(errorResponse);
+        }
 	}
 
 //DELETE	
@@ -549,6 +564,7 @@ public class PaperRestController {
 		@RequestParam("searchTerm") String searchTerm){
 			String url = "https://api.crossref.org/works/"+searchTerm;
 			List<String> oldTitles = new ArrayList<>();
+			RestTemplate restTemplate = new RestTemplate();
 			oldTitles.addAll(paperService.findAllPapersByUserId(userId).stream().map(x-> x.getTitle()).toList());
 
 
