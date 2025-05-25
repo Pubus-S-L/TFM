@@ -358,8 +358,7 @@ export default function UserPaperEdit({ id, onSave }) {
         console.log("userId:", userId);
 
         // Usar la URL completa en lugar de relativa
-        const baseUrl = "${API_BASE_URL}";
-        const url = `${baseUrl}/api/v1/papers${paperId ? "/" + paperId : ""}`;
+        const url = `${API_BASE_URL}/api/v1/papers${paperId ? "/" + paperId : ""}`;
         
         console.log("URL de la solicitud:", url);
         
