@@ -1,3 +1,4 @@
+
 "use client"
 import { useEffect, useState, useRef } from "react"
 import { paperEditFormInputs } from "./form/paperEditFormInputs"
@@ -151,13 +152,26 @@ export default function UserPaperEdit({ id, onSave }) {
     setFiles(prevFiles => prevFiles.filter((_, index) => index !== indexToRemove))
   }
 
-  // Hook useEffect para cargar el paper y los tipos al inicio
+  // useEffect mejorado para limpiar intervalos
   useEffect(() => {
-    // Limpiar intervalos de polling al desmontar el componente
+    // Función de limpieza que se ejecuta al desmontar
     return () => {
-      Object.values(pollingIntervals.current).forEach(clearInterval);
+        console.log('Limpiando intervalos de polling...');
+        Object.entries(pollingIntervals.current).forEach(([fileId, interval]) => {
+            console.log(`Limpiando intervalo para archivo ${fileId}`);
+            clearInterval(interval);
+        });
+        pollingIntervals.current = {};
     };
-  }, []);
+  }, []); // Solo al desmontar
+
+  // Limpiar intervalos cuando no hay archivos procesándose
+  useEffect(() => {
+    if (uploadedFileProcessingStatus.length === 0) {
+        Object.values(pollingIntervals.current).forEach(clearInterval);
+        pollingIntervals.current = {};
+    }
+  }, [uploadedFileProcessingStatus]);
 
   useEffect(() => {
     if (paperId !== "" && paper.id == null) {
@@ -204,15 +218,15 @@ export default function UserPaperEdit({ id, onSave }) {
   }, [paperId, types.length, jwt, API_BASE_URL]); // Dependencias para useEffect
 
   // Función para eliminar un archivo adjunto existente (ya en la DB)
-  function removePaperFile(idToDelete) {
-    // Eliminar inmediatamente el archivo de la UI para una respuesta rápida
+   function removePaperFile(id) {
+    // Eliminar inmediatamente el archivo de la UI
     setPaper((prevPaper) => ({
       ...prevPaper,
-      paperFiles: prevPaper.paperFiles.filter((file) => file.id !== idToDelete),
+      paperFiles: prevPaper.paperFiles.filter((file) => file.id !== id),
     }))
 
     // Luego enviar la solicitud al servidor para eliminar el archivo
-    fetch(`${API_BASE_URL}/api/v1/papers/files/${idToDelete}`, { // Endpoint actualizado
+    fetch(`${API_BASE_URL}/api/v1/papers/${paperId}/delete/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${jwt}`,
@@ -222,19 +236,19 @@ export default function UserPaperEdit({ id, onSave }) {
     })
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Error al eliminar el archivo del servidor.")
+          throw new Error("Error al eliminar el archivo")
         }
-        // No es necesario response.json() si el backend no devuelve un body
-        // return response.json();
+        return response.json()
       })
       .catch((error) => {
         console.error("Error al eliminar archivo:", error)
         setModalShow(true)
-        // Opcional: Si hay un error, restaurar el archivo en la UI recargando el paper
-        // Esto puede ser costoso, una mejor UX sería un mensaje de error y un botón de reintento.
-        alert("Hubo un error al eliminar el archivo. Por favor, intente de nuevo.");
+
+        // Si hay un error, restaurar el archivo en la UI
         fetch(`${API_BASE_URL}/api/v1/papers/${paperId}`, {
-          headers: { Authorization: `Bearer ${jwt}` },
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+          },
         })
           .then((response) => response.json())
           .then((updatedPaper) => {
@@ -280,6 +294,161 @@ export default function UserPaperEdit({ id, onSave }) {
       return updatedPaper
     })
   }
+
+  // Función para cancelar el polling de un archivo específico
+  const cancelPolling = (fileIdToCancel) => {
+    if (pollingIntervals.current[fileIdToCancel]) {
+        console.log(`Cancelando polling para archivo ${fileIdToCancel}`);
+        clearInterval(pollingIntervals.current[fileIdToCancel]);
+        delete pollingIntervals.current[fileIdToCancel];
+        
+        setUploadedFileProcessingStatus(prevStatuses => 
+            prevStatuses.filter(file => file.fileId !== fileIdToCancel)
+        );
+    }
+  };
+
+  // Función startPolling mejorada
+  const startPolling = (paperIdToPoll, fileIdToPoll, fileName) => {
+    // Verificar si ya existe un intervalo para este archivo
+    if (pollingIntervals.current[fileIdToPoll]) {
+        console.log(`Ya existe polling para archivo ${fileName}, saltando...`);
+        return;
+    }
+
+    console.log(`Iniciando polling para archivo ${fileName} (ID: ${fileIdToPoll})`);
+    
+    let attemptCount = 0;
+    const maxAttempts = 120; // 10 minutos máximo (120 * 5 segundos)
+
+    const interval = setInterval(async () => {
+        attemptCount++;
+        
+        // Timeout de seguridad
+        if (attemptCount >= maxAttempts) {
+            console.warn(`Polling timeout para archivo ${fileName} después de ${maxAttempts} intentos`);
+            clearInterval(interval);
+            delete pollingIntervals.current[fileIdToPoll];
+            
+            setUploadedFileProcessingStatus(prevStatuses =>
+                prevStatuses.map(file =>
+                    file.fileId === fileIdToPoll 
+                        ? { ...file, status: "TIMEOUT" } 
+                        : file
+                )
+            );
+            return;
+        }
+
+        try {
+            console.log(`Polling intento ${attemptCount} para archivo ${fileName}`);
+            
+            const statusResponse = await fetch(
+                `${API_BASE_URL}/api/v1/papers/${paperIdToPoll}/files/${fileIdToPoll}/status`, 
+                {
+                    headers: { Authorization: `Bearer ${jwt}` },
+                    // Agregar timeout a la request si el navegador lo soporta
+                    ...(AbortSignal.timeout && { signal: AbortSignal.timeout(10000) })
+                }
+            );
+
+            // Manejar respuesta 404 específicamente
+            if (statusResponse.status === 404) {
+                console.warn(`Archivo ${fileName} no encontrado en el servidor`);
+                setUploadedFileProcessingStatus(prevStatuses =>
+                    prevStatuses.map(file =>
+                        file.fileId === fileIdToPoll 
+                            ? { ...file, status: "NOT_FOUND" } 
+                            : file
+                    )
+                );
+                clearInterval(interval);
+                delete pollingIntervals.current[fileIdToPoll];
+                return;
+            }
+
+            if (!statusResponse.ok) {
+                throw new Error(`HTTP ${statusResponse.status}: ${statusResponse.statusText}`);
+            }
+
+            const statusData = await statusResponse.json();
+            console.log(`Estado recibido para ${fileName}:`, statusData.status);
+
+            // Actualizar el estado de `uploadedFileProcessingStatus`
+            setUploadedFileProcessingStatus(prevStatuses => {
+                const updated = prevStatuses.map(file =>
+                    file.fileId === fileIdToPoll 
+                        ? { ...file, status: statusData.status, lastUpdate: new Date().toISOString() } 
+                        : file
+                );
+                
+                // Si el archivo no estaba en la lista, añadirlo
+                if (!updated.some(file => file.fileId === fileIdToPoll)) {
+                    updated.push({ 
+                        fileId: fileIdToPoll, 
+                        fileName: fileName, 
+                        status: statusData.status,
+                        lastUpdate: new Date().toISOString()
+                    });
+                }
+                return updated;
+            });
+
+            // Si el procesamiento ha terminado, detener el polling
+            if (statusData.status === "COMPLETED" || statusData.status === "FAILED") {
+                console.log(`Polling completado para ${fileName}. Estado final: ${statusData.status}`);
+                clearInterval(interval);
+                delete pollingIntervals.current[fileIdToPoll];
+                
+                // Recargar el paper para obtener la lista actualizada
+                try {
+                    const paperResponse = await fetch(`${API_BASE_URL}/api/v1/papers/${paperIdToPoll}`, {
+                        headers: { Authorization: `Bearer ${jwt}` },
+                    });
+                    
+                    if (paperResponse.ok) {
+                        const updatedPaper = await paperResponse.json();
+                        if (!updatedPaper.message) {
+                            setPaper(updatedPaper);
+                            // Remover de la lista de procesamiento después de un delay
+                            setTimeout(() => {
+                                setUploadedFileProcessingStatus(prevStatuses => 
+                                    prevStatuses.filter(file => file.fileId !== fileIdToPoll)
+                                );
+                            }, 2000); // Dar tiempo para que el usuario vea el estado final
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error al recargar paper después de polling:", error);
+                }
+            }
+        } catch (error) {
+            console.error(`Error en polling para archivo ${fileName} (intento ${attemptCount}):`, error);
+            
+            // Si es un error de timeout, no detener inmediatamente
+            if (error.name === 'AbortError' || error.name === 'TimeoutError') {
+                console.log(`Timeout en intento ${attemptCount} para ${fileName}, continuando...`);
+                return; // Continúa con el siguiente intento
+            }
+            
+            // Para otros errores, detener después de varios intentos fallidos
+            if (attemptCount >= 3) {
+                console.error(`Deteniendo polling para ${fileName} después de ${attemptCount} errores`);
+                clearInterval(interval);
+                delete pollingIntervals.current[fileIdToPoll];
+                setUploadedFileProcessingStatus(prevStatuses =>
+                    prevStatuses.map(file =>
+                        file.fileId === fileIdToPoll 
+                            ? { ...file, status: "FAILED" } 
+                            : file
+                    )
+                );
+            }
+        }
+    }, 5000); // Poll cada 5 segundos
+
+    pollingIntervals.current[fileIdToPoll] = interval;
+  };
 
   // Función handleSubmit mejorada para validar todos los campos antes de enviar
   async function handleSubmit() {
@@ -353,7 +522,6 @@ export default function UserPaperEdit({ id, onSave }) {
     f.append("doi", mypaper.doi || "");
     f.append("scopus", mypaper.scopus || "");
     f.append("userId", userId.toString());
-
 
     // Añadir archivos al FormData
     if (files && files.length > 0) {
@@ -452,74 +620,7 @@ export default function UserPaperEdit({ id, onSave }) {
         console.error("Error de conexión:", error);
         setModalShow(true);
     }
-}
-
-// Función para iniciar el polling de un archivo específico
-const startPolling = (paperIdToPoll, fileIdToPoll, fileName) => {
-    // Limpiar cualquier intervalo existente para este archivo
-    if (pollingIntervals.current[fileIdToPoll]) {
-        clearInterval(pollingIntervals.current[fileIdToPoll]);
-    }
-
-    const interval = setInterval(async () => {
-        try {
-            const statusResponse = await fetch(`${API_BASE_URL}/api/v1/papers/${paperIdToPoll}/files/${fileIdToPoll}/status`, {
-                headers: { Authorization: `Bearer ${jwt}` },
-            });
-            const statusData = await statusResponse.json();
-
-            // Actualizar el estado de `uploadedFileProcessingStatus`
-            setUploadedFileProcessingStatus(prevStatuses => {
-                const updated = prevStatuses.map(file =>
-                    file.fileId === fileIdToPoll ? { ...file, status: statusData.status } : file
-                );
-                // Si el archivo no estaba en la lista (ej. recarga de página), añadirlo
-                if (!updated.some(file => file.fileId === fileIdToPoll)) {
-                    updated.push({ fileId: fileIdToPoll, fileName: fileName, status: statusData.status });
-                }
-                return updated;
-            });
-
-            // Si el procesamiento ha terminado (COMPLETED o FAILED), detener el polling
-            if (statusData.status === "COMPLETED" || statusData.status === "FAILED") {
-                clearInterval(interval);
-                delete pollingIntervals.current[fileIdToPoll];
-                console.log(`Polling detenido para el archivo ${fileName} (ID: ${fileIdToPoll}). Estado: ${statusData.status}`);
-                
-                // Recargar el objeto paper para obtener la lista actualizada de paperFiles del backend
-                // Esto es importante para que el archivo aparezca en la lista de "Attached Files"
-                fetch(`${API_BASE_URL}/api/v1/papers/${paperIdToPoll}`, {
-                    headers: {
-                        Authorization: `Bearer ${jwt}`,
-                    },
-                })
-                .then((response) => response.json())
-                .then((updatedPaper) => {
-                    if (!updatedPaper.message) {
-                        setPaper(updatedPaper);
-                        // Eliminar el archivo de uploadedFileProcessingStatus una vez que está en paperFiles
-                        setUploadedFileProcessingStatus(prevStatuses => 
-                            prevStatuses.filter(file => file.fileId !== fileIdToPoll)
-                        );
-                    }
-                })
-                .catch((error) => console.error("Error al recuperar datos del paper después de polling:", error));
-            }
-        } catch (error) {
-            console.error(`Error polling status for file ${fileName} (ID: ${fileIdToPoll}):`, error);
-            clearInterval(interval); // Detener polling en caso de error
-            delete pollingIntervals.current[fileIdToPoll];
-            setUploadedFileProcessingStatus(prevStatuses =>
-                prevStatuses.map(file =>
-                    file.fileId === fileIdToPoll ? { ...file, status: "FAILED" } : file
-                )
-            );
-        }
-    }, 5000); // Poll cada 5 segundos
-
-    pollingIntervals.current[fileIdToPoll] = interval;
-};
-
+  }
 
   paperEditFormInputs.forEach((i) => (i.handleChange = handleChange))
 

@@ -71,110 +71,97 @@ public class PaperFileServiceImpl implements PaperFileService {
 
     @Override
     public PaperFile upload(MultipartFile file, Paper paper, Integer paperId) throws IOException {
-        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+    String fileName = StringUtils.cleanPath(file.getOriginalFilename());
 
-        // ADVERTENCIA CLAVE PARA OUTOFMEMORYERROR:
-        // Si los archivos PDF son grandes (ej. > 5-10MB), esta línea es la causa principal
-        // del OutOfMemoryError. Se recomienda NO guardar el 'data' directamente en la DB.
-        // En su lugar, subir el archivo a un almacenamiento externo (S3, etc.)
-        // y almacenar solo la URL/ruta en PaperFile.
-        PaperFile paperFile;
-        try (InputStream inputStream = file.getInputStream()) {
-            paperFile = PaperFile.builder()
-                .name(fileName)
-                .type(file.getContentType())
-                .data(inputStream.readAllBytes()) // <-- ¡CUIDADO! Esto carga todo el archivo en memoria.
-                .paper(paper)
-                .processingStatus("PROCESSING")
-                .build();
+    // CAMBIO CLAVE: NO cargar los datos del archivo en memoria
+    PaperFile paperFile = PaperFile.builder()
+        .name(fileName)
+        .type(file.getContentType())
+        .data(null) // <-- CAMBIO: No cargar el archivo en memoria
+        .paper(paper)
+        .processingStatus("PROCESSING")
+        .build();
+
+    PaperFile savedPaperFile = paperFileRepository.save(paperFile);
+
+    // Ya que 'paper' viene del controlador, podría no estar totalmente gestionado por JPA
+    Paper managedPaper = paperService.findPaperById(paperId);
+    if (managedPaper != null) {
+        List<PaperFile> paperFiles = managedPaper.getPaperFiles();
+        if (paperFiles == null) {
+            paperFiles = new ArrayList<>();
         }
-
-        PaperFile savedPaperFile = paperFileRepository.save(paperFile);
-
-        // Ya que 'paper' viene del controlador, podría no estar totalmente gestionado por JPA
-        // Recargarlo para asegurar que está en el contexto de persistencia si es necesario,
-        // o asegúrate de que el 'paperService.updatePaper' lo maneje correctamente.
-        Paper managedPaper = paperService.findPaperById(paperId); // Recargar el paper para asegurar contexto
-        if (managedPaper != null) {
-            List<PaperFile> paperFiles = managedPaper.getPaperFiles();
-            if (paperFiles == null) {
-                paperFiles = new ArrayList<>();
-            }
-            paperFiles.add(savedPaperFile);
-            managedPaper.setPaperFiles(paperFiles);
-            paperService.updatePaper(managedPaper, paperId); // Actualizar el paper gestionado
-        }
-
-
-        // Procesar embeddings de forma asíncrona
-        // Pasamos el MultipartFile original para que el procesamiento asíncrono
-        // pueda leer el InputStream del archivo sin depender del 'data' ya cargado
-        processEmbeddingsAsync(savedPaperFile, file);
-
-        return savedPaperFile;
+        paperFiles.add(savedPaperFile);
+        managedPaper.setPaperFiles(paperFiles);
+        paperService.updatePaper(managedPaper, paperId);
     }
+        // CAMBIO: Procesar embeddings directamente con el MultipartFile
+    processEmbeddingsAsync(savedPaperFile, file);
+
+    return savedPaperFile;
+}
 
     @Async("taskExecutor")
     public CompletableFuture<Void> processEmbeddingsAsync(PaperFile paperFile, MultipartFile file) {
-        try {
-            Map<String, byte[]> embeddingMap = new HashMap<>();
+    try {
+        Map<String, byte[]> embeddingMap = new HashMap<>();
+        
+        if ("application/pdf".equals(file.getContentType())) {
+            // CAMBIO: Usar el MultipartFile directamente, no los datos guardados
+            List<String> pageTextChunks = extractTextFromPdfByPages(file); 
             
-            if ("application/pdf".equals(file.getContentType())) {
-                // CAMBIO CLAVE: Extraer texto por trozos/páginas directamente
-                // Esto evita cargar todo el texto del PDF como una única cadena gigante en memoria.
-                List<String> pageTextChunks = extractTextFromPdfByPages(file); 
-                
-                for (String chunk : pageTextChunks) {
-                    int tokenCount = estimateTokenCount(chunk);
-                    if (tokenCount > MAX_TOKENS) {
-                        List<String> subChunks = splitTextIntoChunks(chunk); // Si una página es muy larga, divídela más
-                        for (String subChunk : subChunks) {
-                            if (!subChunk.trim().isEmpty()) { // Evitar chunks vacíos
-                                embeddingMap = addEmbedding(subChunk, embeddingMap);
-                            }
-                        }
-                    } else {
-                        if (!chunk.trim().isEmpty()) { // Evitar chunks vacíos
-                            embeddingMap = addEmbedding(chunk, embeddingMap);
+            for (String chunk : pageTextChunks) {
+                int tokenCount = estimateTokenCount(chunk);
+                if (tokenCount > MAX_TOKENS) {
+                    List<String> subChunks = splitTextIntoChunks(chunk);
+                    for (String subChunk : subChunks) {
+                        if (!subChunk.trim().isEmpty()) {
+                            embeddingMap = addEmbedding(subChunk, embeddingMap);
+                            // CAMBIO: Añadir pequeña pausa para evitar saturar la API
+                            Thread.sleep(50);
                         }
                     }
-                }
-            } else {
-                // Si no es PDF, puedes manejar otros tipos de archivo aquí
-                // o simplemente ignorar la generación de embeddings.
-                // Por ejemplo, para archivos de texto, puedes leer el contenido directamente
-                // y dividirlo en chunks si es muy grande.
-                try (InputStream inputStream = file.getInputStream()) {
-                    String fileContent = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-                    int tokenCount = estimateTokenCount(fileContent);
-                    if (tokenCount > MAX_TOKENS) {
-                        List<String> chunks = splitTextIntoChunks(fileContent);
-                        for (String chunk : chunks) {
-                            if (!chunk.trim().isEmpty()) {
-                                embeddingMap = addEmbedding(chunk, embeddingMap);
-                            }
-                        }
-                    } else {
-                        if (!fileContent.trim().isEmpty()) {
-                            embeddingMap = addEmbedding(fileContent, embeddingMap);
-                        }
+                } else {
+                    if (!chunk.trim().isEmpty()) {
+                        embeddingMap = addEmbedding(chunk, embeddingMap);
+                        Thread.sleep(50);
                     }
                 }
             }
-
-            paperFile.setEmbeddings(embeddingMap);
-            paperFile.setProcessingStatus("COMPLETED");
-            paperFileRepository.save(paperFile);
-            
-        } catch (Exception e) {
-            paperFile.setProcessingStatus("FAILED");
-            paperFileRepository.save(paperFile);
-            // Considera usar un logger en lugar de printStackTrace en producción
-            e.printStackTrace(); 
+        } else {
+            // CAMBIO: Leer el archivo directamente del MultipartFile
+            try (InputStream inputStream = file.getInputStream()) {
+                String fileContent = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+                int tokenCount = estimateTokenCount(fileContent);
+                if (tokenCount > MAX_TOKENS) {
+                    List<String> chunks = splitTextIntoChunks(fileContent);
+                    for (String chunk : chunks) {
+                        if (!chunk.trim().isEmpty()) {
+                            embeddingMap = addEmbedding(chunk, embeddingMap);
+                            Thread.sleep(50);
+                        }
+                    }
+                } else {
+                    if (!fileContent.trim().isEmpty()) {
+                        embeddingMap = addEmbedding(fileContent, embeddingMap);
+                    }
+                }
+            }
         }
+
+        paperFile.setEmbeddings(embeddingMap);
+        paperFile.setProcessingStatus("COMPLETED");
+        paperFileRepository.save(paperFile);
         
-        return CompletableFuture.completedFuture(null);
+    } catch (Exception e) {
+        paperFile.setProcessingStatus("FAILED");
+        paperFileRepository.save(paperFile);
+        e.printStackTrace(); 
     }
+    
+    return CompletableFuture.completedFuture(null);
+}
+
     
     @Override
     public Map<String,byte[]> addEmbedding(String text, Map<String,byte[]> embeddingMap) {
@@ -195,18 +182,22 @@ public class PaperFileServiceImpl implements PaperFileService {
      * @return Una lista de Strings, donde cada String es el texto de un chunk de páginas.
      * @throws IOException Si hay un error al leer el PDF.
      */
+
     public List<String> extractTextFromPdfByPages(MultipartFile file) throws IOException {
         List<String> pageTexts = new ArrayList<>();
-        try (PDDocument document = PDDocument.load(file.getInputStream())) {
+        
+        // CAMBIO: Usar try-with-resources para liberar memoria automáticamente
+        try (InputStream inputStream = file.getInputStream();
+            PDDocument document = PDDocument.load(inputStream)) {
+            
             PDFTextStripper stripper = new PDFTextStripper();
             
-            // Puedes ajustar cuántas páginas procesar en cada "chunk"
-            // Por ejemplo, procesar 1 página a la vez para máxima granularidad o 5-10 para menos llamadas a la API
-            int pagesPerChunk = 1; // Un chunk por cada página para empezar
+            // CAMBIO: Reducir páginas por chunk para usar menos memoria
+            int pagesPerChunk = 1; // Una página a la vez
             
             int numberOfPages = document.getNumberOfPages();
             for (int i = 0; i < numberOfPages; i += pagesPerChunk) {
-                int startPage = i + 1; // Las páginas en PDFBox son 1-indexed para start/end
+                int startPage = i + 1;
                 int endPage = Math.min(i + pagesPerChunk, numberOfPages);
 
                 stripper.setStartPage(startPage);
@@ -214,6 +205,11 @@ public class PaperFileServiceImpl implements PaperFileService {
                 String text = stripper.getText(document);
                 if (text != null && !text.trim().isEmpty()) {
                     pageTexts.add(text.trim());
+                }
+                
+                // CAMBIO: Liberar memoria cada 10 páginas
+                if (i % 10 == 0 && i > 0) {
+                    System.gc();
                 }
             }
         }
@@ -434,9 +430,9 @@ public class PaperFileServiceImpl implements PaperFileService {
                 .name(dbFile.getName())
                 .url(fileDownloadUri)
                 .type(dbFile.getType())
-                // Si ya no guardas 'data' en PaperFile, dbFile.getData() será null.
-                // Tendrías que obtener el tamaño de otra forma (e.g., al subir el archivo externo)
-                .size(dbFile.getData() != null ? dbFile.getData().length : 0).build(); // Manejar null si 'data' no se guarda
+                // CAMBIO: Manejar el caso donde data es null
+                .size(dbFile.getData() != null ? dbFile.getData().length : 0)
+                .build();
         }).collect(Collectors.toList());
 
         return files;

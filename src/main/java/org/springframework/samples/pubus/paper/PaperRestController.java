@@ -1,6 +1,7 @@
 package org.springframework.samples.pubus.paper;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -154,38 +155,43 @@ public class PaperRestController {
 		}
 	}
 
-//NUEVO ENDPOINT: GET FILE PROCESSING STATUS
-
 	@GetMapping("/{paperId}/files/{fileId}/status")
 	public ResponseEntity<Map<String, String>> getFileProcessingStatus(
 			@PathVariable Integer paperId,
 			@PathVariable Integer fileId) {
 		
-		String status = paperFileService.getProcessingStatus(fileId);
-		
-		Map<String, String> response = new HashMap<>();
-		response.put("paperId", paperId.toString());
-		response.put("fileId", fileId.toString());
-		response.put("status", status);
-		
-		// Agregar información adicional según el estado
-		switch(status) {
-			case "PROCESSING":
-				response.put("message", "File is being processed. Embeddings are being generated.");
-				break;
-			case "COMPLETED":
-				response.put("message", "File processing completed successfully.");
-				break;
-			case "FAILED":
-				response.put("message", "File processing failed. Please try uploading again.");
-				break;
-			case "NOT_FOUND":
-				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-			default:
-				response.put("message", "Unknown status.");
+		try {
+			// Validar que el paper existe y pertenece al usuario actual
+			// (implementar según tu lógica de seguridad)
+			
+			String status = paperFileService.getProcessingStatus(fileId);
+			
+			// Log para debugging
+			logger.info("File processing status check - PaperId: {}, FileId: {}, Status: {}", 
+					paperId, fileId, status);
+			
+			Map<String, String> response = new HashMap<>();
+			response.put("paperId", paperId.toString());
+			response.put("fileId", fileId.toString());
+			response.put("status", status);
+			response.put("timestamp", Instant.now().toString());
+			
+			// ... resto de tu código switch
+			
+			return ResponseEntity.ok(response);
+			
+		} catch (Exception e) {
+			logger.error("Error getting file processing status - PaperId: {}, FileId: {}", 
+						paperId, fileId, e);
+			
+			Map<String, String> errorResponse = new HashMap<>();
+			errorResponse.put("paperId", paperId.toString());
+			errorResponse.put("fileId", fileId.toString());
+			errorResponse.put("status", "ERROR");
+			errorResponse.put("message", "Internal server error");
+			
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
 		}
-		
-		return ResponseEntity.ok(response);
 	}
 
 //NUEVO ENDPOINT: GET ALL FILES STATUS BY PAPER
