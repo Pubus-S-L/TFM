@@ -517,6 +517,9 @@ public class PaperRestController {
 			Paper paper = paperService.findPaperById(paperId);
 			Integer userIdInt = Integer.parseInt(userId);
 			User user = userService.findUser(userIdInt);
+			if (user.getFavorites() == null) {
+				user.setFavorites(new ArrayList<>());
+			}
 			if(!user.getFavorites().contains(paperId)){
 				paper.setLikes(paper.getLikes()+1);
 				user.getFavorites().add(paper.getId());
