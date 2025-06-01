@@ -484,7 +484,7 @@ function ChatMessage({ currentUser, chatId, receiver }) {
   
         <div className="messages-container">
           {isLoading && messages.length === 0 ? (
-            <div className="loading-messages">Cargando mensajes...</div>
+            <div className="loading-messages">Loading messages...</div>
           ) : messages.length === 0 ? (
             <div className="no-messages">There is no message ¡Send the first one!</div>
           ) : (

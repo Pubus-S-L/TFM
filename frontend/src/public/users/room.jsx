@@ -220,7 +220,7 @@ function ChatList() {
               }
             }
           } catch (err) {
-            console.error("Error cargando mensajes:", err);
+            console.error("Error loading messages:", err);
           }
         }
         

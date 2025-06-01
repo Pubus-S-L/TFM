@@ -3,16 +3,18 @@ import "../../static/css/auth/authPage.css";
 import tokenService from "../../services/token.service";
 import FormGenerator from "../../components/formGenerator/formGenerator";
 import { registerFormInputs } from "./form/registerFormInputs";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from 'react-router-dom';
+import { Spinner } from "reactstrap";
 
 export default function Register() {
   const registerFormRef = useRef();   
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   const API_BASE_URL = process.env.REACT_APP_API_URL;   
   
   async function handleSubmit({ values }) {
-
+    setLoading(true);
     if(!registerFormRef.current.validate()) return;
     const request = values;
     request["authority"] = 'user';
@@ -40,7 +42,7 @@ export default function Register() {
             return response.json();
           } else {
             state = "";
-            return response.json();
+            return response.json().then(err => Promise.reject(err.message));
           }
         })
         .then(function (data) {
@@ -48,11 +50,15 @@ export default function Register() {
           else {
             tokenService.setUser(data);
             tokenService.updateLocalAccessToken(data.token);
-            navigate(0);
+            navigate("/papers");
+            window.location.reload();
           }
         })
         .catch((message) => {
           alert(message);
+        })
+        .finally(() => {
+          setLoading(false);
         });
     }
   })
@@ -71,8 +77,9 @@ export default function Register() {
             onSubmit={handleSubmit}
             numberOfColumns={1}
             listenEnterKey
-            buttonText="Save"
+            buttonText={loading ? <Spinner size="sm" /> : "Save"}
             buttonClassName="auth-button"
+            buttonDisabled={loading}
           />
         </div>
       </div>

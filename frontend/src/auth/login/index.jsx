@@ -56,7 +56,7 @@ export default function Login() {
     })
       .then(function (response) {
         if (response.status === 200) return response.json();
-        else return Promise.reject("Invalid login attempt");
+        else return response.json().then(err => Promise.reject(err.message));
       })
       .then(function (data) {
         tokenService.setUser(data);

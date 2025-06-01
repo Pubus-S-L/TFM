@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.pubus.auth.payload.request.LoginRequest;
 import org.springframework.samples.pubus.auth.payload.request.SignupRequest;
@@ -165,7 +166,9 @@ public class AuthController {
 	
 				return ResponseEntity.ok().body(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), roles));
 			}catch(BadCredentialsException exception){
-				return ResponseEntity.badRequest().body("Bad Credentials!");
+				return ResponseEntity
+					.status(HttpStatus.UNAUTHORIZED)
+					.body(new MessageResponse("Error: Invalid username or password"));
 			}	
 	}
 
@@ -181,6 +184,8 @@ public class AuthController {
 		System.out.println("Signup request received: " + signUpRequest.getUsername());
 		if (userService.existsUser(signUpRequest.getUsername()).equals(true)) {
 			return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
+		} else if (userService.existsEmail(signUpRequest.getEmail()).equals(true)) {
+			return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
 		}
 		authService.createUser(signUpRequest);
 		return ResponseEntity.ok(new MessageResponse("User registered successfully!"));

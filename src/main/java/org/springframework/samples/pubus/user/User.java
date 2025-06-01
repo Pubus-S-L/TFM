@@ -64,9 +64,6 @@ public class User extends BaseEntity {
 	@JoinColumn(name = "authority")
 	Authorities authority;
 
-	@ElementCollection
-	@CollectionTable(name = "user_favorites", joinColumns = @JoinColumn(name = "user_id"))
-	@Column(name = "favorite_id")
 	List<Integer> favorites = new ArrayList<>();
 
 

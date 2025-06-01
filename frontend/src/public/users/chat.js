@@ -67,6 +67,7 @@ const Chat = () => {
 
 
     try {
+      setInput(""); // Limpiar el input
       const response = await fetch('https://api.openai.com/v1/chat/completions', requestOptions);
       // Agregar la respuesta de la API a la lista de mensajes
       const data = await response.json();
@@ -78,7 +79,6 @@ const Chat = () => {
       setMessages((prev) => [...prev, errorMessage]);
     }
 
-    setInput(""); // Limpiar el input
   };
 
   const handleKeyDown = (e) => {
