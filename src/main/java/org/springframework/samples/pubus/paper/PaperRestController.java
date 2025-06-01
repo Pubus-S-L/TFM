@@ -512,7 +512,7 @@ public class PaperRestController {
 
 //LIKE
 
-		@PostMapping("{userId}/like/{paperId}")
+		@PostMapping("/{userId}/like/{paperId}")
 		public ResponseEntity<String> likePaper(@PathVariable("paperId") Integer paperId, @PathVariable(value = "userId", required = false) String userId){
 			Paper paper = paperService.findPaperById(paperId);
 			Integer userIdInt = Integer.parseInt(userId);
