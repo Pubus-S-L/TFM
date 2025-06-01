@@ -517,7 +517,9 @@ public class PaperRestController {
 			Paper paper = paperService.findPaperById(paperId);
 			Integer userIdInt = Integer.parseInt(userId);
 			User user = userService.findUser(userIdInt);
-			
+			if(user.getFavorites() == null) {
+				user.setFavorites(new ArrayList<>());
+			}
 			// Usar el mismo objeto Integer para comparación y operaciones
 			Integer paperIdInteger = paper.getId();
 			
@@ -543,7 +545,7 @@ public class PaperRestController {
 							.body("Error processing request: " + e.getMessage());
 		}
 	}
-	
+
 //PROMPT
 
 		@GetMapping("/users/{userId}/prompt")
