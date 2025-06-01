@@ -1,4 +1,3 @@
-
 "use client"
 import { useEffect, useState, useRef } from "react"
 import { paperEditFormInputs } from "./form/paperEditFormInputs"
@@ -27,7 +26,6 @@ export default function UserPaperEdit({ id, onSave }) {
     keywords: "",
     notes: "",
     user: {},
-    paperFiles: [] // Asegurarse de que paperFiles esté inicializado
   }
   const user = tokenService.getUser()
   const jwt = typeof window !== 'undefined' ? JSON.parse(window.localStorage.getItem("jwt") || '""') : ""
@@ -37,17 +35,14 @@ export default function UserPaperEdit({ id, onSave }) {
   const [paperId, setPaperId] = useState(id)
   const [userId, setUserId] = useState(user.id)
   const editPaperFormRef = useRef()
-  const [files, setFiles] = useState([]) // Archivos seleccionados para subir
+  const [files, setFiles] = useState([])
   const [formErrors, setFormErrors] = useState({})
   const [paperLoaded, setPaperLoaded] = useState(false)
   const [touchedFields, setTouchedFields] = useState({})
-  const [isSaving, setIsSaving] = useState(false) // Estado para controlar el spinner de carga
+  // Estado para controlar el spinner de carga
+  const [isSaving, setIsSaving] = useState(false)
   const navigate = useNavigate();
   const API_BASE_URL = process.env.REACT_APP_API_URL;
-
-  // NUEVOS ESTADOS PARA POLLING
-  const [uploadedFileProcessingStatus, setUploadedFileProcessingStatus] = useState([]); // Estado para archivos recién subidos y su estado de procesamiento
-  const pollingIntervals = useRef({}); // Para almacenar los intervalos de polling por archivo
 
   const validateField = (name, value, isEditing = false, isTouched = false) => {
     const field = paperEditFormInputs.find((input) => input.name === name)
@@ -94,10 +89,10 @@ export default function UserPaperEdit({ id, onSave }) {
       return `The field can not be longer than 1000 caracteres (actual: ${value.length})`
     }
     if (name === "title" && value && value.length > 200) {
-      return `The field can not be longer than 200 characters (actual: ${value.length})`
+      return `The field can not be longer than 200 characteres (actual: ${value.length})`
     }
     if (name === "authors" && value && value.length > 500) {
-      return `The field can not be longer than 500 characters (actual: ${value.length})`
+      return `The field can not be longer than 500 characteres (actual: ${value.length})`
     }
 
     return errorMessage
@@ -140,85 +135,21 @@ export default function UserPaperEdit({ id, onSave }) {
   
     // Concatenar los archivos nuevos a los existentes, evitando duplicados
     setFiles(prevFiles => {
+      // Filtrar los archivos ya existentes (si quieres evitar duplicados)
       const newFiles = filesArray.filter(newFile => 
-        !prevFiles.some(existingFile => existingFile.name === newFile.name && existingFile.size === newFile.size)
+        !prevFiles.some(existingFile => existingFile.name === newFile.name)
       );
       return [...prevFiles, ...newFiles];
     });
   };
-
-  // Nueva función para eliminar un archivo seleccionado (antes de subirlo)
+  // Nueva función para eliminar un archivo seleccionado
   const removeSelectedFile = (indexToRemove) => {
     setFiles(prevFiles => prevFiles.filter((_, index) => index !== indexToRemove))
   }
 
-  // useEffect mejorado para limpiar intervalos
-  useEffect(() => {
-    // Función de limpieza que se ejecuta al desmontar
-    return () => {
-        console.log('Limpiando intervalos de polling...');
-        Object.entries(pollingIntervals.current).forEach(([fileId, interval]) => {
-            console.log(`Limpiando intervalo para archivo ${fileId}`);
-            clearInterval(interval);
-        });
-        pollingIntervals.current = {};
-    };
-  }, []); // Solo al desmontar
+  useEffect(() => setupPaper(), [])
 
-  // Limpiar intervalos cuando no hay archivos procesándose
-  useEffect(() => {
-    if (uploadedFileProcessingStatus.length === 0) {
-        Object.values(pollingIntervals.current).forEach(clearInterval);
-        pollingIntervals.current = {};
-    }
-  }, [uploadedFileProcessingStatus]);
-
-  useEffect(() => {
-    if (paperId !== "" && paper.id == null) {
-      fetch(`${API_BASE_URL}/api/v1/papers/${paperId}`, {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-        },
-      })
-        .then((p) => p.json())
-        .then((p) => {
-          if (p.message) {
-            setModalShow(true)
-          } else {
-            setPaper(p)
-            setPaperId(p.id)
-            if (!p.type || !p.type.name) {
-              p.type = { name: "None" }
-            }
-            setPaperLoaded(true) // Marcar que el paper se ha cargado
-          }
-        })
-        .catch((m) => {
-          setModalShow(true)
-        })
-    } else {
-      setPaperLoaded(true) // Si no hay paperId, estamos creando uno nuevo
-    }
-
-    if (types.length === 0) {
-      fetch(`${API_BASE_URL}/api/v1/papers/types`, {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-        },
-      })
-        .then((data) => data.json())
-        .then((data) => {
-          if (!data.message) setTypes(data)
-          else {
-            setModalShow(true)
-          }
-        })
-        .catch((error) => setModalShow(true))
-    }
-  }, [paperId, types.length, jwt, API_BASE_URL]); // Dependencias para useEffect
-
-  // Función para eliminar un archivo adjunto existente (ya en la DB)
-   function removePaperFile(id) {
+  function removePaperFile(id) {
     // Eliminar inmediatamente el archivo de la UI
     setPaper((prevPaper) => ({
       ...prevPaper,
@@ -259,6 +190,51 @@ export default function UserPaperEdit({ id, onSave }) {
           .catch((error) => console.error("Error al recuperar datos del paper:", error))
       })
   }
+  function setupPaper() {
+    if (paperId !== "" && paper.id == null) {
+      const paper = fetch(`${API_BASE_URL}/api/v1/papers/${paperId}`, {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      })
+        .then((p) => p.json())
+        .then((p) => {
+          if (p.message) {
+            setModalShow(true)
+          } else {
+            setPaper(p)
+            setPaperId(p.id)
+            if (!p.type || !p.type.name) {
+              p.type = { name: "None" }
+            }
+            // Marcar que el paper se ha cargado completamente
+            setPaperLoaded(true)
+          }
+        })
+        .catch((m) => {
+          setModalShow(true)
+        })
+    } else {
+      // Si no hay paperId, estamos creando uno nuevo, así que también marcamos como cargado
+      setPaperLoaded(true)
+    }
+
+    if (types.length === 0) {
+      fetch(`${API_BASE_URL}/api/v1/papers/types`, {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      })
+        .then((data) => data.json())
+        .then((data) => {
+          if (!data.message) setTypes(data)
+          else {
+            setModalShow(true)
+          }
+        })
+        .catch((error) => setModalShow(true))
+    }
+  }
 
   // Función handleChange mejorada para validar en tiempo real
   function handleChange(event) {
@@ -294,161 +270,6 @@ export default function UserPaperEdit({ id, onSave }) {
       return updatedPaper
     })
   }
-
-  // Función para cancelar el polling de un archivo específico
-  const cancelPolling = (fileIdToCancel) => {
-    if (pollingIntervals.current[fileIdToCancel]) {
-        console.log(`Cancelando polling para archivo ${fileIdToCancel}`);
-        clearInterval(pollingIntervals.current[fileIdToCancel]);
-        delete pollingIntervals.current[fileIdToCancel];
-        
-        setUploadedFileProcessingStatus(prevStatuses => 
-            prevStatuses.filter(file => file.fileId !== fileIdToCancel)
-        );
-    }
-  };
-
-  // Función startPolling mejorada
-  const startPolling = (paperIdToPoll, fileIdToPoll, fileName) => {
-    // Verificar si ya existe un intervalo para este archivo
-    if (pollingIntervals.current[fileIdToPoll]) {
-        console.log(`Ya existe polling para archivo ${fileName}, saltando...`);
-        return;
-    }
-
-    console.log(`Iniciando polling para archivo ${fileName} (ID: ${fileIdToPoll})`);
-    
-    let attemptCount = 0;
-    const maxAttempts = 120; // 10 minutos máximo (120 * 5 segundos)
-
-    const interval = setInterval(async () => {
-        attemptCount++;
-        
-        // Timeout de seguridad
-        if (attemptCount >= maxAttempts) {
-            console.warn(`Polling timeout para archivo ${fileName} después de ${maxAttempts} intentos`);
-            clearInterval(interval);
-            delete pollingIntervals.current[fileIdToPoll];
-            
-            setUploadedFileProcessingStatus(prevStatuses =>
-                prevStatuses.map(file =>
-                    file.fileId === fileIdToPoll 
-                        ? { ...file, status: "TIMEOUT" } 
-                        : file
-                )
-            );
-            return;
-        }
-
-        try {
-            console.log(`Polling intento ${attemptCount} para archivo ${fileName}`);
-            
-            const statusResponse = await fetch(
-                `${API_BASE_URL}/api/v1/papers/${paperIdToPoll}/files/${fileIdToPoll}/status`, 
-                {
-                    headers: { Authorization: `Bearer ${jwt}` },
-                    // Agregar timeout a la request si el navegador lo soporta
-                    ...(AbortSignal.timeout && { signal: AbortSignal.timeout(10000) })
-                }
-            );
-
-            // Manejar respuesta 404 específicamente
-            if (statusResponse.status === 404) {
-                console.warn(`Archivo ${fileName} no encontrado en el servidor`);
-                setUploadedFileProcessingStatus(prevStatuses =>
-                    prevStatuses.map(file =>
-                        file.fileId === fileIdToPoll 
-                            ? { ...file, status: "NOT_FOUND" } 
-                            : file
-                    )
-                );
-                clearInterval(interval);
-                delete pollingIntervals.current[fileIdToPoll];
-                return;
-            }
-
-            if (!statusResponse.ok) {
-                throw new Error(`HTTP ${statusResponse.status}: ${statusResponse.statusText}`);
-            }
-
-            const statusData = await statusResponse.json();
-            console.log(`Estado recibido para ${fileName}:`, statusData.status);
-
-            // Actualizar el estado de `uploadedFileProcessingStatus`
-            setUploadedFileProcessingStatus(prevStatuses => {
-                const updated = prevStatuses.map(file =>
-                    file.fileId === fileIdToPoll 
-                        ? { ...file, status: statusData.status, lastUpdate: new Date().toISOString() } 
-                        : file
-                );
-                
-                // Si el archivo no estaba en la lista, añadirlo
-                if (!updated.some(file => file.fileId === fileIdToPoll)) {
-                    updated.push({ 
-                        fileId: fileIdToPoll, 
-                        fileName: fileName, 
-                        status: statusData.status,
-                        lastUpdate: new Date().toISOString()
-                    });
-                }
-                return updated;
-            });
-
-            // Si el procesamiento ha terminado, detener el polling
-            if (statusData.status === "COMPLETED" || statusData.status === "FAILED") {
-                console.log(`Polling completado para ${fileName}. Estado final: ${statusData.status}`);
-                clearInterval(interval);
-                delete pollingIntervals.current[fileIdToPoll];
-                
-                // Recargar el paper para obtener la lista actualizada
-                try {
-                    const paperResponse = await fetch(`${API_BASE_URL}/api/v1/papers/${paperIdToPoll}`, {
-                        headers: { Authorization: `Bearer ${jwt}` },
-                    });
-                    
-                    if (paperResponse.ok) {
-                        const updatedPaper = await paperResponse.json();
-                        if (!updatedPaper.message) {
-                            setPaper(updatedPaper);
-                            // Remover de la lista de procesamiento después de un delay
-                            setTimeout(() => {
-                                setUploadedFileProcessingStatus(prevStatuses => 
-                                    prevStatuses.filter(file => file.fileId !== fileIdToPoll)
-                                );
-                            }, 2000); // Dar tiempo para que el usuario vea el estado final
-                        }
-                    }
-                } catch (error) {
-                    console.error("Error al recargar paper después de polling:", error);
-                }
-            }
-        } catch (error) {
-            console.error(`Error en polling para archivo ${fileName} (intento ${attemptCount}):`, error);
-            
-            // Si es un error de timeout, no detener inmediatamente
-            if (error.name === 'AbortError' || error.name === 'TimeoutError') {
-                console.log(`Timeout en intento ${attemptCount} para ${fileName}, continuando...`);
-                return; // Continúa con el siguiente intento
-            }
-            
-            // Para otros errores, detener después de varios intentos fallidos
-            if (attemptCount >= 3) {
-                console.error(`Deteniendo polling para ${fileName} después de ${attemptCount} errores`);
-                clearInterval(interval);
-                delete pollingIntervals.current[fileIdToPoll];
-                setUploadedFileProcessingStatus(prevStatuses =>
-                    prevStatuses.map(file =>
-                        file.fileId === fileIdToPoll 
-                            ? { ...file, status: "FAILED" } 
-                            : file
-                    )
-                );
-            }
-        }
-    }, 5000); // Poll cada 5 segundos
-
-    pollingIntervals.current[fileIdToPoll] = interval;
-  };
 
   // Función handleSubmit mejorada para validar todos los campos antes de enviar
   async function handleSubmit() {
@@ -513,15 +334,16 @@ export default function UserPaperEdit({ id, onSave }) {
     f.append("authors", mypaper.authors);
     f.append("publicationYear", mypaper.publicationYear);
     f.append("type", JSON.stringify(mypaper.type)); // Si 'type' es un objeto
-    f.append("publisher", mypaper.publisher || ""); // Asegurarse de que no sea 'null' si es opcional
-    f.append("publicationData", mypaper.publicationData || "");
-    f.append("abstractContent", mypaper.abstractContent || "");
-    f.append("keywords", mypaper.keywords || "");
-    f.append("notes", mypaper.notes || "");
-    f.append("source", mypaper.source || "");
-    f.append("doi", mypaper.doi || "");
-    f.append("scopus", mypaper.scopus || "");
+    f.append("publisher", mypaper.publisher);
+    f.append("publicationData", mypaper.publicationData);
+    f.append("abstractContent", mypaper.abstractContent);
+    f.append("keywords", mypaper.keywords);
+    f.append("notes", mypaper.notes);
+    f.append("source", mypaper.source);
+    f.append("doi", mypaper.doi);
+    f.append("scopus", mypaper.scopus);
     f.append("userId", userId.toString());
+
 
     // Añadir archivos al FormData
     if (files && files.length > 0) {
@@ -535,6 +357,7 @@ export default function UserPaperEdit({ id, onSave }) {
         console.log("paper:", JSON.stringify(mypaper));
         console.log("userId:", userId);
 
+        // Usar la URL completa en lugar de relativa
         const url = `${API_BASE_URL}/api/v1/papers${paperId ? "/" + paperId : ""}`;
         
         console.log("URL de la solicitud:", url);
@@ -549,15 +372,18 @@ export default function UserPaperEdit({ id, onSave }) {
 
         console.log("Estado de la respuesta:", response.status);
         
+        // Desactivar el spinner
         setIsSaving(false);
 
         if (response.ok) {
+            // Primero verifiquemos si la respuesta es vacía
             const responseText = await response.text();
             console.log("Respuesta del servidor (texto):", responseText);
             
             if (!responseText || responseText.trim() === "") {
-                console.log("Respuesta vacía del servidor, pero el estado es OK. Recargando...");
-                navigate(0); // Recargar la página si no hay contenido.
+                console.log("Respuesta vacía del servidor, pero el estado es OK");
+                // Si la operación fue exitosa pero no hay respuesta JSON, redirigir
+                navigate(0);
                 return;
             }
             
@@ -566,44 +392,16 @@ export default function UserPaperEdit({ id, onSave }) {
                 console.log("Respuesta del servidor (JSON):", responseData);
                 
                 if (responseData.message) {
+                    // Si hay un mensaje de error en la respuesta
                     console.error("Error en la respuesta:", responseData.message);
                     setModalShow(true);
                 } else {
-                    // Si se creó un nuevo paper, actualiza paperId para futuras operaciones de edición
-                    if (!paperId && responseData.paper && responseData.paper.id) {
-                        setPaperId(responseData.paper.id);
-                        setPaper(prevPaper => ({...prevPaper, id: responseData.paper.id, paperFiles: responseData.paper.paperFiles || []}));
-                    } else if (paperId && responseData.paper) {
-                        // Si es una actualización, refresca los datos del paper por si los paperFiles cambiaron
-                        setPaper(responseData.paper);
-                    }
-
-                    // *** Lógica clave para manejar la respuesta asíncrona de archivos ***
-                    if (responseData.uploadedFiles && responseData.uploadedFiles.length > 0) {
-                        // Actualizar el estado de archivos recién subidos para su visualización de progreso
-                        setUploadedFileProcessingStatus(responseData.uploadedFiles);
-                        // Limpiar los archivos en el estado 'files' (los que están en el input de file)
-                        setFiles([]);
-
-                        // Iniciar el polling para cada archivo
-                        responseData.uploadedFiles.forEach(fileInfo => {
-                            // Asegurarse de que tenemos el paper.id real (podría ser recién creado)
-                            const currentPaperId = responseData.paper ? responseData.paper.id : paper.id;
-                            if (currentPaperId) {
-                                startPolling(currentPaperId, fileInfo.fileId, fileInfo.fileName);
-                            }
-                        });
-
-                        alert("Archivos subidos exitosamente. Procesando embeddings en segundo plano. Podrás ver el estado en la lista de archivos.");
-                        // No navegamos, esperamos el polling para actualizar la UI
-
-                    } else {
-                        // Si no hay archivos nuevos, simplemente navegamos
-                        navigate(0); // Recargar la página para reflejar los cambios básicos del paper
-                    }
+                    // Operación exitosa, redirigir
+                    navigate(0);
                 }
             } catch (error) {
                 console.error("Error al parsear la respuesta JSON:", error);
+                // Si no podemos parsear pero el status es OK, asumimos éxito
                 if (response.status >= 200 && response.status < 300) {
                     navigate(0);
                 } else {
@@ -611,16 +409,67 @@ export default function UserPaperEdit({ id, onSave }) {
                 }
             }
         } else {
+            // Error en la respuesta
             const errorText = await response.text();
             console.error(`Error del servidor (${response.status}):`, errorText);
             setModalShow(true);
         }
     } catch (error) {
+        // Error de conexión
         setIsSaving(false);
         console.error("Error de conexión:", error);
         setModalShow(true);
     }
-  }
+    
+    // Función auxiliar para manejar la respuesta
+    async function handleResponse(response) {
+        console.log("Estado de la respuesta:", response.status);
+        
+        // Desactivar el spinner
+        setIsSaving(false);
+        
+        if (response.ok) {
+            // Primero verifiquemos si la respuesta es vacía
+            const responseText = await response.text();
+            console.log("Respuesta del servidor (texto):", responseText);
+            
+            if (!responseText || responseText.trim() === "") {
+                console.log("Respuesta vacía del servidor, pero el estado es OK");
+                // Si la operación fue exitosa pero no hay respuesta JSON, redirigir
+                navigate(0);
+                return;
+            }
+            
+            try {
+                const responseData = JSON.parse(responseText);
+                console.log("Respuesta del servidor (JSON):", responseData);
+                
+                if (responseData.message) {
+                    // Si hay un mensaje de error en la respuesta
+                    console.error("Error en la respuesta:", responseData.message);
+                    setModalShow(true);
+                } else {
+                    // Operación exitosa, redirigir
+                    navigate(0);
+                }
+            } catch (error) {
+                console.error("Error al parsear la respuesta JSON:", error);
+                // Si no podemos parsear pero el status es OK, asumimos éxito
+                if (response.status >= 200 && response.status < 300) {
+                    navigate(0);
+                } else {
+                    setModalShow(true);
+                }
+            }
+        } else {
+            // Error en la respuesta
+            const errorText = await response.text();
+            console.error(`Error del servidor (${response.status}):`, errorText);
+            setModalShow(true);
+        }
+    }
+}
+
 
   paperEditFormInputs.forEach((i) => (i.handleChange = handleChange))
 
@@ -666,11 +515,15 @@ export default function UserPaperEdit({ id, onSave }) {
   }
 
   // Función para validar todos los campos al cargar el formulario
+  // Ahora solo se ejecuta cuando paperLoaded cambia a true
   useEffect(() => {
     if (paperLoaded) {
+      // Si estamos editando un paper existente, no mostramos errores inicialmente
       if (paperId) {
-        // No validamos en la carga inicial para papers existentes
+        // No hacemos nada, esperamos a que el usuario interactúe con los campos
+        console.log("Paper cargado para edición, esperando interacción del usuario")
       } else {
+        // Si es un nuevo paper, podemos validar los campos requeridos
         const initialErrors = {}
         let hasInitialErrors = false
 
@@ -692,7 +545,7 @@ export default function UserPaperEdit({ id, onSave }) {
         }
       }
     }
-  }, [paperLoaded]);
+  }, [paperLoaded])
 
   // Helper para truncar nombres de archivo largos
   const truncateFileName = (fileName, maxLength = 25) => {
@@ -707,10 +560,7 @@ export default function UserPaperEdit({ id, onSave }) {
     <div className="paper-edit-container">
       {/* Loading Spinner */}
       {isSaving && (
-        <div className="overlay-spinner">
-          <span className="loader"></span>
-          <p>Guardando paper y subiendo archivos...</p>
-        </div>
+        <span class="loader"></span>
       )}
 
       <h2 className="page-title">{paper.id ? "Edit Paper" : "Add Paper"}</h2>
@@ -861,7 +711,7 @@ export default function UserPaperEdit({ id, onSave }) {
           <label htmlFor="file-upload" className="upload-label">
             <Upload className="upload-icon" />
             <p className="upload-text">Click to upload or drag and drop</p>
-            <p className="upload-hint">PDF, DOC, DOCX (MAX. 199MB)</p> {/* Updated max size hint */}
+            <p className="upload-hint">PDF, DOC, DOCX (MAX. 10MB)</p>
             <input
               id="file-upload"
               type="file"
@@ -873,10 +723,9 @@ export default function UserPaperEdit({ id, onSave }) {
           </label>
         </div>
 
-        {/* Display for files selected for upload (before actual upload) */}
+        {/* Modified file selection display - now shows each file with a delete button */}
         {files && files.length > 0 && (
           <div className="selected-files-list">
-            <h4 className="files-list-title">Files to Upload</h4>
             {files.map((file, index) => (
               <div key={index} className="selected-file-item">
                 <div className="selected-file-info">
@@ -895,35 +744,6 @@ export default function UserPaperEdit({ id, onSave }) {
           </div>
         )}
 
-        {/* Display for files that are currently processing (recently uploaded) */}
-        {uploadedFileProcessingStatus.length > 0 && (
-          <div className="processing-files-list">
-            <h4 className="files-list-title">Processing Files</h4>
-            {uploadedFileProcessingStatus.map((file, index) => (
-              <div key={index} className="processing-file-item">
-                <div className="file-info">
-                  <FileText className="file-icon" />
-                  <span className="file-name">{truncateFileName(file.fileName)}</span>
-                </div>
-                <div className="file-processing-status">
-                  {file.status === "PROCESSING" && (
-                    <>
-                      <Loader className="spinner" size={18} /> Procesando...
-                    </>
-                  )}
-                  {file.status === "COMPLETED" && (
-                    <span className="text-success">Completado &#10003;</span>
-                  )}
-                  {file.status === "FAILED" && (
-                    <span className="text-danger">Fallido <X size={18} /></span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Display for already attached files (from backend) */}
         {paper.paperFiles && paper.paperFiles.length > 0 && (
           <div className="files-list">
             <h4 className="files-list-title">Attached Files</h4>
@@ -931,7 +751,7 @@ export default function UserPaperEdit({ id, onSave }) {
               <div key={index} className="file-item">
                 <div className="file-info">
                   <FileText className="file-icon" />
-                  <span className="file-name">{truncateFileName(paperFile.name)}</span>
+                  <span className="file-name">{paperFile.name}</span>
                 </div>
                 <button className="delete-button" onClick={() => removePaperFile(paperFile.id)}>
                   <Trash2 className="delete-icon" />
@@ -945,13 +765,7 @@ export default function UserPaperEdit({ id, onSave }) {
 
       <div className="save-button-container">
         <button className="save-button" onClick={handleSaveClick} disabled={isSaving}>
-          {isSaving ? (
-            <>
-              <span className="loader"></span> Guardando...
-            </>
-          ) : (
-            "Save"
-          )}
+          {isSaving ? "Guardando..." : "Save"}
         </button>
       </div>
     </div>

@@ -1,7 +1,6 @@
 package org.springframework.samples.pubus.paper;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -61,18 +60,19 @@ public class PaperRestController {
 	private final PaperService paperService;
 	private final UserService userService;
 	private final PaperFileService paperFileService;
-	// private static final String USER_AUTH = "USER"; // No usado
-	// private static final String ADMIN_AUTH = "ADMIN"; // No usado
-	// private final RestTemplate restTemplate; // No usado en el controller
+	private static final String USER_AUTH = "USER";
+	private static final String ADMIN_AUTH = "ADMIN";
+	private final RestTemplate restTemplate;
 	private final ObjectMapper objectMapper;
 	private static final Logger logger = LoggerFactory.getLogger(PaperRestController.class);
 
 	@Autowired
-	public PaperRestController(PaperService paperService, UserService userService, PaperFileService paperFileService, ObjectMapper objectMapper) {
+	public PaperRestController(PaperService paperService, UserService userService, PaperFileService paperFileService, RestTemplate restTemplate,ObjectMapper objectMapper) {
 		this.paperService = paperService;
 		this.userService = userService;
 		this.paperFileService = paperFileService;
-		this.objectMapper = objectMapper; // Usa el ObjectMapper inyectado
+		this.restTemplate = restTemplate;
+		this.objectMapper = objectMapper;
 	}
 
 	@InitBinder("paper")
@@ -98,163 +98,78 @@ public class PaperRestController {
     @GetMapping
     public ResponseEntity<List<Paper>> findAll(
             @RequestParam(required = false) Integer userId,
-            @RequestParam(required = false) List<String> types,
+            @RequestParam(required = false) List<String> types, // Spring Boot mapea esto automáticamente desde "types=Type1,Type2"
             @RequestParam(required = false) String search) {
 
-        logger.debug("API Request - userId: {}, types: {}, search: {}", userId, types, search);
+        // Opcional: Logs para depuración en el controlador
+        System.out.println("API Request - userId: " + userId + ", types: " + types + ", search: " + search);
 
+        // Llama al servicio con los parámetros directamente recibidos
         List<Paper> papers = paperService.findPapersFiltered(userId, types, search);
 
         return new ResponseEntity<>(papers, HttpStatus.OK);
     }
 
-//UPLOAD FILE - VERSIÓN ASÍNCRONA
+// // GET FILTERED
 
-	@PostMapping("/{paperId}/files") // Nuevo endpoint para subir archivos a un paper existente
-	public ResponseEntity<Map<String, Object>> uploadFile(@PathVariable Integer paperId, @RequestParam("files") List<MultipartFile> files) {
-		try {
-			Paper paper = RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
+// 	public ResponseEntity<List<Paper>> searchPaper(String originalSearch) {
+// 		String search = originalSearch.toLowerCase();
+// 		Set<Paper> set_complete = new HashSet<>();
 
-			List<Map<String, Object>> uploadedFiles = new ArrayList<>();
-			
-			for(MultipartFile file: files){	
-				long fileSize = file.getSize();
-				long maxfileSize = 199 * 1024 * 1024; // 199 MB
-				if (fileSize > maxfileSize) {
-					Map<String, Object> errorResponse = new HashMap<>();
-					errorResponse.put("error", "File size exceeds limit");
-					errorResponse.put("fileName", file.getOriginalFilename());
-					errorResponse.put("maxSize", "199MB");
-					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-				}
-				
-				// Subir archivo de forma asíncrona
-				PaperFile uploadedFile = paperFileService.upload(file, paper, paperId);
-				
-				Map<String, Object> fileInfo = new HashMap<>();
-				fileInfo.put("fileId", uploadedFile.getId());
-				fileInfo.put("fileName", uploadedFile.getName());
-				fileInfo.put("status", uploadedFile.getProcessingStatus());
-				uploadedFiles.add(fileInfo);
-			}
-			
-			Map<String, Object> response = new HashMap<>();
-			response.put("paperId", paperId);
-			response.put("uploadedFiles", uploadedFiles);
-			response.put("message", "Files uploaded successfully. Processing embeddings in background.");
-			response.put("totalFiles", files.size());
-			
-			return ResponseEntity.status(HttpStatus.OK).body(response);
-			
-		} catch (IOException e) {
-			logger.error("Error al subir archivos: {}", e.getMessage(), e);
-			Map<String, Object> errorResponse = new HashMap<>();
-			errorResponse.put("error", "Failed to upload files");
-			errorResponse.put("message", e.getMessage());
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+// 		List<Paper> list1 = this.paperService.findAllPapersByAuthor(search);
+// 		List<Paper> list2 = this.paperService.findAllPapersAbstractWord(search);
+// 		List<Paper> list3 = this.paperService.findAllPapersByKeyword(search);
+// 		List<Paper> list4 = this.paperService.findPaperByTitle(search);
+
+// 		set_complete.addAll(list1);
+// 		set_complete.addAll(list2);
+// 		set_complete.addAll(list3);
+// 		set_complete.addAll(list4);
+
+// 		List<Paper> list_complete = set_complete.stream().collect(Collectors.toList());
+
+// 		return new ResponseEntity<>((List<Paper>) list_complete, HttpStatus.OK);
+// 	}
+
+//UPLOAD FILE
+
+	public ResponseEntity<Paper> uploadFile(Integer paperId, Paper paper, List<MultipartFile> files) {
+	try {
+		//Paper paper = RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
+		for(MultipartFile file: files){	
+			long fileSize = file.getSize();
+			long maxfileSize = 199 * 1024 * 1024;
+			if (fileSize > maxfileSize) return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+			paperFileService.upload(file, paper, paperId);	
 		}
+		Paper paperUpdated = paperService.findPaperById(paperId);
+		return ResponseEntity.status(HttpStatus.OK).body(paperUpdated);
+	} catch (IOException e) {
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
 	}
-
-	@GetMapping("/{paperId}/files/{fileId}/status")
-	public ResponseEntity<Map<String, String>> getFileProcessingStatus(
-			@PathVariable Integer paperId,
-			@PathVariable Integer fileId) {
-		
-		try {
-			// Validar que el paper existe y pertenece al usuario actual
-			// (implementar según tu lógica de seguridad)
-			
-			String status = paperFileService.getProcessingStatus(fileId);
-			
-			// Log para debugging
-			logger.info("File processing status check - PaperId: {}, FileId: {}, Status: {}", 
-					paperId, fileId, status);
-			
-			Map<String, String> response = new HashMap<>();
-			response.put("paperId", paperId.toString());
-			response.put("fileId", fileId.toString());
-			response.put("status", status);
-			response.put("timestamp", Instant.now().toString());
-			
-			// ... resto de tu código switch
-			
-			return ResponseEntity.ok(response);
-			
-		} catch (Exception e) {
-			logger.error("Error getting file processing status - PaperId: {}, FileId: {}", 
-						paperId, fileId, e);
-			
-			Map<String, String> errorResponse = new HashMap<>();
-			errorResponse.put("paperId", paperId.toString());
-			errorResponse.put("fileId", fileId.toString());
-			errorResponse.put("status", "ERROR");
-			errorResponse.put("message", "Internal server error");
-			
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-		}
-	}
-
-//NUEVO ENDPOINT: GET ALL FILES STATUS BY PAPER
-
-	@GetMapping("/{paperId}/files/status")
-	public ResponseEntity<Map<String, Object>> getAllFilesStatus(@PathVariable Integer paperId) {
-		Paper paper = RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
-		
-		List<PaperFile> paperFiles = paper.getPaperFiles();
-		List<Map<String, Object>> filesStatus = new ArrayList<>();
-		
-		int processing = 0, completed = 0, failed = 0;
-		
-		for (PaperFile file : paperFiles) {
-			Map<String, Object> fileStatus = new HashMap<>();
-			fileStatus.put("fileId", file.getId());
-			fileStatus.put("fileName", file.getName());
-			fileStatus.put("status", file.getProcessingStatus());
-			filesStatus.add(fileStatus);
-			
-			// Contar estados
-			switch(file.getProcessingStatus()) {
-				case "PROCESSING": processing++; break;
-				case "COMPLETED": completed++; break;
-				case "FAILED": failed++; break;
-			}
-		}
-		
-		Map<String, Object> response = new HashMap<>();
-		response.put("paperId", paperId);
-		response.put("files", filesStatus);
-		response.put("summary", Map.of(
-			"total", paperFiles.size(),
-			"processing", processing,
-			"completed", completed,
-			"failed", failed
-		));
-		
-		return ResponseEntity.ok(response);
 	}
 
 //DOWNLOAD FILE
 
 	@GetMapping("/{paperId}/download/{paperFileId}")
 	public ResponseEntity<byte[]> downloadFile(@PathVariable int paperFileId) {
-		try {
-			PaperFile paperFile = paperFileService.download(paperFileId).get();
-			return ResponseEntity.status(HttpStatus.OK)
-					.header(HttpHeaders.CONTENT_TYPE, paperFile.getType())
-					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + paperFile.getName()+ "\"")
-					.body(paperFile.getData()); // CUIDADO: Carga el archivo completo si está en DB
-					
-		} catch (NotFoundException e) {
-			logger.warn("File with ID {} not found for download.", paperFileId);
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-		}
+	try {
+		PaperFile paperFile = paperFileService.download(paperFileId).get();
+		return ResponseEntity.status(HttpStatus.OK)
+				.header(HttpHeaders.CONTENT_TYPE, paperFile.getType())
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + paperFile.getName()+ "\"")
+				.body(paperFile.getData());
+				
+	} catch (NotFoundException e) {
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+	}
 	}
 
 //GET FILES BY PAPERID
 
 	@GetMapping("/{paperId}/files")
 	public ResponseEntity<List<ResponseFile>> getListFiles(@PathVariable int paperId){
-		RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
+		Paper paper = RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
 		List<ResponseFile> files = paperFileService.getAllFilesByPaperId(paperId);
 		return ResponseEntity.status(HttpStatus.OK).body(files);
 	}
@@ -265,7 +180,7 @@ public class PaperRestController {
 	public ResponseEntity<Paper> findById(@PathVariable("paperId") int paperId) {
 		Paper paper = RestPreconditions.checkNotNull(paperService.findPaperById(paperId), "Paper", "ID", paperId);
 			return new ResponseEntity<>(paper, HttpStatus.OK);
-	}	
+	} 
 	
 //GET BY USERID
 
@@ -295,15 +210,16 @@ public class PaperRestController {
 		return new ResponseEntity<>((List<Paper>) list_complete, HttpStatus.OK);
 	}
 
-//CREATE - MODIFICADO PARA RESPUESTA ASÍNCRONA
+
+//CREATE	
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseEntity<?> create(
+	public ResponseEntity<Paper> create(
         @RequestParam("title") String title,
         @RequestParam("authors") String authors,
         @RequestParam("publicationYear") String publicationYear,
-        @RequestParam("type") String typeJson,
+        @RequestParam("type") String typeJson, // Recibimos el JSON de Type como String
         @RequestParam(value = "publisher", required = false) String publisher,
         @RequestParam(value = "publicationData", required = false) String publicationData,
         @RequestParam(value = "abstractContent", required = false) String abstractContent,
@@ -317,14 +233,20 @@ public class PaperRestController {
         throws DataAccessException, DuplicatedPaperTitleException {
 
     logger.debug("Iniciando creación de Paper (atributos separados)");
-    logger.debug("Title recibido: {}", title);
-    logger.debug("Files recibidos: {}", (files != null ? files.size() : "null"));
+    logger.debug("Title recibido: " + title);
+    logger.debug("Authors recibido: " + authors);
+    logger.debug("Publication Year recibido: " + publicationYear);
+    logger.debug("Type JSON recibido: " + typeJson);
+    logger.debug("UserId recibido: " + userId);
+	logger.debug("Files recibidos: " + (files != null ? files.size() : "null"));
 
     try {
         Integer id = Integer.parseInt(userId);
         User user = userService.findUser(id);
-        logger.debug("Usuario encontrado: {}", user);
+        logger.debug("Usuario encontrado: " + user);
 
+        // Deserializar el JSON de Type a un objeto Type
+        ObjectMapper objectMapper = new ObjectMapper();
         PaperType type = objectMapper.readValue(typeJson, PaperType.class);
 
         Paper newPaper = new Paper();
@@ -341,48 +263,35 @@ public class PaperRestController {
 		newPaper.setDOI(doi);
         newPaper.setScopus(scopus);
         newPaper.setUser(user);
+        logger.debug("Paper antes de guardar: " + newPaper);
 
         Paper savedPaper = this.paperService.savePaper(newPaper);
-        logger.debug("Paper guardado: {}", savedPaper);
+        logger.debug("Paper guardado: " + savedPaper);
 
         if (files != null && !files.isEmpty()) {
-            logger.debug("Procesando archivos de forma asíncrona...");
-            // Llamar al nuevo endpoint uploadFile
-            ResponseEntity<Map<String, Object>> fileResponse = uploadFile(savedPaper.getId(), files);
-            
-            // Agregar información del paper creado a la respuesta
-            Map<String, Object> response = fileResponse.getBody();
-            if (response == null) { // Asegurar que el cuerpo no es nulo
-                response = new HashMap<>();
-            }
-            response.put("paper", savedPaper);
-            
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            logger.debug("Procesando archivos...");
+            return uploadFile(savedPaper.getId(), savedPaper, files);
         }
 
         return new ResponseEntity<>(savedPaper, HttpStatus.CREATED);
     } catch (Exception e) {
-        logger.error("Error al crear el paper: {}", e.getMessage(), e); // Log con stack trace
-        
-        Map<String, Object> errorResponse = new HashMap<>();
-        errorResponse.put("error", "Failed to create paper");
-        errorResponse.put("message", e.getMessage());
-        
+        logger.debug("Error al crear el paper (atributos separados): " + e.getMessage());
+        e.printStackTrace();
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(errorResponse);
+                .body(null);
     }
 }
 
-//UPDATE - MODIFICADO PARA RESPUESTA ASÍNCRONA
+//UPDATE
 
 	@PutMapping("{paperId}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<?> update(@PathVariable("paperId") int paperId,	
+	public ResponseEntity<Paper> update(@PathVariable("paperId") int paperId, 
 		@RequestParam("title") String title,
 		@RequestParam("authors") String authors,
 		@RequestParam("publicationYear") String publicationYear,
-		@RequestParam("type") String typeJson,
+		@RequestParam("type") String typeJson, // Recibimos el JSON de Type como String
 		@RequestParam(value = "publisher", required = false) String publisher,
 		@RequestParam(value = "publicationData", required = false) String publicationData,
 		@RequestParam(value = "abstractContent", required = false) String abstractContent,
@@ -399,10 +308,11 @@ public class PaperRestController {
 		User loggedUser = userService.findUser(id);
 		User paperUser = aux.getUser();
 		Paper newPaper = new Paper();
-        // ObjectMapper objectMapper = new ObjectMapper(); // Ya está inyectado
+		ObjectMapper objectMapper = new ObjectMapper();
+        PaperType type;
 
 		try {
-			PaperType type = objectMapper.readValue(typeJson, PaperType.class);
+			type = objectMapper.readValue(typeJson, PaperType.class);
 			newPaper.setTitle(title);
 			newPaper.setAuthors(authors);
 			newPaper.setPublicationYear(Integer.parseInt(publicationYear));
@@ -418,52 +328,28 @@ public class PaperRestController {
 			newPaper.setUser(paperUser);
 
 			if (loggedUser.getId().equals(paperUser.getId())) {
-				Paper paper = paperService.updatePaper(newPaper, paperId); // Actualizar primero el paper
-				
-				if(files != null && !files.isEmpty()){
-					// Llamar al nuevo endpoint uploadFile
-					ResponseEntity<Map<String, Object>> fileResponse = uploadFile(paperId, files);
-					
-					Map<String, Object> response = fileResponse.getBody();
-					if (response == null) { // Asegurar que el cuerpo no es nulo
-						response = new HashMap<>();
-					}
-					response.put("paper", paper); // Añadir el paper actualizado
-					
-					return ResponseEntity.ok(response);
-				} else {
-					return new ResponseEntity<>(paper, HttpStatus.OK); // Si no hay archivos, retorna solo el paper
+				if(files!=null){
+					Paper paper = paperService.updatePaper(newPaper, paperId);
+					ResponseEntity<Paper> res = uploadFile(paperId, paper, files);
+					return res;
 				}
-			} else {
+				else{
+					Paper res = paperService.updatePaper(newPaper, paperId);
+					return new ResponseEntity<>(res, HttpStatus.OK);
+				}
+			} else
 				throw new ResourceNotOwnedException(aux);
-			}
-		} catch (JsonMappingException e) {
-			logger.error("Error de mapeo JSON al actualizar paper: {}", e.getMessage(), e);
-			Map<String, Object> errorResponse = new HashMap<>();
-			errorResponse.put("error", "JSON mapping error");
-			errorResponse.put("message", e.getMessage());
+		 } catch (JsonMappingException e) {
 			return ResponseEntity
-				.status(HttpStatus.INTERNAL_SERVER_ERROR)
-				.body(errorResponse);
+			.status(HttpStatus.INTERNAL_SERVER_ERROR)
+			.body(null);
 		} catch (JsonProcessingException e) {
-			logger.error("Error de procesamiento JSON al actualizar paper: {}", e.getMessage(), e);
-			
-			Map<String, Object> errorResponse = new HashMap<>();
-			errorResponse.put("error", "JSON processing error");
-			errorResponse.put("message", e.getMessage());
-			
+			logger.debug("Error al crear el paper (atributos separados): " + e.getMessage());
+			e.printStackTrace();
 			return ResponseEntity
 					.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(errorResponse);
-		} catch (IOException e) { // Catch para errores de I/O de uploadFile
-            logger.error("Error de I/O al actualizar paper y subir archivos: {}", e.getMessage(), e);
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "File upload failed during paper update");
-            errorResponse.put("message", e.getMessage());
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(errorResponse);
-        }
+					.body(null);
+		}
 	}
 
 //DELETE	
@@ -570,7 +456,6 @@ public class PaperRestController {
 		@RequestParam("searchTerm") String searchTerm){
 			String url = "https://api.crossref.org/works/"+searchTerm;
 			List<String> oldTitles = new ArrayList<>();
-			RestTemplate restTemplate = new RestTemplate();
 			oldTitles.addAll(paperService.findAllPapersByUserId(userId).stream().map(x-> x.getTitle()).toList());
 
 
