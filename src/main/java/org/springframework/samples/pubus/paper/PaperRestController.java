@@ -511,31 +511,39 @@ public class PaperRestController {
 		}
 
 //LIKE
-
-		@PostMapping("/{userId}/like/{paperId}")
-		public ResponseEntity<String> likePaper(@PathVariable("paperId") Integer paperId, @PathVariable(value = "userId", required = false) String userId){
+	@PostMapping("{userId}/like/{paperId}") 
+	public ResponseEntity<String> likePaper(@PathVariable("paperId") Integer paperId, @PathVariable(value = "userId", required = false) String userId){
+		try {
 			Paper paper = paperService.findPaperById(paperId);
 			Integer userIdInt = Integer.parseInt(userId);
 			User user = userService.findUser(userIdInt);
-			if (user.getFavorites() == null) {
-				user.setFavorites(new ArrayList<>());
-			}
-			if(!user.getFavorites().contains(paperId)){
-				paper.setLikes(paper.getLikes()+1);
-				user.getFavorites().add(paper.getId());
+			
+			// Usar el mismo objeto Integer para comparación y operaciones
+			Integer paperIdInteger = paper.getId();
+			
+			if(!user.getFavorites().contains(paperIdInteger)){
+				paper.setLikes(paper.getLikes() + 1);
+				user.getFavorites().add(paperIdInteger);
 				paperService.savePaper(paper);
 				userService.saveUser(user);
 				return ResponseEntity.ok("You liked this paper");
-			}else{
-				paper.setLikes(paper.getLikes()-1);
-				user.getFavorites().remove(paper.getId());
+			} else {
+				paper.setLikes(paper.getLikes() - 1);
+				// Usar Integer.valueOf() o cast explícito para asegurar que se elimine por valor
+				user.getFavorites().remove(paperIdInteger);
 				paperService.savePaper(paper);
 				userService.saveUser(user);
 				return ResponseEntity.ok("You took off your like");
 			}
-
+		} catch (Exception e) {
+			// Log del error para debugging
+			System.err.println("Error in likePaper: " + e.getMessage());
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+							.body("Error processing request: " + e.getMessage());
 		}
-
+	}
+	
 //PROMPT
 
 		@GetMapping("/users/{userId}/prompt")
