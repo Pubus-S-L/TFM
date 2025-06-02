@@ -20,7 +20,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class PaperService {
 
 	private PaperRepository paperRepository;
@@ -208,25 +211,11 @@ public class PaperService {
     // }
 
 	public List<PaperSummaryDTO> findPapersFiltered(Integer userId, List<String> types, String searchTerm) {
-        // Normalizar parámetros de entrada
-        List<String> normalizedTypes = (types == null || types.isEmpty()) ? 
-            Collections.emptyList() : 
-            types.stream()
-                 .filter(Objects::nonNull)
-                 .map(String::trim)
-                 .filter(s -> !s.isEmpty())
-                 .collect(Collectors.toList());
-        
-        String normalizedSearch = (searchTerm != null && !searchTerm.trim().isEmpty()) ? 
-            searchTerm.trim() : null;
-        
-        // Usar la consulta nativa optimizada
-        List<Object[]> results = paperRepository.findFilteredPapersOptimized(
-            userId, normalizedTypes, normalizedSearch);
-        
-        return results.stream()
-                     .map(PaperSummaryDTO::fromObjectArray)
-                     .collect(Collectors.toList());
+
+        boolean noTypeFilter = (types == null || types.isEmpty());
+        List<String> typesForQuery = noTypeFilter ? Collections.emptyList() : types;
+        String searchTermForQuery = (searchTerm != null && searchTerm.isEmpty()) ? null : searchTerm;
+        return paperRepository.findFilteredPapers(userId, typesForQuery, noTypeFilter, searchTermForQuery);
     }
     
     @Cacheable(value = "paperTypes", unless = "#result.isEmpty()")

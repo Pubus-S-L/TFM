@@ -172,7 +172,7 @@ export default function Papers() {
                     <CardDescription>
                       <p><strong>Authors:</strong> {paper.authors}</p>
                       <p><strong>Publication Year:</strong> {paper.publicationYear}</p>
-                      <p><strong>Type:</strong> {paper.type?.name}</p>
+                      <p><strong>Type:</strong> {paper.typeName}</p>
                       {paper.likes != null && paper.likes > 0 && (
                         <span className="inline-flex items-center gap-1 text-sm font-medium text-gray-700 self-start">
                           <Heart size={16} className="text-red-500" />

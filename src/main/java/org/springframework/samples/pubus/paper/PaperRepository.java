@@ -102,39 +102,26 @@ public interface PaperRepository extends CrudRepository<Paper, Integer> {
             ELSE p.publication_year
             END DESC
         """, nativeQuery = true)
-    List<Object[]> findFilteredPapersOptimized(
+    List<Paper> findFilteredPapersOptimized(
         @Param("userId") Integer userId,
         @Param("types") List<String> types,
         @Param("searchTerm") String searchTerm
     );
 
     // Versión alternativa con JPQL optimizada - Para compatibilidad
-    @Query("""
-        SELECT new org.springframework.samples.pubus.paper.PaperSummaryDTO(
-            p.id, p.title, p.authors, p.publicationYear, p.likes, p.type.name
-        )
-        FROM Paper p 
-        LEFT JOIN p.type pt
-        WHERE (:userId IS NULL OR p.user.id = :userId)
-        AND (:#{#types.size()} = 0 OR pt.name IN :types)
-        AND (:searchTerm IS NULL OR :searchTerm = '' OR 
-             UPPER(p.title) LIKE UPPER(CONCAT('%', :searchTerm, '%')) OR 
-             UPPER(p.authors) LIKE UPPER(CONCAT('%', :searchTerm, '%')))
-        ORDER BY 
-            CASE WHEN :searchTerm IS NOT NULL AND :searchTerm != '' THEN
-                CASE 
-                    WHEN UPPER(p.title) LIKE UPPER(CONCAT('%', :searchTerm, '%')) THEN 1
-                    WHEN UPPER(p.authors) LIKE UPPER(CONCAT('%', :searchTerm, '%')) THEN 2
-                    ELSE 3
-                END
-            ELSE p.publicationYear
-            END DESC
-        """)
-    List<PaperSummaryDTO> findFilteredPapersSummary(
-        @Param("userId") Integer userId,
-        @Param("types") List<String> types,
-        @Param("searchTerm") String searchTerm
-    );
+    @Query("SELECT new org.springframework.samples.pubus.paper.PaperSummaryDTO(p.id, p.title, p.authors, p.publicationYear, p.likes, p.type.name) FROM Paper p WHERE " +
+            "(:userId IS NULL OR p.user.id = :userId) AND " +
+            "(:noTypeFilter = TRUE OR p.type.name IN :types) AND " +
+            "(:searchTerm IS NULL OR :searchTerm = '' OR " +
+            "  LOWER(p.authors) LIKE CONCAT('%', LOWER(:searchTerm), '%') OR " +
+            "  LOWER(p.abstractContent) LIKE CONCAT('%', LOWER(:searchTerm), '%') OR " +
+            "  LOWER(p.keywords) LIKE CONCAT('%', LOWER(:searchTerm), '%') OR " +
+            "  LOWER(p.title) LIKE CONCAT('%', LOWER(:searchTerm), '%'))")
+    List<PaperSummaryDTO> findFilteredPapers(
+            @Param("userId") Integer userId,
+            @Param("types") List<String> types,
+            @Param("noTypeFilter") boolean noTypeFilter,
+            @Param("searchTerm") String searchTerm);
 
     // Query simple para obtener solo tipos (caché)
     @Query("SELECT DISTINCT p.type FROM Paper p WHERE p.type IS NOT NULL ORDER BY p.type.name")
