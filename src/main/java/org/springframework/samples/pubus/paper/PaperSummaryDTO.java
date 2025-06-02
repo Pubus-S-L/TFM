@@ -1,5 +1,10 @@
 package org.springframework.samples.pubus.paper;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class PaperSummaryDTO {
     private Integer id;
     private String title;
@@ -25,29 +30,12 @@ public class PaperSummaryDTO {
             ((Number) row[0]).intValue(),      // id
             (String) row[1],                    // title
             (String) row[2],                    // authors
-            (Integer) row[3],                   // publication_year
-            (Integer) row[4],                   // likes
+            ((Number) row[3]).intValue(),                   // publication_year
+            ((Number) row[4]).intValue(),                   // likes
             (String) row[5]                     // type_name
         );
     }
     
-    // Getters y setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-    
-    public String getAuthors() { return authors; }
-    public void setAuthors(String authors) { this.authors = authors; }
-    
-    public Integer getPublicationYear() { return publicationYear; }
-    public void setPublicationYear(Integer publicationYear) { this.publicationYear = publicationYear; }
-    
-    public Integer getLikes() { return likes; }
-    public void setLikes(Integer likes) { this.likes = likes; }
-    
-    public String getTypeName() { return typeName; }
-    public void setTypeName(String typeName) { this.typeName = typeName; }
+
 }
 
