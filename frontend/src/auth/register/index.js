@@ -5,9 +5,11 @@ import FormGenerator from "../../components/formGenerator/formGenerator";
 import { registerFormInputs } from "./form/registerFormInputs";
 import { useRef, useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import { Spinner } from "reactstrap";
+import { Alert, Spinner } from "reactstrap";
+import { set } from "zod";
 
 export default function Register() {
+  const [message, setMessage] = useState(null)
   const registerFormRef = useRef();   
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -34,7 +36,7 @@ export default function Register() {
       const signupData = await signupResponse.json();
 
       if (!signupResponse.ok) {
-        alert(signupData.message || "Signup failed");
+        setMessage(signupData.message || "Signup failed");
         setLoading(false);
         return;
       }
@@ -54,7 +56,7 @@ export default function Register() {
       const loginData = await loginResponse.json();
 
       if (!loginResponse.ok) {
-        alert(loginData.message || "Login failed");
+        setMessage(loginData.message || "Login failed");
         setLoading(false);
         return;
       }
@@ -66,7 +68,7 @@ export default function Register() {
       window.location.reload();
 
     } catch (error) {
-      alert(error.message || "Unexpected error occurred");
+      setMessage(error.message || "Unexpected error occurred");
     } finally {
       setLoading(false);
     }
@@ -74,6 +76,11 @@ export default function Register() {
 
   return (
     <div className="auth-page-container">
+      {message ? (
+                <Alert color="primary">{message}</Alert>
+              ) : (
+                <></>
+              )}
       <h1>Register</h1>
       <div className="auth-form-container">
         <FormGenerator
