@@ -1,7 +1,7 @@
 package org.springframework.samples.pubus.paper;
 
 public class PaperSummaryDTO {
-    private Long id;
+    private Integer id;
     private String title;
     private String authors;
     private Integer publicationYear;
@@ -9,7 +9,7 @@ public class PaperSummaryDTO {
     private String typeName;
 
     // Constructor para JPQL
-    public PaperSummaryDTO(Long id, String title, String authors, 
+    public PaperSummaryDTO(Integer id, String title, String authors, 
                           Integer publicationYear, Integer likes, String typeName) {
         this.id = id;
         this.title = title;
@@ -22,7 +22,7 @@ public class PaperSummaryDTO {
     // Constructor para consulta nativa
     public static PaperSummaryDTO fromObjectArray(Object[] row) {
         return new PaperSummaryDTO(
-            ((Number) row[0]).longValue(),      // id
+            ((Number) row[0]).intValue(),      // id
             (String) row[1],                    // title
             (String) row[2],                    // authors
             (Integer) row[3],                   // publication_year
