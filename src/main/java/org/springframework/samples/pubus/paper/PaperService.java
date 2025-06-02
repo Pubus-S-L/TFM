@@ -210,10 +210,11 @@ public class PaperService {
     //     return paperRepository.searchAllFieldsByUser(searchTerm.toLowerCase(), userId);
     // }
 
+	@Transactional(readOnly = true)
 	public List<PaperSummaryDTO> findPapersFiltered(Integer userId, List<String> types, String searchTerm) {
 
         boolean noTypeFilter = (types == null || types.isEmpty());
-        List<String> typesForQuery = noTypeFilter ? Collections.emptyList() : types;
+        List<String> typesForQuery = noTypeFilter ? null : types;
         String searchTermForQuery = (searchTerm != null && searchTerm.isEmpty()) ? null : searchTerm;
         return paperRepository.findFilteredPapers(userId, typesForQuery, noTypeFilter, searchTermForQuery);
     }
