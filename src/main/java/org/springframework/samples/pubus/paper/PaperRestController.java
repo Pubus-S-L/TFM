@@ -113,35 +113,14 @@ public class PaperRestController {
             @RequestParam(required = false) List<String> types, // Spring Boot mapea esto automáticamente desde "types=Type1,Type2"
             @RequestParam(required = false) String search) {
 
-        // Opcional: Logs para depuración en el controlador
-        System.out.println("API Request - userId: " + userId + ", types: " + types + ", search: " + search);
+         logger.debug("Received request: userId={}, types={}, search='{}'",
+                 userId, types, search);
 
-        // Llama al servicio con los parámetros directamente recibidos
-        List<PaperSummaryDTO> papers = paperService.findPapersFiltered(userId, types, search);
+    	List<PaperSummaryDTO> papers = paperService.findPapersFiltered(userId, types, search);
 
+    	logger.debug("Returning {} papers", papers.size());
         return new ResponseEntity<>(papers, HttpStatus.OK);
     }
-
-// // GET FILTERED
-
-// 	public ResponseEntity<List<Paper>> searchPaper(String originalSearch) {
-// 		String search = originalSearch.toLowerCase();
-// 		Set<Paper> set_complete = new HashSet<>();
-
-// 		List<Paper> list1 = this.paperService.findAllPapersByAuthor(search);
-// 		List<Paper> list2 = this.paperService.findAllPapersAbstractWord(search);
-// 		List<Paper> list3 = this.paperService.findAllPapersByKeyword(search);
-// 		List<Paper> list4 = this.paperService.findPaperByTitle(search);
-
-// 		set_complete.addAll(list1);
-// 		set_complete.addAll(list2);
-// 		set_complete.addAll(list3);
-// 		set_complete.addAll(list4);
-
-// 		List<Paper> list_complete = set_complete.stream().collect(Collectors.toList());
-
-// 		return new ResponseEntity<>((List<Paper>) list_complete, HttpStatus.OK);
-// 	}
 
 //UPLOAD FILE
 
@@ -194,34 +173,6 @@ public class PaperRestController {
 			return new ResponseEntity<>(paper, HttpStatus.OK);
 	} 
 	
-//GET BY USERID
-
-	@GetMapping("/users/{userId}")
-	public ResponseEntity<List<Paper>> findAllByUserId(@PathVariable("userId") int userId, @RequestParam(required = false) String search) {
-		return searchPaperByUserId(userId,search);
-	}
-
-//SEARCH PAPER BY USERID
-
-	public ResponseEntity<List<Paper>> searchPaperByUserId(int userId, String originalSearch) {
-		String search = originalSearch.toLowerCase();
-		Set<Paper> set_complete = new HashSet<>();
-
-		List<Paper> list1 = this.paperService.findAllPapersByAuthorAndUser(search, userId);
-		List<Paper> list2 = this.paperService.findAllPapersAbstractWordAndUser(search, userId);
-		List<Paper> list3 = this.paperService.findAllPapersByKeywordAndUser(search, userId);
-		List<Paper> list4 = this.paperService.findPaperByTitleAndUser(search, userId);
-		
-		set_complete.addAll(list1);
-		set_complete.addAll(list2);
-		set_complete.addAll(list3);
-		set_complete.addAll(list4);
-
-		List<Paper> list_complete = set_complete.stream().collect(Collectors.toList());
-
-		return new ResponseEntity<>((List<Paper>) list_complete, HttpStatus.OK);
-	}
-
 
 //CREATE	
 

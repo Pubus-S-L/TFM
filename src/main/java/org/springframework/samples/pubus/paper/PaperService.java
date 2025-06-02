@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -28,6 +29,7 @@ public class PaperService {
 
 	private PaperRepository paperRepository;
 	private PaperFileService paperFileService;
+	private static final Logger logger = LoggerFactory.getLogger(PaperRestController.class);
 
 	@Autowired
 	public PaperService(PaperRepository paperRepository, PaperFileService paperFileService) {
@@ -212,11 +214,18 @@ public class PaperService {
 
 	@Transactional(readOnly = true)
 	public List<PaperSummaryDTO> findPapersFiltered(Integer userId, List<String> types, String searchTerm) {
+		boolean noTypeFilter = (types == null || types.isEmpty());
+		List<String> typesForQuery = noTypeFilter ? null : types;
+		String searchTermForQuery = (searchTerm != null && searchTerm.isEmpty()) ? null : searchTerm;
 
-        boolean noTypeFilter = (types == null || types.isEmpty());
-        List<String> typesForQuery = noTypeFilter ? null : types;
-        String searchTermForQuery = (searchTerm != null && searchTerm.isEmpty()) ? null : searchTerm;
-        return paperRepository.findFilteredPapers(userId, typesForQuery, noTypeFilter, searchTermForQuery);
+		logger.debug("Filtering papers with: userId={}, noTypeFilter={}, typesForQuery={}, searchTermForQuery='{}'",
+					userId, noTypeFilter, typesForQuery, searchTermForQuery);
+
+		List<PaperSummaryDTO> results = paperRepository.findFilteredPapers(userId, typesForQuery, noTypeFilter, searchTermForQuery);
+
+		logger.debug("Query returned {} results", results.size());
+
+		return results;
     }
     
     @Cacheable(value = "paperTypes", unless = "#result.isEmpty()")

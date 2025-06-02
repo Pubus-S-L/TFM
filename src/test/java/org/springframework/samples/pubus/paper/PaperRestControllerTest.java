@@ -259,39 +259,39 @@ public class PaperRestControllerTest {
         verify(paperService).findPaperById(paperId);
     }
 
-    @Test
-    public void testFindAllByUserId_Success() {
-        int userId = 1;
-        String search = "";
-        List<Paper> expectedPapers = Arrays.asList(new Paper(), new Paper());
+    // @Test
+    // public void testFindAllByUserId_Success() {
+    //     int userId = 1;
+    //     String search = "";
+    //     List<Paper> expectedPapers = Arrays.asList(new Paper(), new Paper());
 
-        when(paperService.findAllPapersByAuthorAndUser(search, userId)).thenReturn(new ArrayList<>());
-        when(paperService.findAllPapersAbstractWordAndUser(search, userId)).thenReturn(new ArrayList<>());
-        when(paperService.findAllPapersByKeywordAndUser(search, userId)).thenReturn(new ArrayList<>());
-        when(paperService.findPaperByTitleAndUser(search, userId)).thenReturn(expectedPapers); // Asegúrate de que este es el método que devuelve los resultados
-        paperRestController = new PaperRestController(paperService, userService, paperFileService, restTemplate, objectMapper);
-        ResponseEntity<List<Paper>> response = paperRestController.findAllByUserId(userId, search);
+    //     when(paperService.findAllPapersByAuthorAndUser(search, userId)).thenReturn(new ArrayList<>());
+    //     when(paperService.findAllPapersAbstractWordAndUser(search, userId)).thenReturn(new ArrayList<>());
+    //     when(paperService.findAllPapersByKeywordAndUser(search, userId)).thenReturn(new ArrayList<>());
+    //     when(paperService.findPaperByTitleAndUser(search, userId)).thenReturn(expectedPapers); // Asegúrate de que este es el método que devuelve los resultados
+    //     paperRestController = new PaperRestController(paperService, userService, paperFileService, restTemplate, objectMapper);
+    //     ResponseEntity<List<Paper>> response = paperRestController.findAllByUserId(userId, search);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(new HashSet<>(expectedPapers), new HashSet<>(response.getBody()));
-    }
+    //     assertEquals(HttpStatus.OK, response.getStatusCode());
+    //     assertEquals(new HashSet<>(expectedPapers), new HashSet<>(response.getBody()));
+    // }
 
-    @Test
-    public void testFindAllByUserId_WithSearch_Success() {
-        int userId = 1;
-        String search = "keyword";
-        List<Paper> expectedPapers = Arrays.asList(new Paper());
+    // @Test
+    // public void testFindAllByUserId_WithSearch_Success() {
+    //     int userId = 1;
+    //     String search = "keyword";
+    //     List<Paper> expectedPapers = Arrays.asList(new Paper());
 
-        when(paperService.findAllPapersByAuthorAndUser(search, userId)).thenReturn(new ArrayList<>());
-        when(paperService.findAllPapersAbstractWordAndUser(search, userId)).thenReturn(expectedPapers); // Mockea una de las llamadas de búsqueda
-        when(paperService.findAllPapersByKeywordAndUser(search, userId)).thenReturn(new ArrayList<>());
-        when(paperService.findPaperByTitleAndUser(search, userId)).thenReturn(new ArrayList<>());
-        paperRestController = new PaperRestController(paperService, userService, paperFileService, restTemplate, objectMapper);
-        ResponseEntity<List<Paper>> response = paperRestController.findAllByUserId(userId, search);
+    //     when(paperService.findAllPapersByAuthorAndUser(search, userId)).thenReturn(new ArrayList<>());
+    //     when(paperService.findAllPapersAbstractWordAndUser(search, userId)).thenReturn(expectedPapers); // Mockea una de las llamadas de búsqueda
+    //     when(paperService.findAllPapersByKeywordAndUser(search, userId)).thenReturn(new ArrayList<>());
+    //     when(paperService.findPaperByTitleAndUser(search, userId)).thenReturn(new ArrayList<>());
+    //     paperRestController = new PaperRestController(paperService, userService, paperFileService, restTemplate, objectMapper);
+    //     ResponseEntity<List<Paper>> response = paperRestController.findAllByUserId(userId, search);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(expectedPapers, response.getBody());
-    }
+    //     assertEquals(HttpStatus.OK, response.getStatusCode());
+    //     assertEquals(expectedPapers, response.getBody());
+    // }
 
     // @Test
     // public void testCreate_Success() throws Exception {
