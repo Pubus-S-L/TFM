@@ -118,7 +118,9 @@ public class PaperRestController {
 
     	List<PaperSummaryDTO> papers = paperService.findPapersFiltered(userId, types, search);
 
-    	logger.debug("Returning {} papers", papers.size());
+    	logger.debug("Returning number of {} papers", papers.size());
+		logger.debug("Returning {} papers", papers);
+		
         return new ResponseEntity<>(papers, HttpStatus.OK);
     }
 

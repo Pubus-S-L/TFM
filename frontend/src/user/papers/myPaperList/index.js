@@ -313,7 +313,7 @@ useEffect(() => {
         <CardDescription>
           <p><strong>Authors:</strong> {paper.authors}</p>
           <p><strong>Publication Year:</strong> {paper.publicationYear}</p>
-          <p><strong>Type:</strong> {paper.type.name}</p>
+          <p><strong>Type:</strong> {paper.typeName}</p>
         </CardDescription>
       </CardContent>
       <CardFooter className="flex flex-wrap justify-center gap-4 sm:gap-6">
