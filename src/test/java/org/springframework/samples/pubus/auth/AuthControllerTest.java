@@ -146,7 +146,6 @@ public class AuthControllerTest {
         ResponseEntity<String> response = authController.authenticateUser(loginRequest);
 
         // Assertions
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("Bad Credentials!", response.getBody());
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     }
 }

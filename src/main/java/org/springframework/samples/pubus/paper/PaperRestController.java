@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.Optional;
 import jakarta.validation.Valid;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.data.util.Pair;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -82,11 +84,14 @@ public class PaperRestController {
 
 //GET TYPES	
 
-	@GetMapping("types")
-	public ResponseEntity<List<PaperType>> findAllTypes() {
-		List<PaperType> res = (List<PaperType>) paperService.findPaperTypes();
-		return new ResponseEntity<>(res, HttpStatus.OK);
-	}
+	@GetMapping("/types")
+    public ResponseEntity<List<PaperType>> getAllTypes() {
+        List<PaperType> types = paperService.getAllPaperTypes();
+        
+        return ResponseEntity.ok()
+                           .cacheControl(CacheControl.maxAge(1, TimeUnit.HOURS)) // Cache más largo para tipos
+                           .body(types);
+    }
 
 //GET PAPERS BY TYPE
 
@@ -95,19 +100,17 @@ public class PaperRestController {
 		return new ResponseEntity<>((List<Paper>) this.paperService.findAllPapersByType(paperType), HttpStatus.OK);
 	}
 
-    @GetMapping
-    public ResponseEntity<List<Paper>> findAll(
+	@GetMapping
+    public ResponseEntity<List<PaperSummaryDTO>> findAll(
             @RequestParam(required = false) Integer userId,
-            @RequestParam(required = false) List<String> types, // Spring Boot mapea esto automáticamente desde "types=Type1,Type2"
+            @RequestParam(required = false) List<String> types,
             @RequestParam(required = false) String search) {
-
-        // Opcional: Logs para depuración en el controlador
-        System.out.println("API Request - userId: " + userId + ", types: " + types + ", search: " + search);
-
-        // Llama al servicio con los parámetros directamente recibidos
-        List<Paper> papers = paperService.findPapersFiltered(userId, types, search);
-
-        return new ResponseEntity<>(papers, HttpStatus.OK);
+        
+        List<PaperSummaryDTO> papers = paperService.findPapersFiltered(userId, types, search);
+        
+        return ResponseEntity.ok()
+                           .cacheControl(CacheControl.maxAge(5, TimeUnit.MINUTES)) // Cache HTTP
+                           .body(papers);
     }
 
 // // GET FILTERED

@@ -6,9 +6,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.samples.pubus.exceptions.ResourceNotFoundException;
 import org.springframework.samples.pubus.paper.exceptions.DuplicatedPaperTitleException;
@@ -204,12 +207,31 @@ public class PaperService {
     //     return paperRepository.searchAllFieldsByUser(searchTerm.toLowerCase(), userId);
     // }
 
-	public List<Paper> findPapersFiltered(Integer userId, List<String> types, String searchTerm) {
-
-        boolean noTypeFilter = (types == null || types.isEmpty());
-        List<String> typesForQuery = noTypeFilter ? Collections.emptyList() : types;
-        String searchTermForQuery = (searchTerm != null && searchTerm.isEmpty()) ? null : searchTerm;
-        return paperRepository.findFilteredPapers(userId, typesForQuery, noTypeFilter, searchTermForQuery);
+	public List<PaperSummaryDTO> findPapersFiltered(Integer userId, List<String> types, String searchTerm) {
+        // Normalizar parámetros de entrada
+        List<String> normalizedTypes = (types == null || types.isEmpty()) ? 
+            Collections.emptyList() : 
+            types.stream()
+                 .filter(Objects::nonNull)
+                 .map(String::trim)
+                 .filter(s -> !s.isEmpty())
+                 .collect(Collectors.toList());
+        
+        String normalizedSearch = (searchTerm != null && !searchTerm.trim().isEmpty()) ? 
+            searchTerm.trim() : null;
+        
+        // Usar la consulta nativa optimizada
+        List<Object[]> results = paperRepository.findFilteredPapersOptimized(
+            userId, normalizedTypes, normalizedSearch);
+        
+        return results.stream()
+                     .map(PaperSummaryDTO::fromObjectArray)
+                     .collect(Collectors.toList());
+    }
+    
+    @Cacheable(value = "paperTypes", unless = "#result.isEmpty()")
+    public List<PaperType> getAllPaperTypes() {
+        return paperRepository.findAllDistinctTypes();
     }
 
 }

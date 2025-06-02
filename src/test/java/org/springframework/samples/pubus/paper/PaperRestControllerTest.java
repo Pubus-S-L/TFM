@@ -114,10 +114,10 @@ public class PaperRestControllerTest {
     paperType2.setId(2);
     paperType2.setName("Book");
     paperTypes.add(paperType2);
-    Mockito.when(paperService.findPaperTypes()).thenReturn(paperTypes);
+    Mockito.when(paperService.getAllPaperTypes()).thenReturn(paperTypes);
     paperRestController = new PaperRestController(paperService, userService, paperFileService, restTemplate, objectMapper);
     // Call the controller method
-    ResponseEntity<List<PaperType>> responseEntity = paperRestController.findAllTypes();
+    ResponseEntity<List<PaperType>> responseEntity = paperRestController.getAllTypes();
 
     // Assert that the response is successful (status code 200)
     assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
