@@ -24,7 +24,7 @@ export default function Papers() {
   useEffect(() => {
     async function fetchTypes() {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/v1/papers/types`, {
+        const response = await fetch(`${API_BASE_URL}/api/v1/papers/typesUsed`, {
           headers: {
             "Content-Type": "application/json",
           },

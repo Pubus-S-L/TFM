@@ -99,6 +99,18 @@ public class PaperRestController {
 		}
 	}
 
+	@GetMapping("/typesUsed")
+	public ResponseEntity<List<PaperType>> getAllTypesUsed() {
+		try {
+			List<PaperType> types = paperService.getAllPaperTypesUsed();
+			return ResponseEntity.ok(types);
+		} catch (Exception e) {
+			log.error("Error getting paper types", e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+				.body(new ArrayList<>());
+		}
+	}
+
 
 //GET PAPERS BY TYPE
 

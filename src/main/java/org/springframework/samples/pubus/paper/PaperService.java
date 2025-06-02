@@ -230,6 +230,11 @@ public class PaperService {
     
     @Cacheable(value = "paperTypes", unless = "#result.isEmpty()")
     public List<PaperType> getAllPaperTypes() {
+        return paperRepository.findPaperTypes();
+    }
+
+	@Cacheable(value = "paperTypes", unless = "#result.isEmpty()")
+    public List<PaperType> getAllPaperTypesUsed() {
         return paperRepository.findAllDistinctTypes();
     }
 
