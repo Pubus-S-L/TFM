@@ -1,122 +1,482 @@
 [
     {
-        "query": "¿Qué contiene el documento rag systems?",
-        "expectedDocuments": [
-            "rag_systems.pdf"
-        ]
-    },
-    {
-        "query": "¿Qué contiene el documento embedding vectors?",
-        "expectedDocuments": [
-            "embedding_vectors.pdf"
-        ]
-    },
-    {
-        "query": "¿Qué contiene el documento neural networks?",
-        "expectedDocuments": [
-            "neural_networks.pdf"
-        ]
-    },
-    {
-        "query": "¿Qué contiene el documento springboot basics?",
-        "expectedDocuments": [
-            "springboot_basics.pdf"
-        ]
-    },
-    {
-        "query": "¿Qué contiene el documento language models?",
-        "expectedDocuments": [
-            "language_models.pdf"
-        ]
-    },
-    {
-        "query": "¿Qué contiene el documento tokenization?",
-        "expectedDocuments": [
-            "tokenization.pdf"
-        ]
-    },
-    {
-        "query": "¿Qué contiene el documento fine tuning?",
-        "expectedDocuments": [
-            "fine_tuning.pdf"
-        ]
-    },
-    {
-        "query": "¿Qué contiene el documento model evaluation?",
-        "expectedDocuments": [
-            "model_evaluation.pdf"
-        ]
-    },
-    {
-        "query": "¿Qué contiene el documento context retrieval?",
-        "expectedDocuments": [
-            "context_retrieval.pdf"
-        ]
-    },
-    {
-        "query": "¿Qué contiene el documento semantic search?",
-        "expectedDocuments": [
-            "semantic_search.pdf"
-        ]
-    },
-    {
-        "query": "¿Qué contiene el documento information retrieval?",
-        "expectedDocuments": [
-            "information_retrieval.pdf"
-        ]
-    },
-    {
-        "query": "¿Qué contiene el documento openai api?",
-        "expectedDocuments": [
-            "openai_api.pdf"
-        ]
-    },
-    {
-        "query": "¿Qué contiene el documento retrieval augmented generation?",
-        "expectedDocuments": [
-            "retrieval_augmented_generation.pdf"
-        ]
-    },
-    {
-        "query": "¿Qué contiene el documento vector databases?",
-        "expectedDocuments": [
-            "vector_databases.pdf"
-        ]
-    },
-    {
-        "query": "¿Qué contiene el documento bert vs gpt?",
-        "expectedDocuments": [
-            "bert_vs_gpt.pdf"
-        ]
-    },
-    {
-        "query": "¿Qué contiene el documento java embeddings?",
-        "expectedDocuments": [
-            "java_embeddings.pdf"
-        ]
-    },
-    {
-        "query": "¿Qué contiene el documento llm pipeline?",
-        "expectedDocuments": [
-            "llm_pipeline.pdf"
-        ]
-    },
-    {
-        "query": "¿Qué contiene el documento chatbot design?",
-        "expectedDocuments": [
-            "chatbot_design.pdf"
-        ]
-    },
-    {
-        "query": "¿Qué contiene el documento ai intro?",
+        "query": "¿Qué es ai intro?",
         "expectedDocuments": [
             "ai_intro.pdf"
         ]
     },
     {
-        "query": "¿Qué contiene el documento deep learning?",
+        "query": "Explica el concepto de ai intro.",
+        "expectedDocuments": [
+            "ai_intro.pdf"
+        ]
+    },
+    {
+        "query": "Información general sobre ai intro.",
+        "expectedDocuments": [
+            "ai_intro.pdf"
+        ]
+    },
+    {
+        "query": "¿Para qué se utiliza ai intro?",
+        "expectedDocuments": [
+            "ai_intro.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué es bert vs gpt?",
+        "expectedDocuments": [
+            "bert_vs_gpt.pdf"
+        ]
+    },
+    {
+        "query": "Explica el concepto de bert vs gpt.",
+        "expectedDocuments": [
+            "bert_vs_gpt.pdf"
+        ]
+    },
+    {
+        "query": "Información general sobre bert vs gpt.",
+        "expectedDocuments": [
+            "bert_vs_gpt.pdf"
+        ]
+    },
+    {
+        "query": "¿Para qué se utiliza bert vs gpt?",
+        "expectedDocuments": [
+            "bert_vs_gpt.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué es chatbot design?",
+        "expectedDocuments": [
+            "chatbot_design.pdf"
+        ]
+    },
+    {
+        "query": "Explica el concepto de chatbot design.",
+        "expectedDocuments": [
+            "chatbot_design.pdf"
+        ]
+    },
+    {
+        "query": "Información general sobre chatbot design.",
+        "expectedDocuments": [
+            "chatbot_design.pdf"
+        ]
+    },
+    {
+        "query": "¿Para qué se utiliza chatbot design?",
+        "expectedDocuments": [
+            "chatbot_design.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué es context retrieval?",
+        "expectedDocuments": [
+            "context_retrieval.pdf"
+        ]
+    },
+    {
+        "query": "Explica el concepto de context retrieval.",
+        "expectedDocuments": [
+            "context_retrieval.pdf"
+        ]
+    },
+    {
+        "query": "Información general sobre context retrieval.",
+        "expectedDocuments": [
+            "context_retrieval.pdf"
+        ]
+    },
+    {
+        "query": "¿Para qué se utiliza context retrieval?",
+        "expectedDocuments": [
+            "context_retrieval.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué es deep learning?",
         "expectedDocuments": [
             "deep_learning.pdf"
+        ]
+    },
+    {
+        "query": "Explica el concepto de deep learning.",
+        "expectedDocuments": [
+            "deep_learning.pdf"
+        ]
+    },
+    {
+        "query": "Información general sobre deep learning.",
+        "expectedDocuments": [
+            "deep_learning.pdf"
+        ]
+    },
+    {
+        "query": "¿Para qué se utiliza deep learning?",
+        "expectedDocuments": [
+            "deep_learning.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué es embedding vectors?",
+        "expectedDocuments": [
+            "embedding_vectors.pdf"
+        ]
+    },
+    {
+        "query": "Explica el concepto de embedding vectors.",
+        "expectedDocuments": [
+            "embedding_vectors.pdf"
+        ]
+    },
+    {
+        "query": "Información general sobre embedding vectors.",
+        "expectedDocuments": [
+            "embedding_vectors.pdf"
+        ]
+    },
+    {
+        "query": "¿Para qué se utiliza embedding vectors?",
+        "expectedDocuments": [
+            "embedding_vectors.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué es fine tuning?",
+        "expectedDocuments": [
+            "fine_tunning.pdf"
+        ]
+    },
+    {
+        "query": "Explica el concepto de fine tuning.",
+        "expectedDocuments": [
+            "fine_tunning.pdf"
+        ]
+    },
+    {
+        "query": "Información general sobre fine tuning.",
+        "expectedDocuments": [
+            "fine_tunning.pdf"
+        ]
+    },
+    {
+        "query": "¿Para qué se utiliza fine tuning?",
+        "expectedDocuments": [
+            "fine_tunning.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué es information retrieval?",
+        "expectedDocuments": [
+            "information_retrieval.pdf"
+        ]
+    },
+    {
+        "query": "Explica el concepto de information retrieval.",
+        "expectedDocuments": [
+            "information_retrieval.pdf"
+        ]
+    },
+    {
+        "query": "Información general sobre information retrieval.",
+        "expectedDocuments": [
+            "information_retrieval.pdf"
+        ]
+    },
+    {
+        "query": "¿Para qué se utiliza information retrieval?",
+        "expectedDocuments": [
+            "information_retrieval.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué es java embeddings?",
+        "expectedDocuments": [
+            "java_embeddings.pdf"
+        ]
+    },
+    {
+        "query": "Explica el concepto de java embeddings.",
+        "expectedDocuments": [
+            "java_embeddings.pdf"
+        ]
+    },
+    {
+        "query": "Información general sobre java embeddings.",
+        "expectedDocuments": [
+            "java_embeddings.pdf"
+        ]
+    },
+    {
+        "query": "¿Para qué se utiliza java embeddings?",
+        "expectedDocuments": [
+            "java_embeddings.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué es language models?",
+        "expectedDocuments": [
+            "language_models.pdf"
+        ]
+    },
+    {
+        "query": "Explica el concepto de language models.",
+        "expectedDocuments": [
+            "language_models.pdf"
+        ]
+    },
+    {
+        "query": "Información general sobre language models.",
+        "expectedDocuments": [
+            "language_models.pdf"
+        ]
+    },
+    {
+        "query": "¿Para qué se utiliza language models?",
+        "expectedDocuments": [
+            "language_models.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué es llm pipeline?",
+        "expectedDocuments": [
+            "llm_pipeline.pdf"
+        ]
+    },
+    {
+        "query": "Explica el concepto de llm pipeline.",
+        "expectedDocuments": [
+            "llm_pipeline.pdf"
+        ]
+    },
+    {
+        "query": "Información general sobre llm pipeline.",
+        "expectedDocuments": [
+            "llm_pipeline.pdf"
+        ]
+    },
+    {
+        "query": "¿Para qué se utiliza llm pipeline?",
+        "expectedDocuments": [
+            "llm_pipeline.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué es model evaluation?",
+        "expectedDocuments": [
+            "model_evaluation.pdf"
+        ]
+    },
+    {
+        "query": "Explica el concepto de model evaluation.",
+        "expectedDocuments": [
+            "model_evaluation.pdf"
+        ]
+    },
+    {
+        "query": "Información general sobre model evaluation.",
+        "expectedDocuments": [
+            "model_evaluation.pdf"
+        ]
+    },
+    {
+        "query": "¿Para qué se utiliza model evaluation?",
+        "expectedDocuments": [
+            "model_evaluation.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué es neural networks?",
+        "expectedDocuments": [
+            "neural_networks.pdf"
+        ]
+    },
+    {
+        "query": "Explica el concepto de neural networks.",
+        "expectedDocuments": [
+            "neural_networks.pdf"
+        ]
+    },
+    {
+        "query": "Información general sobre neural networks.",
+        "expectedDocuments": [
+            "neural_networks.pdf"
+        ]
+    },
+    {
+        "query": "¿Para qué se utiliza neural networks?",
+        "expectedDocuments": [
+            "neural_networks.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué es openai api?",
+        "expectedDocuments": [
+            "openai_api.pdf"
+        ]
+    },
+    {
+        "query": "Explica el concepto de openai api.",
+        "expectedDocuments": [
+            "openai_api.pdf"
+        ]
+    },
+    {
+        "query": "Información general sobre openai api.",
+        "expectedDocuments": [
+            "openai_api.pdf"
+        ]
+    },
+    {
+        "query": "¿Para qué se utiliza openai api?",
+        "expectedDocuments": [
+            "openai_api.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué es rag systems?",
+        "expectedDocuments": [
+            "rag_systems.pdf"
+        ]
+    },
+    {
+        "query": "Explica el concepto de rag systems.",
+        "expectedDocuments": [
+            "rag_systems.pdf"
+        ]
+    },
+    {
+        "query": "Información general sobre rag systems.",
+        "expectedDocuments": [
+            "rag_systems.pdf"
+        ]
+    },
+    {
+        "query": "¿Para qué se utiliza rag systems?",
+        "expectedDocuments": [
+            "rag_systems.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué es retrieval augmented generation?",
+        "expectedDocuments": [
+            "retrieval_augmented_generation.pdf"
+        ]
+    },
+    {
+        "query": "Explica el concepto de retrieval augmented generation.",
+        "expectedDocuments": [
+            "retrieval_augmented_generation.pdf"
+        ]
+    },
+    {
+        "query": "Información general sobre retrieval augmented generation.",
+        "expectedDocuments": [
+            "retrieval_augmented_generation.pdf"
+        ]
+    },
+    {
+        "query": "¿Para qué se utiliza retrieval augmented generation?",
+        "expectedDocuments": [
+            "retrieval_augmented_generation.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué es semantic search?",
+        "expectedDocuments": [
+            "semantic_search.pdf"
+        ]
+    },
+    {
+        "query": "Explica el concepto de semantic search.",
+        "expectedDocuments": [
+            "semantic_search.pdf"
+        ]
+    },
+    {
+        "query": "Información general sobre semantic search.",
+        "expectedDocuments": [
+            "semantic_search.pdf"
+        ]
+    },
+    {
+        "query": "¿Para qué se utiliza semantic search?",
+        "expectedDocuments": [
+            "semantic_search.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué es springboot basics?",
+        "expectedDocuments": [
+            "springboot_basics.pdf"
+        ]
+    },
+    {
+        "query": "Explica el concepto de springboot basics.",
+        "expectedDocuments": [
+            "springboot_basics.pdf"
+        ]
+    },
+    {
+        "query": "Información general sobre springboot basics.",
+        "expectedDocuments": [
+            "springboot_basics.pdf"
+        ]
+    },
+    {
+        "query": "¿Para qué se utiliza springboot basics?",
+        "expectedDocuments": [
+            "springboot_basics.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué es tokenization?",
+        "expectedDocuments": [
+            "tokenization.pdf"
+        ]
+    },
+    {
+        "query": "Explica el concepto de tokenization.",
+        "expectedDocuments": [
+            "tokenization.pdf"
+        ]
+    },
+    {
+        "query": "Información general sobre tokenization.",
+        "expectedDocuments": [
+            "tokenization.pdf"
+        ]
+    },
+    {
+        "query": "¿Para qué se utiliza tokenization?",
+        "expectedDocuments": [
+            "tokenization.pdf"
+        ]
+    },
+    {
+        "query": "¿Qué es vector databases?",
+        "expectedDocuments": [
+            "vector_databases.pdf"
+        ]
+    },
+    {
+        "query": "Explica el concepto de vector databases.",
+        "expectedDocuments": [
+            "vector_databases.pdf"
+        ]
+    },
+    {
+        "query": "Información general sobre vector databases.",
+        "expectedDocuments": [
+            "vector_databases.pdf"
+        ]
+    },
+    {
+        "query": "¿Para qué se utiliza vector databases?",
+        "expectedDocuments": [
+            "vector_databases.pdf"
         ]
     }
 ]

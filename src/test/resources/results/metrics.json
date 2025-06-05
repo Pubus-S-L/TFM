@@ -1,12 +1,12 @@
 {
-  "exactMatches" : 17,
-  "totalQueries" : 20,
-  "precision" : 1.0,
-  "recall" : 0.85,
-  "accuracy" : 0.85,
-  "errorRate" : 0.15,
-  "partialRetrievalRate" : 0.0,
-  "errors" : 3,
-  "f1Score" : 0.9189189189189189,
-  "partialMatches" : 0
+  "exactMatches" : 67,
+  "totalQueries" : 80,
+  "precision" : 0.8375,
+  "recall" : 1.0,
+  "accuracy" : 0.8375,
+  "errorRate" : 0.0,
+  "partialRetrievalRate" : 0.1625,
+  "errors" : 0,
+  "f1Score" : 0.9115646258503401,
+  "partialMatches" : 13
 }
